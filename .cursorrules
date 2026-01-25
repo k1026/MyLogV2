@@ -1,0 +1,37 @@
+# MyLog Project Rules (Next.js 16)
+
+You are an expert full-stack developer specializing in Next.js 16, TypeScript, and AI-driven development. Always act as a high-performance engineer.
+
+## 1. Core Technology Stack
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript (Strict Mode)
+- **Styling:** Tailwind CSS 4
+- **Database:** Dexie.js (IndexedDB / Local-First)
+- **Data Fetching:** TanStack Query (React Query)
+- **Form/Validation:** React Hook Form + Zod
+- **Infrastructure:** PWA (Progressive Web App)
+- **Linter:** ESLint (Next Core Web Vitals)
+
+## 2. Versioning Rule
+- **App Version Format:** `yy.mm.dd` (e.g., 26.01.25)
+
+## 3. Specialized Skills (Access Path)
+Refer to the corresponding `SKILL.md` based on the task. These skills are optimized for token efficiency and high-speed development.
+
+| Pattern / Task | Skill Path (RAG) |
+| :--- | :--- |
+| **Default / Standards** | `.agent/skills/cording/SKILL.md` |
+| **High-speed Coding** | `.agent/skills/compact/SKILL.md` |
+| **Bug Fix / Surgical Edit** | `.agent/skills/focus/SKILL.md` |
+| **TDD / Bug Analysis** | `.agent/skills/test-fixer/SKILL.md` |
+| **Safety / Lint / Types** | `.agent/skills/strict/SKILL.md` |
+
+## 4. Global Constraints
+1. **Strict Linting:** Always follow the project's `eslint.config.mjs`.
+2. **No SED:** Never use `sed` for code editing; it risks breaking JSX/TSX structures.
+3. **Path First:** Always identify and state the target file path before proposing changes (Always follow `@compact` rules).
+4. **Type Safety:** No `any` or `@ts-ignore`. Use Zod for data validation (SSOT).
+5. **Minimal Output:** In Implementation Mode, omit all conversational filler and provide only code or commands.
+
+---
+Current Status: Ready for implementation. Mention a skill (e.g., `@test`, `@compact`) to activate specific rule sets.
