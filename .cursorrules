@@ -36,6 +36,7 @@ You are an expert full-stack developer specializing in Next.js 16, TypeScript, a
 | **@tdd-first** | `.agent/skills/tdd-first/SKILL.md` | Step 1: Test-First. 生成後は人間が `npm run test:ai` を実行。 |
 | **@tdd-fix** | `.agent/skills/tdd-fix/SKILL.md` | Step 2: `test-results.log` を読み取り、実装を修正。 |
 | **@tdd-strict** | `.agent/skills/tdd-strict/SKILL.md` | Step 3: 修正箇所の型安全確認とリファクタリング。 |
+| **@tdd-refine** | `.agent/skills/tdd-refine/SKILL.md` | Step 4: テストをより厳格で洗練されたものにすることで、実装コードを堅牢なものにする。 |
 
 ## 4. Global Constraints
 1. **Strict Linting:** Always follow the project s `eslint.config.mjs`.
