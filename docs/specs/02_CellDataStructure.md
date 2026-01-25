@@ -1,10 +1,16 @@
 # 2. Cellデータ構造
-データの基本単位を「Cell（セル）」と呼びます。
+
+## 2.1 定義
+アプリケーションのデータの基本単位を「Cell（セル）」と呼びます。
+データベースのレコードはCellを単位に記録し、Cellのデータメンバがカラムになります。
+
+## 2.2 メンバ定義
+Cellクラスには以下のデータメンバが定義されています。
 
 | プロパティ名 | 型 | 説明 |
 | --- | --- | --- |
-| `id` | string | `[Unix timestamp in ms]-[5-digit random uppercase alphanumeric]` |
-| `attribute` | string | 分類 (`Card`, `Time`, `Text`, `Task`) |
+| `id` | string | `[Unix timestamp in ms]-[5-digit random uppercase alphanumeric]`のフォーマットでCellを一意に識別します。 |
+| `attribute` | string | 分類 (`Card`, `Time`, `Text`, `Task`) があります。Cellに記録する値や使用するUIが属性によって変化します。|
 | `name` | string | セルの名前 |
 | `value` | string | セルの値 |
 | `geo` | string | セル作成時の位置情報（緯度 経度 高度 の順でスペース区切り）。取得不可時はnull。 |

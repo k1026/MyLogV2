@@ -38,5 +38,19 @@ export class OfflineAppDB extends Dexie {
     }
 }
 
-// データベースインスタンスの作成とエクスポート
-export const db = new OfflineAppDB();
+// --- データベースインスタンスのシングルトン化 ---
+
+/**
+ * Next.jsのホットリロード時にインスタンスが多重生成されるのを防ぐための定義
+ */
+const globalForDb = globalThis as unknown as {
+    db: OfflineAppDB | undefined;
+};
+
+// 既存のインスタンスがあればそれを使用し、なければ新規作成
+export const db = globalForDb.db ?? new OfflineAppDB();
+
+// 開発環境の場合は globalThis に保存して再利用可能にする
+if (process.env.NODE_ENV !== 'production') {
+    globalForDb.db = db;
+}
