@@ -48,6 +48,11 @@ describe('Cell Class', () => {
             expect(id.startsWith(MOCK_NOW.toString())).toBe(true);
         });
 
+        it('generateId() が短時間に複数回呼ばれても、ランダム部分により異なるIDを生成すること', () => {
+            const ids = new Set(Array.from({ length: 100 }, () => Cell.generateId()));
+            expect(ids.size).toBe(100);
+        });
+
         describe('create() defaults', () => {
             it('Card属性: name="Card", value=""', () => {
                 const cell = Cell.create({ attribute: 'Card' });
@@ -123,6 +128,12 @@ describe('Cell Class', () => {
                 expect(cardCell.value).toBe(`${validId1} ${validId2}`);
             });
 
+            it('既存の値に余計なスペースがあっても、追加時に正規化されること', () => {
+                cardCell.value = `  ${validId1}   `;
+                cardCell.addCellId(validId2);
+                expect(cardCell.value).toBe(`${validId1} ${validId2}`);
+            });
+
             it('空文字は追加されないこと', () => {
                 cardCell.addCellId('');
                 expect(cardCell.value).toBe('');
@@ -176,13 +187,20 @@ describe('Cell Class', () => {
                 expect(cardCell.value).toBe('');
             });
 
-            it('スペースが含まれる既存のIDリストから正しく削除され、余計なスペースが残らないこと', () => {
+            it('スペースが含まれる既存のIDリストから正しく削除され、余計なスペースが残らず正規化されること', () => {
                 const id1 = '1700000000000-AAAAA';
                 const id2 = '1700000000000-BBBBB';
                 const id3 = '1700000000000-CCCCC';
                 cardCell.value = ` ${id1}  ${id2}   ${id3} `;
                 cardCell.removeCellId(id2);
                 expect(cardCell.value).toBe(`${id1} ${id3}`);
+            });
+
+            it('全削除後の値が空文字（正規化済み）になること', () => {
+                const id1 = '1700000000000-AAAAA';
+                cardCell.value = `  ${id1}  `;
+                cardCell.removeCellId(id1);
+                expect(cardCell.value).toBe('');
             });
         });
 

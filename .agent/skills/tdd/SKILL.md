@@ -8,17 +8,16 @@
         - 新規機能の実装、または既存機能の外部から見た振る舞いが変わる修正の場合は **Step 1** へ進む。
         - 振る舞いを変えない内部最適化・リファクタリングの場合は **Step 2** へ進む。
     1. **Step 1: Test-First (tdd-first)**: 
-        - `tdd-first`を実行し仕様書を元に、実装に必要なテストと空のシグネチャを作成する。
-        - テストコマンド`npm run test:ai` を実行し、対象のテストが全て論理的にエラー（Red）になるまで`tdd-first`によるテスト実装を繰り返す。
+        - `.agent/skills/tdd-first/SKILL.md`を実行し仕様書を元に、実装に必要なテストと空のシグネチャを作成する。
+        - テストコマンド`npm run test:ai` を実行し、対象のテストが全て論理的にエラー（Red）になるまで`.agent/skills/tdd-first/SKILL.md`によるテスト実装を繰り返す。
         - 全てのテストが論理的にエラー(Red)になったら**Step2**に進む。
     2. **Step 2: Implementation (tdd-fix)**: 
-        - `tdd-fix` を実行し、全てのテストをパス（Green）させるための最短の実装を行う。
-        - `npm run test:ai` を実行し全てのテストをパスするまで`tdd-fix`を繰り返す。
-    3. **Step 3: Optimization (tdd-strict)**: 
-        - `tdd-strict` を実行し、**Step2**で変更されたコードを検証し、コードのを最適化する。
-        - 最適化後、**Step 4** へ進む。
-    4. **Step 4: Hardening (tdd-refine)**: 
-        - `tdd-refine` を実行してテストケースを厳格化する。
-        - 再度`npm run test:ai` を実行し、全てのテストにパスするまで **Step 3** と **Step 4** を繰り返し品質を高める。
-    5. **Step 5: Completion**: 
-        - 全てのテストのパスを確認しユーザーに完了を報告する。
+        - `.agent/skills/tdd-fix/SKILL.md`を実行し、全てのテストをパス（Green）させるための最短の実装を行う。
+        - `npm run test:ai` を実行し全てのテストをパスするまで`.agent/skills/tdd-fix/SKILL.md`を繰り返す。
+    3. **Step 3: Optimization & Hardening (tdd-strict, tdd-refine)**: 
+        - `.agent/skills/tdd-strict/SKILL.md`を実行し、**Step2**で変更されたコードを検証し、コードのを最適化する。
+        - コードの最適化後、`.agent/skills/tdd-refine/SKILL.md`を実行してテストケースを厳格化する。
+        - 再度`npm run test:ai` を実行し、全てのテストにパスするまで **Step 3** の最初から繰り返し品質を高める。
+        - **Step 3** で全てのテストをパスしたら**Step 4**に進む。
+    4. **Step 4: Completion**: 
+        - 要約をまとめてユーザーに完了を報告する。

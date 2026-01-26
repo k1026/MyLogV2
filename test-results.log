@@ -1,0 +1,12 @@
+
+ RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
+
+ ✓ app/lib/db.test.ts (3 tests) 7ms
+ ✓ app/lib/utils.test.ts (1 test) 5ms
+ ✓ app/lib/cell.test.ts (24 tests) 41ms
+
+ Test Files  3 passed (3)
+      Tests  28 passed (28)
+   Start at  10:48:11
+   Duration  3.45s (transform 362ms, setup 1.22s, import 855ms, tests 54ms, environment 6.84s)
+

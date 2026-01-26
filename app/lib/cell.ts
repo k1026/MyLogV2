@@ -52,8 +52,8 @@ export class Cell {
      */
     static generateId(): string {
         const timestamp = Date.now();
-        // 36進数に変換して大文字化し、後ろから5文字取ることで大文字英数字5桁を生成
-        const randomStr = Math.random().toString(36).toUpperCase().slice(-5).padStart(5, '0');
+        // Math.randomを36進数変換し、小数部分から5文字抽出して大文字化する
+        const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase().padEnd(5, '0');
         return `${timestamp}-${randomStr}`;
     }
 
@@ -70,7 +70,8 @@ export class Cell {
      * IDリストをパースする（空白区切り）
      */
     private getCellIds(): string[] {
-        return this.value.split(/\s+/).filter(id => id.length > 0);
+        const trimmed = this.value.trim();
+        return trimmed ? trimmed.split(/\s+/) : [];
     }
 
     /**
@@ -81,10 +82,10 @@ export class Cell {
         if (this.attribute !== 'Card') return;
         if (!ID_REGEX.test(cellId)) return;
 
-        const ids = this.getCellIds();
-        if (!ids.includes(cellId)) {
-            ids.push(cellId);
-            this.value = ids.join(' ');
+        const ids = new Set(this.getCellIds());
+        if (!ids.has(cellId)) {
+            ids.add(cellId);
+            this.value = Array.from(ids).join(' ');
         }
     }
 
@@ -108,14 +109,11 @@ export class Cell {
         value?: string;
         geo?: string;
     }): Cell {
-        const defaultName = this.getDefaultName(params.attribute, params.name);
-        const defaultValue = this.getDefaultValue(params.attribute, params.value);
-
         const data: z.infer<typeof CellSchema> = {
             id: this.generateId(),
             attribute: params.attribute,
-            name: defaultName,
-            value: defaultValue,
+            name: this.getDefaultName(params.attribute, params.name),
+            value: this.getDefaultValue(params.attribute, params.value),
             geo: params.geo ?? '',
             remove: '',
         };
@@ -123,17 +121,16 @@ export class Cell {
         return new Cell(data);
     }
 
+    private static readonly DEFAULT_NAMES: Partial<Record<CellAttribute, string>> = {
+        Card: 'Card',
+        Time: 'Time',
+    };
+
     /**
      * 属性に応じたデフォルトの名前を取得する
      */
     private static getDefaultName(attribute: CellAttribute, providedName?: string): string {
-        if (providedName !== undefined) return providedName;
-
-        switch (attribute) {
-            case 'Card': return 'Card';
-            case 'Time': return 'Time';
-            default: return '';
-        }
+        return providedName ?? this.DEFAULT_NAMES[attribute] ?? '';
     }
 
     /**
