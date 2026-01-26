@@ -1,5 +1,13 @@
-# 0 Antigravity アプリケーション実装ガイドライン (Refined)
+---
+name: guideline
+description: Next.js 16 + PWA + Local-First構成におけるアプリケーション実装ガイドライン。AIによる解釈性・保守性およびトークン効率（コンテキスト最適化）を最大化することを目的とします。
+---
+
+## 目的 (Goal)
 本プロジェクトは Next.js 16 (App Router) + PWA + Local-First (Dexie.js) 構成において、AIによる解釈性・保守性およびトークン効率（コンテキスト最適化）を最大化することを目的とする。
+
+## ルールと制約 (Rules & Constraints)
+
 
 ## 0.0 仕様の厳守と型安全性の絶対視 (Strict Adherence & Type Safety)
 - **仕様の正当性**: 実装は `.md` 仕様書を正とする。矛盾がある場合は推測せず必ず確認する。

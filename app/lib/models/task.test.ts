@@ -1,7 +1,7 @@
-// Path: app/lib/utils.test.ts
+// Path: app/lib/models/task.test.ts
 import { describe, it, expect } from 'vitest';
 import { mockValid } from 'zod-mocking';
-import { TaskSchema, toggleTask } from './utils';
+import { TaskSchema, toggleTask } from './task';
 import type { z } from 'zod';
 
 /**

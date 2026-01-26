@@ -1,10 +1,13 @@
-# Skill: cording (Next.js 16 + Tailwind 4)
-
-## Goal
+---
+name: cording
+description: Next.js 16 + Tailwind 4環境下で一貫性のある高品質なコードを生成する。
+---
+## 目的 (Goal)
 AIによる解釈性・保守性とトークン効率を最大化し、Next.js 16 / Tailwind 4 環境下で一貫性のある高品質なコードを生成する。
 
-## Rules
+## ルールと制約 (Rules & Constraints)
 ### 1. Core Principles (設計原則)
+
 - **Type Safety First:** すべてのデータ構造に型を定義せよ。`any` および `@ts-ignore` は厳禁とする。
 - **Context Autonomy:** ファイルは独立性を保ち、ワイルドカードインポート (`import *`) を禁止し、依存関係は明示的にせよ。
 - **Token Efficiency:** 不要なコード、コメント、巨大なファイル（200行超）を排除し、AIの読み取り効率を最大化せよ。

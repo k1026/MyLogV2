@@ -18,6 +18,11 @@ export const CellSchema = z.object({
 });
 
 /**
+ * CellSchemaから推論される型
+ */
+export type CellData = z.infer<typeof CellSchema>;
+
+/**
  * IDのバリデーション用正規表現
  */
 const ID_REGEX = /^\d+-[A-Z0-9]{5}$/;
@@ -37,7 +42,7 @@ export class Cell {
     geo: string;
     remove: string;
 
-    constructor(data: z.infer<typeof CellSchema>) {
+    constructor(data: CellData) {
         this.id = data.id;
         this.attribute = data.attribute;
         this.name = data.name;
@@ -52,7 +57,7 @@ export class Cell {
      */
     static generateId(): string {
         const timestamp = Date.now();
-        // Math.randomを36進数変換し、小数部分から5文字抽出して大文字化する
+        // より確実に5文字の英数字を生成する
         const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase().padEnd(5, '0');
         return `${timestamp}-${randomStr}`;
     }
@@ -61,17 +66,17 @@ export class Cell {
      * IDから生成時間を取得する（Unixミリ秒）
      */
     get createdAt(): number {
-        const parts = this.id.split('-');
-        const timestamp = parts[0];
-        return timestamp ? parseInt(timestamp, 10) : 0;
+        const timestampPart = this.id.split('-')[0];
+        if (!timestampPart) return 0;
+        const ts = parseInt(timestampPart, 10);
+        return isNaN(ts) ? 0 : ts;
     }
 
     /**
      * IDリストをパースする（空白区切り）
      */
     private getCellIds(): string[] {
-        const trimmed = this.value.trim();
-        return trimmed ? trimmed.split(/\s+/) : [];
+        return this.value.trim() ? this.value.trim().split(/\s+/) : [];
     }
 
     /**
@@ -79,8 +84,7 @@ export class Cell {
      * 重複は許可しない。
      */
     addCellId(cellId: string): void {
-        if (this.attribute !== 'Card') return;
-        if (!ID_REGEX.test(cellId)) return;
+        if (this.attribute !== 'Card' || !ID_REGEX.test(cellId)) return;
 
         const ids = new Set(this.getCellIds());
         if (!ids.has(cellId)) {
@@ -109,7 +113,7 @@ export class Cell {
         value?: string;
         geo?: string;
     }): Cell {
-        const data: z.infer<typeof CellSchema> = {
+        const data: CellData = {
             id: this.generateId(),
             attribute: params.attribute,
             name: this.getDefaultName(params.attribute, params.name),
@@ -157,7 +161,7 @@ export class Cell {
     /**
      * plain objectに変換する
      */
-    toObject(): z.infer<typeof CellSchema> {
+    toObject(): CellData {
         return {
             id: this.id,
             attribute: this.attribute,
@@ -168,3 +172,4 @@ export class Cell {
         };
     }
 }
+

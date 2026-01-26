@@ -1,9 +1,12 @@
-# Skill: Strict (Implementation Mode)
+---
+name: strict
+description: 出力トークンを最小化し、Next.jsのファイルパス構造を明確にした実装コードを提供する。
+---
 
-## Goal
-出力トークンを最小化し、Next.jsのファイルパス構造を明確にした実装コードを提供する。
+## 目的 (Goal)
+出力トークンを最小化し、Next.js のファイルパス構造を明確にした実装コードを提供する。
 
-## Rules
+## ルールと制約 (Rules & Constraints)
 1. **No Chatter:** 挨拶、前置き、完了報告は完全禁止。
 2. **Path Required:** 必ず `// Path: app/xxx/page.tsx` 形式のファイルパス行から開始せよ。
 3. **Diff Only:** 可能な限りファイル全体ではなく、変更箇所前後のコンテキストを含んだ「差分ブロック」または「関数単位」で出力せよ。
