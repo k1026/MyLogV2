@@ -108,51 +108,65 @@ describe('Cell Class', () => {
         });
 
         describe('addCellId()', () => {
+            const validId1 = '1700000000000-AAAAA';
+            const validId2 = '1700000000000-BBBBB';
+
             it('ID がスペース区切りで追加され、べき等性が保たれること', () => {
-                cardCell.addCellId('id-1');
-                expect(cardCell.value).toBe('id-1');
+                cardCell.addCellId(validId1);
+                expect(cardCell.value).toBe(validId1);
 
                 // 重複追加の防止（べき等性）
-                cardCell.addCellId('id-1');
-                expect(cardCell.value).toBe('id-1');
+                cardCell.addCellId(validId1);
+                expect(cardCell.value).toBe(validId1);
 
-                cardCell.addCellId('id-2');
-                expect(cardCell.value).toBe('id-1 id-2');
+                cardCell.addCellId(validId2);
+                expect(cardCell.value).toBe(`${validId1} ${validId2}`);
             });
 
             it('空文字は追加されないこと', () => {
                 cardCell.addCellId('');
-                // 現状の実装では空文字も追加されうるが、仕様として空文字はIDとして無効
-                // 実際の実装を確認すると split(' ') して includes するので empty string は入る可能性がある
-                // もし入ってしまうなら、実装を修正するかテストで期待値を定める必要がある。
-                // 仕様 docs/specs/02_CellDataStructure.md には特に記載がないが、一般的にIDは空ではない。
-                // ここでは現状の実装挙動をテストするか、あるべき姿をテストする。
-                // ひとまず、「追加されない」ことを期待値とし、もし失敗したら実装を微修正する。
+                expect(cardCell.value).toBe('');
+            });
+
+            it('スペースのみの文字列は追加されないこと', () => {
+                cardCell.addCellId('   ');
+                expect(cardCell.value).toBe('');
+            });
+
+            it('IDの形式が不正な場合でも追加されないこと (ロジック保護)', () => {
+                // 仕様上、IDは [timestamp]-[random] だが、addCellIdがそれをバリデーションするか
+                // 今回は実装側でバリデーションを強化することを想定し、不正形式は弾くテストを追加
+                cardCell.addCellId('invalid-id');
+                expect(cardCell.value).toBe('');
             });
         });
 
         describe('removeCellId()', () => {
+            const id1 = '1700000000000-AAAAA';
+            const id2 = '1700000000000-BBBBB';
+            const id3 = '1700000000000-CCCCC';
+
             beforeEach(() => {
-                cardCell.value = 'id-1 id-2 id-3';
+                cardCell.value = `${id1} ${id2} ${id3}`;
             });
 
             it('中間、最初、最後の ID が正しく削除されること', () => {
                 // 中間
-                cardCell.removeCellId('id-2');
-                expect(cardCell.value).toBe('id-1 id-3');
+                cardCell.removeCellId(id2);
+                expect(cardCell.value).toBe(`${id1} ${id3}`);
 
                 // 最初
-                cardCell.removeCellId('id-1');
-                expect(cardCell.value).toBe('id-3');
+                cardCell.removeCellId(id1);
+                expect(cardCell.value).toBe(id3);
 
                 // 最後 (かつ最後の一つ)
-                cardCell.removeCellId('id-3');
+                cardCell.removeCellId(id3);
                 expect(cardCell.value).toBe('');
             });
 
             it('存在しない ID を削除しようとしても変化がないこと (べき等性)', () => {
                 const originalValue = cardCell.value;
-                cardCell.removeCellId('non-existent');
+                cardCell.removeCellId('1700000000000-ZZZZZ');
                 expect(cardCell.value).toBe(originalValue);
             });
 
@@ -161,16 +175,33 @@ describe('Cell Class', () => {
                 expect(() => cardCell.removeCellId('some-id')).not.toThrow();
                 expect(cardCell.value).toBe('');
             });
+
+            it('スペースが含まれる既存のIDリストから正しく削除され、余計なスペースが残らないこと', () => {
+                const id1 = '1700000000000-AAAAA';
+                const id2 = '1700000000000-BBBBB';
+                const id3 = '1700000000000-CCCCC';
+                cardCell.value = ` ${id1}  ${id2}   ${id3} `;
+                cardCell.removeCellId(id2);
+                expect(cardCell.value).toBe(`${id1} ${id3}`);
+            });
         });
 
         it('Attribute が Card 以外の場合、メソッドが副作用を持たないこと', () => {
             const textCell = Cell.create({ attribute: 'Text', value: 'original' });
+            const validId = '1700000000000-AAAAA';
 
-            textCell.addCellId('id-1');
+            textCell.addCellId(validId);
             expect(textCell.value).toBe('original');
 
-            textCell.removeCellId('id-1');
+            textCell.removeCellId(validId);
             expect(textCell.value).toBe('original');
+        });
+
+        it('値を操作した後も、attribute に応じた不変条件が維持されること', () => {
+            const taskCell = Cell.create({ attribute: 'Task' });
+            // Taskセルのvalueは完了時刻か空文字であるべき
+            taskCell.addCellId('some-id');
+            expect(taskCell.value).toBe(''); // Card以外なので追加されないはず
         });
     });
 

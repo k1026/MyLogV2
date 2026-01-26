@@ -18,6 +18,11 @@ export const CellSchema = z.object({
 });
 
 /**
+ * IDのバリデーション用正規表現
+ */
+const ID_REGEX = /^\d+-[A-Z0-9]{5}$/;
+
+/**
  * アプリケーションのデータの基本単位である「Cell（セル）」クラス
  * 仕様書: docs/specs/02_CellDataStructure.md
  * 
@@ -57,7 +62,15 @@ export class Cell {
      */
     get createdAt(): number {
         const parts = this.id.split('-');
-        return parseInt(parts[0], 10);
+        const timestamp = parts[0];
+        return timestamp ? parseInt(timestamp, 10) : 0;
+    }
+
+    /**
+     * IDリストをパースする（空白区切り）
+     */
+    private getCellIds(): string[] {
+        return this.value.split(/\s+/).filter(id => id.length > 0);
     }
 
     /**
@@ -66,11 +79,12 @@ export class Cell {
      */
     addCellId(cellId: string): void {
         if (this.attribute !== 'Card') return;
+        if (!ID_REGEX.test(cellId)) return;
 
-        const ids = this.value ? this.value.split(' ') : [];
+        const ids = this.getCellIds();
         if (!ids.includes(cellId)) {
             ids.push(cellId);
-            this.value = ids.join(' ').trim();
+            this.value = ids.join(' ');
         }
     }
 
@@ -80,9 +94,9 @@ export class Cell {
     removeCellId(cellId: string): void {
         if (this.attribute !== 'Card') return;
 
-        const ids = this.value ? this.value.split(' ') : [];
+        const ids = this.getCellIds();
         const filteredIds = ids.filter(id => id !== cellId);
-        this.value = filteredIds.join(' ').trim();
+        this.value = filteredIds.join(' ');
     }
 
     /**
