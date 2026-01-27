@@ -10,14 +10,14 @@ description: ミューテーションテストのためのバグ注入と検証�
 - このスキルは Windows OS かつ Typescript環境でのみ実行します。他の環境では実行せずにスキップしてください。
 
 ### Step 1: Preparation (準備・バックアップ):
-`.agent/skills/tdd-mutation/scripts/mutation-inject.js`を使用してテスト対象となる実装コードファイルのバックアップを確保します。
+`.agent/skills/SAT-DD/tdd-mutation/scripts/mutation-inject.js`を使用してテスト対象となる実装コードファイルのバックアップを確保します。
 
 下記に`mutation-inject.js`の起動例を示します。<target_file_path>が対象の実装コード、<mutant_source_path>が変異体を注入するコードのファイルパスです。
 
 > ### Syntax
-> node .agent/skills/tdd-mutation/scripts/mutation-inject.js <target_file_path> <mutant_source_path>
+> node .agent/skills/SAT-DD/tdd-mutation/scripts/mutation-inject.js <target_file_path> <mutant_source_path>
 > ### Example
-> node .agent/skills/tdd-mutation/scripts/mutation-inject.js src/utils/calculate.ts temp/buggy_calculate.ts
+> node .agent/skills/SAT-DD/tdd-mutation/scripts/mutation-inject.js src/utils/calculate.ts temp/buggy_calculate.ts
 
 ### Step 2: Mutant Injection (変異体注入):
 システムの健全性とテスト強度を測るため、以下のどちらかのCaseで変異体を注入します。
@@ -47,25 +47,25 @@ description: ミューテーションテストのためのバグ注入と検証�
     * ❌ **不合格:** テストが全て成功してしまった場合（バグを見逃した）、テストケース不足と判断する。
 
 ### Step 4: Restoration (完全復元):
-検証の合否に関わらず、`.agent/skills/tdd-mutation/scripts/mutation-restore.js`を用いて変異体コードを削除し、バックアップファイルから実装コードを即座に正常な状態へ書き戻します。
+検証の合否に関わらず、`.agent/skills/SAT-DD/tdd-mutation/scripts/mutation-restore.js`を用いて変異体コードを削除し、バックアップファイルから実装コードを即座に正常な状態へ書き戻します。
 
 下記に`mutation-restore.js`の起動例を示します。<target_file_path>が対象の実装コードのバックアップファイルのパスです。
 
 > ### Syntax
-> node .agent/skills/tdd-mutation/scripts/mutation-restore.js <target_file_path>
+> node .agent/skills/SAT-DD/tdd-mutation/scripts/mutation-restore.js <target_file_path>
 > ### Example
-> node .agent/skills/tdd-mutation/scripts/mutation-restore.js src/utils/calculate.ts
+> node .agent/skills/SAT-DD/tdd-mutation/scripts/mutation-restore.js src/utils/calculate.ts
 
 ### Step 5: Safety Sweep (安全走査):
-正しく復元されたかを確認するため、`.agent/skills/tdd-mutation/scripts/mutation-guard.js`を実行しプロジェクトをスキャンします。
+正しく復元されたかを確認するため、`.agent/skills/SAT-DD/tdd-mutation/scripts/mutation-guard.js`を実行しプロジェクトをスキャンします。
 マーカーの残留が検出された場合、エラーを報告し、手動確認を要求する。
 
 下記に`mutation-guard.js`の仕様例を示します。<target_file_path>はテストした実装コードのパスで、そのファイルが配置されたフォルダ内に変異体コードが残っていないかを確認します。
 
 > ### Syntax
-> node .agent/skills/tdd-mutation/scripts/mutation-guard.js <target_file_path>
+> node .agent/skills/SAT-DD/tdd-mutation/scripts/mutation-guard.js <target_file_path>
 > ### Example
-> node .agent/skills/tdd-mutation/scripts/mutation-guard.js src/utils/calculate.ts
+> node .agent/skills/SAT-DD/tdd-mutation/scripts/mutation-guard.js src/utils/calculate.ts
 
 【重要】スクリプトを実行して `CRITICAL FAILURE`や`Mutant marker detected`や`FAILED:`などが出力された場合はファイルの復元に失敗したと判断し、直ちにプロセスを中断しユーザーに状況と問題を報告してください。
 

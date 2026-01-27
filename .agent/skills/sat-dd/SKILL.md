@@ -14,7 +14,7 @@ description: Specification-AI-Test Driven Development (SAT-DD) を実行する�
 - 実装コードは`.agent/skills/guideline/SKILL.md`に従うこと。
 - **【重要】**：同じStepを3回繰り返すたびにユーザーに継続するか確認を求めること。
 - 実装は下記のワークフローに従い進めること。
-- ワークフローの各ステップの試行回数を`.agent/skills/sat-dd/step_log.md`に記録すること。
+- ワークフローの各ステップの試行回数を`.agent/skills/SAT-DD/step_log.md`に記録すること。
 
 ### 開発ワークフロー
 
@@ -30,22 +30,22 @@ description: Specification-AI-Test Driven Development (SAT-DD) を実行する�
     * 振る舞いを変えない内部最適化・リファクタリングの場合は**Step 3**の実装に進む。
 
 ### Step 2: Test Preparation (T) - テストファースト
-4.   `.agent/skills/tdd-first/SKILL.md`を実行し仕様書を元にテストを作成する。既存機能の変更の場合は既存のテストを修正する。
+4.   `.agent/skills/SAT-DD/tdd-first/SKILL.md`を実行し仕様書を元にテストを作成する。既存機能の変更の場合は既存のテストを修正する。
 5.  `npm run test:ai`を実行した後、`test-results.log`の内容を確認し、**全てのテストが「論理的に失敗（Red）」している**ことを確認する(※ コンパイルエラーではなく、アサーションエラーでの失敗を目指すこと)。全てのテストがエラーになっていない場合は4. のテストの作成からやり直す。
 6.  全てのテストが論理的にエラー(Red)になったら**Step 3**の実装に進む。
 
 ### Step 3: AI Implementation (A) - 実装
 
-7.  `.agent/skills/tdd-fix/SKILL.md`を実行し、全てのテストをパス（Green）させるための最短の実装を行う。
+7.  `.agent/skills/SAT-DD/tdd-fix/SKILL.md`を実行し、全てのテストをパス（Green）させるための最短の実装を行う。
 8.  `npm run test:ai` を実行し全てのテストをパスしたら**Step 4**に進む。テストでエラーがでたら7.の実装に戻る。
 
 ### Step 4: Optimization & Hardening - 最適化と厳格化
-9.  `.agent/skills/tdd-strict/SKILL.md`を実行し、**Step3**で作成されたコードを検証し、コードを最適化する。
-10. `.agent/skills/tdd-refine/SKILL.md`を実行してテストケースを厳格化する。
+9.  `.agent/skills/SAT-DD/tdd-strict/SKILL.md`を実行し、**Step3**で作成されたコードを検証し、コードを最適化する。
+10. `.agent/skills/SAT-DD/tdd-refine/SKILL.md`を実行してテストケースを厳格化する。
 11. 再度`npm run test:ai` を実行し、全てのテストにパスするまで **Step 4** の最初から繰り返し品質を高める。全てのテストをパスしたら**Step 5**に進む。
 
 ### Step 5: Mutation Testing (M) - 意図的な破壊と検証
-12. `.agent/skills/tdd-mutation/SKILL.md`を実行してテストの堅牢性を確認する。
+12. `.agent/skills/SAT-DD/tdd-mutation/SKILL.md`を実行してテストの堅牢性を確認する。
 
 13. テストが正確にエラーを検出できたら**Step 6**の最終同期に進む。そうでなければ**Step 4**の最適化と厳格化に戻る。必要な場合は**Step 2**のテストの作成まで戻り実装をやり直す。
 

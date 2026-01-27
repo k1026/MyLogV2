@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // 検索対象外のディレクトリ
-const IGNORE_DIRS = ['node_modules', '.git', '.next', 'dist', 'build', 'coverage'];
+const IGNORE_DIRS = ['node_modules', '.git', '.next', 'dist', 'build', 'coverage', '.agent'];
 // 検索対象の拡張子
 const TARGET_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
 // ★重要: このタグだけを探すので、他のNODE_ENV利用には影響しない
@@ -62,7 +62,7 @@ if (targetPath) {
 } else {
     // 引数がない場合: 安全のためプロジェクトルート(スクリプトの親)をスキャン
     // ※ プロジェクト全体を確認したい場合用
-    scanTargetDir = path.resolve(__dirname, '..');
+    scanTargetDir = path.resolve(__dirname, '..', '..', '..', '..', '..');
     console.log(`🛡️  Full Scan: Checking project root "${scanTargetDir}"`);
 }
 

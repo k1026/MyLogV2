@@ -1,13 +1,24 @@
 ---
 name: strict
-description: 出力トークンを最小化し、Next.jsのファイルパス構造を明確にした実装コードを提供する。
+description: 実装コードの型安全性の検証と最適化を行う。
 ---
 
+# Strict Implementation Verification
+
 ## 目的 (Goal)
-出力トークンを最小化し、Next.js のファイルパス構造を明確にした実装コードを提供する。
+実装コードの型安全性の検証と、パフォーマンス・可読性の最適化を行う。
 
 ## ルールと制約 (Rules & Constraints)
-1. **No Chatter:** 挨拶、前置き、完了報告は完全禁止。
-2. **Path Required:** 必ず `// Path: app/xxx/page.tsx` 形式のファイルパス行から開始せよ。
-3. **Diff Only:** 可能な限りファイル全体ではなく、変更箇所前後のコンテキストを含んだ「差分ブロック」または「関数単位」で出力せよ。
-4. **No Explanations:** 修正理由の解説は禁止。重要な注釈のみ `// NOTE: ...` としてコード内に埋め込む。
+0. **コード規約**:
+   - `.agent/skills/guideline/SKILL.md`を参考にコードを書くこと。
+1. **Target Identification**: 
+   - 変更が加えられたコード行を正確に特定し、そこをスキャン対象とする。
+2. **Compliance Check**: 
+   - `any` が含まれていないか？
+   - `unknown` からのキャストは適切か？
+   - Zodスキーマとの型矛盾はないか？
+3. **Optimization**: 
+   - コードの可読性や効率を最適化する。
+4. **Conditioned Report**:
+   - **問題がある場合**: 「検証の結果、[具体的な問題点] が見つかりました。」と報告し修正案を併せて提示する。
+   - 検証に合格するまでプロセスを完了しないこと。

@@ -51,4 +51,7 @@ worker-*.js.map
 fallback-*.js.map
 
 # Test logs
-#test-results.log
+test-results.log
+
+# SAT backup files
+*.sat_backup
