@@ -14,7 +14,7 @@ description: Specification-AI-Test Driven Development (SAT-DD) を実行する�
 - 実装コードは`.agent/skills/guideline/SKILL.md`に従うこと。
 - **【重要】**：同じStepを3回繰り返すたびにユーザーに継続するか確認を求めること。
 - 実装は下記のワークフローに従い進めること。
-- ワークフローの各ステップの試行回数を`.agent/skills/SAT-DD/step_log.md`に記録すること。
+- ワークフローの各ステップの試行回数を記録し最後にまとめて報告すること
 
 ### 開発ワークフロー
 

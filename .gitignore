@@ -49,9 +49,3 @@ sw.js.map
 workbox-*.js.map
 worker-*.js.map
 fallback-*.js.map
-
-# Test logs
-test-results.log
-
-# SAT backup files
-*.sat_backup
