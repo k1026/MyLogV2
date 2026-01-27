@@ -8,7 +8,7 @@ description: 実装コードの型安全性の検証と最適化を行う。
 
 ## ルールと制約 (Rules & Constraints)
 0. **コード規約**:
-   - `docs/specs/00_CordingRules.md`を参考にコードを書くこと。
+   - `.agent/skills/guideline/SKILL.md`を参考にコードを書くこと。
 1. **Target Identification**: 
    - 直前の `tdd-fix` で変更されたコード行を正確に特定し、そこをスキャン対象とする。
 2. **Compliance Check**: 
