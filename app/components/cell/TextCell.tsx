@@ -95,8 +95,8 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
                     onKeyDown={handleKeyDown}
                     placeholder={isFocused ? "Title" : ""}
                     className={cn(
-                        "bg-white/40 border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-3 rounded-2xl text-slate-800 font-bold text-lg placeholder:text-slate-300",
-                        "focus:border-purple-400 focus:bg-white focus:shadow-sm"
+                        "bg-white/90 border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-3 rounded-2xl text-slate-800 font-bold text-lg placeholder:text-slate-400",
+                        "focus:border-purple-500 focus:bg-white focus:shadow-sm"
                     )}
                 />
             )}
@@ -108,8 +108,8 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
                     placeholder={isFocused ? "Description..." : ""}
                     rows={1}
                     className={cn(
-                        "bg-white/20 border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-center p-3 rounded-2xl text-slate-600 placeholder:text-slate-300 leading-relaxed text-base",
-                        "focus:border-purple-400 focus:bg-white focus:shadow-sm"
+                        "bg-white/80 border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-center p-3 rounded-2xl text-slate-700 placeholder:text-slate-400 leading-relaxed text-base",
+                        "focus:border-purple-500 focus:bg-white focus:shadow-sm"
                     )}
                 />
             )}

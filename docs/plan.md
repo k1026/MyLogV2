@@ -1,61 +1,109 @@
-# 実装計画: データベース ファイル入出力機能 (DB File I/O)
+# 実装計画: Card UI (カードUI)
 
-## 概要
-`docs/specs/03_DatabaseSpecification.md` の更新に基づき、データベースの全データを JSONL 形式でエクスポートおよびインポートする機能を実装する。データのバックアップとリストアを主目的とし、ファイルサイズの最小化と処理効率を重視して DB内部形式（短縮キー）を利用する。
+本文書は、`docs/specs/05_CardUI.md` に基づくカードUIの実装計画である。
+Cardは複数のCell (Time, Text, Task) を束ねるコンテナであり、ユーザー操作の基本単位となる。
 
-## 要件定義
-### 1. エクスポート機能 (`exportAsJSONL`)
-- **対象データ**: DB内の全ての `Cell` データ。
-- **出力形式**: JSONL (JSON Lines)。各行が1つの `CellDB` オブジェクト（`I`, `A`, `N`, `V`...）を表す。
-- **データ変換**:
-    - **なし**。DBから取得した生データをそのまま出力する。
-    - これにより、アプリケーション型への変換コストを削減する。
-- **戻り値**: 全データを結合した文字列 (`string`)。
+## 1. 仕様分析と要件定義
 
-### 2. インポート機能 (`importFromJSONL`)
-- **入力**: JSONL 形式の文字列。
-- **処理フロー**:
-    1. 文字列を行単位に分割。
-    2. 空行を無視。
-    3. 各行を JSON パース (結果は `any` -> `CellDB` と仮定)。
-    4. **変換**: `CellRepository.mapFromDB` を使用して `Cell` オブジェクトに変換。
-    5. **検証**: `CellSchema` (Zod) を用いて `Cell` オブジェクトをバリデーション。
-    6. **保存**: Validなデータについて、`CellRepository.save` (内部で再度 `mapToDB` が行われるが、安全のため許容) を用いて DB に保存 (Upsert)。
-- **エラーハンドリング**:
-    - パースエラー、マッピングエラー、バリデーションエラーが発生した行はスキップする。
-    - 処理結果として `ImportResult` (成功数、失敗数、エラー詳細配列) を返す。
-- **注意点**: インポートデータが信頼できるバックアップデータである場合が多いが、スキーマ変更等への対応のため、必ずモデルバリデーションを通すこととする。
+### 1.1 仕様概要
+- **構造**: `Card` 属性のCell。`value` に子セルのIDリストを保持。
+- **状態**:
+  - **折りたたみ (Default)**: プレビュー表示 (Time, Title)。
+  - **展開 (Expanded)**: 子セル詳細表示、編集可能。
+- **自動処理**:
+  - 作成時に `Time` (現在時刻) と `Text` (空) を自動追加。
+  - 折りたたみ時に空の `Task`, `Text` セルを削除 (Clean up)。
+- **ソート機能**:
+  - 生成日時 (Asc/Desc)。
+  - タスク状態 (未完了/完了優先)。
+  - **手動ソート (Drag & Drop)**: `Card.value` の順序を物理的に変更。
+- **UI/UX**:
+  - FAB (Floating Action Button) でセル追加。
+  - 長押しでメニュー (Pie Menu / Context Menu)。
+  - **背景色**: 子セルの平均レア度 (Rarity) に連動。
 
-### 3. 対象ファイル
-- `app/lib/db/operations.ts`: `CellRepository` へのメソッド追加。
-- `app/lib/db/types.ts`: `ImportResult` 型の定義（必要であれば）。
+### 1.2 依存関係・前提条件
+- **DB層**: `CellRepository` の参照・更新。
+- **既存コンポーネント**: `TimeCell`, `TextCell`, `TaskCell` の再利用。
+- **Rarity**: `useRarity` (または Context) からレア度情報を取得可能であること。
+- **Style**: Tailwind CSS を使用。
 
-## 実装ステップ
+---
 
-### Step 1: テスト作成 (Test First)
-- **Target**: `app/lib/db/fileIO.test.ts` (新規作成)
+## 2. 実装ステップ (SAT-DD)
+
+### Step 1: Cardコンポーネントの基盤作成と表示
+- **目的**: Cardの基本的な表示 (折りたたみ/展開) とデータ連携を確認する。
 - **Action**:
-    - `exportAsJSONL` のテストケース作成:
-        - DBにデータを投入。
-        - エクスポート結果が `I`, `A`, `N` などのキーを持つ JSONL であることを検証。
-    - `importFromJSONL` のテストケース作成:
-        - 正常系: `I`, `A` キーを持つ JSONL を読み込ませ、DB に正しくデータが格納されるか検証（アプリ形式で取得できるか確認）。
-        - 異常系:
-            - 不正な JSON。
-            - 必須フィールド欠け (`I` がない、など)。
-            - `mapFromDB` で変換できないデータ。
-            - バリデーションエラー（`attribute` が不正な値など）。
-        - 混合系: 正常と異常が混在する場合の挙動検証。
+  1. `app/components/card/Card.tsx` 作成。
+  2. **Props定義**: `cell: Cell` (Card属性), `onUpdate: (cell: Cell) => void` 等。
+  3. **State管理**: `isExpanded` (boolean)。
+  4. **折りたたみ表示**:
+     - `Card.value` から先頭のセル(Time以外)を取得しタイトル表示。
+     - 右上に生成日時 (`Card.id` 由来) 表示。
+  5. **展開表示 (リスト)**:
+     - `Card.value` に含まれる IDリストを解析。
+     - `CellRepository` (または `useLiveQuery` via Dexie) を使用して子セルデータを取得。
+     - リストレンダリング (仮実装)。
+  6. **テスト**:
+     - 親から渡された `Card` データが正しく表示されるか。
+     - クリックで `isExpanded` が切り替わるか。
 
-### Step 2: 実装 (Implementation)
-- **Target**: `app/lib/db/operations.ts`
+### Step 2: 自動処理とデータ整合性 (Auto-Element & Clean-up)
+- **目的**: Card作成時のデフォルト状態と、閉じた時のクリーンアップ処理を実装。
 - **Action**:
-    - `importFromJSONL`, `exportAsJSONL` を実装。
-    - エクスポートでは `db.cells.orderBy('I').reverse().toArray()` を使用して生データを取得する。
-    - インポートでは以下のパイプラインを実装する:
-        `raw json -> CellDB object -> Cell object -> Validation -> Save`
+  1. **作成時ロジック**:
+     - Card作成関数 (`createCard` helper) を実装。
+     - `Time` セル作成 -> `Text` セル作成 -> `Card` の `value` に追加。
+     - IDが時間順になるよう `1ms` 待機処理。
+  2. **Clean-upロジック**:
+     - `useEffect` または `onCollapse` イベントで発火。
+     - 空の `Task` (name空), `Text` (name&value空) を検出し、DBから削除 & Cardのvalueから除外。
+  3. **テスト**:
+     - `createCard` が正しい初期構造 (Card > Time, Text) を返すか。
+     - 空のセルを持つカードを閉じた時、それらが削除されるか。
 
-### Step 3: 動作検証とリファクタリング (Refine)
+### Step 3: ソート機能とツールバーの実装
+- **目的**: 複雑なソートロジックと手動並べ替えの下地を作る。
 - **Action**:
-    - `npm test app/lib/db/fileIO.test.ts` を実行し、All Green を確認。
-    - 大量データでの簡単なパフォーマンステスト（必要に応じて）。
+  1. **ツールバーUI**: 展開時にヘッダー部分にアイコン (Sort, Task, Manual) を配置。
+  2. **ソートロジック実装 (Hook: `useCardSort`)**:
+     - `Time` セルは常に先頭維持。
+     - **日時ソート**: ID比較。
+     - **タスクソート**: Taskセルの `value` (done/not done) 比較。
+  3. **手動ソート (Manual)**:
+     - UIライブラリ (dnd-kit 等) 導入検討、またはシンプルな実装。今回は基本実装で進行。
+     - 並べ替え確定時、**`Card.value` のID順序を書き換えて保存**する処理。
+  4. **テスト**:
+     - 各ソートモードで表示順が期待通り変わること。
+     - Manualソート実行後、DB内の `Card.value` が更新されていること。
+
+### Step 4: FABとセル追加機能
+- **目的**: ユーザーがCardに新しい情報を追加できるようにする。
+- **Action**:
+  1. **FAB (Floating Action Button)** 配置 (展開時のみ)。
+  2. **追加ロジック**:
+     - ボタンクリック -> 新規セル (Default: Text?) 追加。
+     - 現在のソート順、または末尾に追加。
+     - **フォーカス制御**: 追加直後にそのセルのタイトル入力欄へフォーカス。
+  3. **パイメニュー (簡易版)**:
+     - 長押し判定フック。
+     - `Text` / `Task` 選択メニュー表示。
+  4. **テスト**:
+     - 追加ボタンでセルが増えるか。
+     - 追加されたセルにフォーカスが当たるか。
+
+### Step 5: デザイン研磨とRarity連携
+- **目的**: 仕様書通りの「Wow」なデザインとレア度連携。
+- **Action**:
+  1. **Rarity連携**:
+     - 子セルの平均レア度計算 (Card, Time 除外)。
+     - 背景色への反映 (Gradient)。
+  2. **スタイル調整**:
+     - Glassmorphism, 影, アニメーション (展開時のTransition)。
+     - 削除済み (Remove) 状態のスタイル (打ち消し線)。
+  3. **仮想スクロール (Virtual Scroll)**:
+     - *※Optional/Advanced*: 基本実装完了後に導入検討。
+
+---
+

@@ -1,10 +1,12 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/lib/models/cell.test.ts (9 tests) 14ms
- ✓ app/lib/db/fileIO.test.ts (7 tests) 68ms
- ✓ app/lib/db/operations.test.ts (12 tests) 85ms
- ✓ app/components/cell/CellContainer.test.tsx (4 tests) 73ms
+ ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 12ms
+ ✓ app/lib/models/cell.test.ts (9 tests) 23ms
+ ✓ app/components/card/cardUtils.test.ts (4 tests) 149ms
+ ✓ app/lib/db/operations.test.ts (12 tests) 98ms
+ ✓ app/lib/db/fileIO.test.ts (7 tests) 89ms
+ ✓ app/components/card/useCardSort.test.ts (5 tests) 80ms
 stderr | app/components/cell/TextCell.test.tsx > TextCell > Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること
 An update to TextCell inside a test was not wrapped in act(...).
 
@@ -17,15 +19,69 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/cell/TimeCell.test.tsx (4 tests) 149ms
- ✓ app/components/cell/TextCell.test.tsx (9 tests) 191ms
- ✓ app/components/cell/TaskCell.test.tsx (4 tests) 413ms
-     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  337ms
- ✓ app/page.test.tsx (2 tests) 586ms
-     ✓ 初期表示で TimeCell, TextCell, TaskCell と Saveボタンが表示されること  405ms
+ ✓ app/components/card/CardToolbar.test.tsx (4 tests) 172ms
+ ✓ app/components/cell/TimeCell.test.tsx (4 tests) 214ms
+ ✓ app/contexts/RarityContext.test.tsx (3 tests) 147ms
+ ✓ app/components/cell/TextCell.test.tsx (9 tests) 258ms
+ ✓ app/components/cell/TaskCell.test.tsx (4 tests) 511ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  409ms
+ ✓ app/components/card/Card.test.tsx (7 tests) 429ms
+Not implemented: Window's alert() method
+Not implemented: navigation to another Document
+stderr | app/components/db-viewer/DbViewer.test.tsx > DbViewer > 閉じるボタンをクリックすると onClose が呼ばれること
+An update to DbViewer inside a test was not wrapped in act(...).
 
- Test Files  8 passed (8)
-      Tests  51 passed (51)
-   Start at  14:37:04
-   Duration  5.11s (transform 1.59s, setup 3.67s, import 5.81s, tests 1.58s, environment 21.15s)
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | app/components/db-viewer/DbViewer.test.tsx > DbViewer > 閉じるボタンをクリックすると onClose が呼ばれること
+An update to DbViewer inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to DbViewer inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1001ms
+     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  659ms
+stderr | app/components/card/CardFAB.test.tsx > CardFAB > shows pie menu on long press
+An update to CardFAB inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ app/components/card/CardFAB.test.tsx (3 tests) 1070ms
+     ✓ renders the FAB button  382ms
+     ✓ shows pie menu on long press  640ms
+
+ Test Files  14 passed (14)
+      Tests  82 passed (82)
+   Start at  17:18:03
+   Duration  7.76s (transform 4.23s, setup 8.15s, import 15.27s, tests 4.25s, environment 51.72s)
 
