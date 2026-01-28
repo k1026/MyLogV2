@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CardList } from './CardList';
 import { RarityProvider } from '@/app/contexts/RarityContext';
+import { UIStateProvider } from '@/app/contexts/UIStateContext';
 import { Cell, CellAttribute } from '@/app/lib/models/cell';
 import { vi, describe, it, expect } from 'vitest';
 
@@ -28,7 +29,9 @@ describe('CardList Virtual Scroll', () => {
         const cards = createDummyCards(200);
         render(
             <RarityProvider>
-                <CardList cards={cards} />
+                <UIStateProvider>
+                    <CardList cards={cards} />
+                </UIStateProvider>
             </RarityProvider>
         );
 

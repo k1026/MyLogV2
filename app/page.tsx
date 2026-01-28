@@ -11,10 +11,13 @@ import { Header } from './components/Header/Header';
 import { CardList } from './components/CardList/CardList';
 import { useLocation } from './contexts/LocationContext';
 import { CardAddButton } from './components/CardList/CardAddButton';
+import { Footer } from './components/Footer/Footer';
+import { useUIState } from './contexts/UIStateContext';
 
 export default function Home() {
-    const useCardListResult = useCardList();
-    const { cards, isLoading, totalCount } = useCardListResult;
+    const { sortOrder } = useUIState();
+    const useCardListResult = useCardList(sortOrder);
+    const { cards, isLoading, isSorting, totalCount } = useCardListResult;
     const { isCalculating } = useRarity();
     const { geoString } = useLocation();
     const [mounted, setMounted] = useState(false);
@@ -61,10 +64,8 @@ export default function Home() {
                 onReset={handleReset}
                 onRandomPick={handleRandomPick}
                 onDbOpen={() => setIsDbViewerOpen(true)}
-                isDbLoading={isLoading || isCalculating} // Use isCalculating as proxy for "activity" or isLoading?
-            // Spec says DB loading. `isLoading` from useCardList is initial load.
-            // `isCalculating` is Rarity.
-            // For now use `isLoading || isCalculating`.
+                isDbLoading={isLoading || isCalculating}
+                isSorting={isSorting}
             />
 
             {/* Main Content (Card List) */}
@@ -92,6 +93,9 @@ export default function Home() {
                 isOpen={isDbViewerOpen}
                 onClose={() => setIsDbViewerOpen(false)}
             />
+
+            {/* Footer */}
+            <Footer />
 
             {/* Card Add Button (FAB) */}
             <CardAddButton

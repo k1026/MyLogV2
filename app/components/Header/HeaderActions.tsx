@@ -6,12 +6,14 @@ interface HeaderActionsProps {
     onRandomPick: () => void;
     onDbOpen: () => void;
     isDbLoading: boolean;
+    isSorting?: boolean;
 }
 
 export const HeaderActions: React.FC<HeaderActionsProps> = ({
     onRandomPick,
     onDbOpen,
-    isDbLoading
+    isDbLoading,
+    isSorting = false,
 }) => {
     return (
         <div className="flex items-center gap-3">
@@ -28,17 +30,19 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
                 onClick={onDbOpen}
                 className={cn(
                     "w-10 h-10 flex flex-col items-center justify-center rounded-xl transition-all border shadow-sm active:scale-95 relative overflow-hidden",
-                    isDbLoading
+                    (isDbLoading || isSorting)
                         ? "text-purple-600 border-purple-500/30 bg-purple-500/10"
                         : "text-slate-400 border-slate-200 hover:bg-slate-50 hover:text-slate-600"
                 )}
                 aria-label="Database Viewer"
                 title="Database Status"
             >
-                {isDbLoading ? (
+                {(isDbLoading || isSorting) ? (
                     <>
                         <Database size={16} className="animate-pulse mb-0.5" />
-                        <span className="text-[6px] font-bold uppercase tracking-tighter leading-none animate-pulse">Load</span>
+                        <span className="text-[6px] font-bold uppercase tracking-tighter leading-none animate-pulse">
+                            {isSorting ? "Sorting" : "Load"}
+                        </span>
                     </>
                 ) : (
                     <Database size={20} />
