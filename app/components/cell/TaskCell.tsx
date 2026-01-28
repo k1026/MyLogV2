@@ -8,12 +8,22 @@ import { cn } from '@/app/lib/utils';
 interface TaskCellProps {
     cell: Cell;
     onSave?: (cell: Cell) => void;
+    isNew?: boolean;
 }
 
-export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave }) => {
+export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
     const [name, setName] = useState(cell.name);
     const isChecked = cell.value === 'true';
     const nameRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isNew) {
+            setTimeout(() => {
+                nameRef.current?.focus();
+                nameRef.current?.select();
+            }, 50);
+        }
+    }, [isNew]);
 
     useEffect(() => {
         setName(cell.name);
@@ -47,7 +57,7 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave }) => {
                     type="checkbox"
                     checked={isChecked}
                     onChange={(e) => handleCheckboxChange(e.target.checked)}
-                    className="appearance-none w-7 h-7 rounded-xl border-2 border-slate-200 bg-white/90 checked:bg-purple-500 checked:border-purple-500 transition-all cursor-pointer relative
+                    className="appearance-none w-7 h-7 rounded-xl border-2 border-slate-200 bg-transparent checked:bg-purple-500 checked:border-purple-500 transition-all cursor-pointer relative
                         checked:after:content-['✓'] checked:after:absolute checked:after:text-white checked:after:text-base checked:after:font-bold checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 hover:border-purple-400 ring-offset-2 focus:ring-4 focus:ring-purple-500/10"
                 />
             </div>
@@ -59,8 +69,8 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave }) => {
                 onBlur={handleBlur}
                 placeholder="To-do Task"
                 className={cn(
-                    "bg-white/90 border-b-2 border-transparent outline-none transition-all duration-300 text-center font-bold text-lg p-3 rounded-2xl placeholder:text-slate-400 flex-1",
-                    "focus:border-purple-500 focus:bg-white focus:shadow-sm",
+                    "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-center font-bold text-lg p-3 rounded-2xl placeholder:text-slate-400 flex-1",
+                    "focus:border-purple-500",
                     isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"
                 )}
             />

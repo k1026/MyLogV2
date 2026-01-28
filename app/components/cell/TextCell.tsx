@@ -6,9 +6,10 @@ import { cn } from '@/app/lib/utils';
 interface TextCellProps {
     cell: Cell;
     onSave?: (cell: Cell) => void;
+    isNew?: boolean;
 }
 
-export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
+export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
     const [name, setName] = useState(cell.name);
     const [value, setValue] = useState(cell.value);
     const [isFocused, setIsFocused] = useState(false);
@@ -34,6 +35,16 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
 
     // フォーカス管理 (仕様 4.2.2)
     useEffect(() => {
+        if (isNew) {
+            setIsFocused(true);
+            // We need a short timeout to ensure the element is rendered and can be selected
+            setTimeout(() => {
+                nameRef.current?.focus();
+                nameRef.current?.select();
+            }, 50);
+            return;
+        }
+
         if (isFocused) {
             // レンダリング完了後にフォーカスを設定
             // 既存の focus check を行って、すでにフォーカスがある場合は何もしない（誤作動防止）
@@ -49,7 +60,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
                 valueRef.current?.focus();
             }
         }
-    }, [isFocused]); // name, value を依存に入れると入力中にフォーカスが飛ぶ可能性があるので入れない
+    }, [isFocused, isNew]);
 
     const handleBlur = (e: React.FocusEvent) => {
         // コンテナ外にフォーカスが移ったかチェック (relatedTarget is the new focused element)
@@ -73,8 +84,8 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
         }
     };
 
-    // 表示判定
-    const showName = isFocused || !!name;
+    // 表示判定: 両方空の場合は、場所を明示するために常にタイトルを表示する
+    const showName = isFocused || !!name || (!name && !value);
     const showValue = isFocused || !!value;
 
     return (
@@ -93,10 +104,10 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={isFocused ? "Title" : ""}
+                    placeholder={isFocused || !name ? "Title" : ""}
                     className={cn(
-                        "bg-white/90 border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-3 rounded-2xl text-slate-800 font-bold text-lg placeholder:text-slate-400",
-                        "focus:border-purple-500 focus:bg-white focus:shadow-sm"
+                        "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-3 rounded-2xl text-slate-800 font-bold text-lg placeholder:text-slate-400",
+                        "focus:border-purple-500"
                     )}
                 />
             )}
@@ -105,11 +116,11 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
                     ref={valueRef}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    placeholder={isFocused ? "Description..." : ""}
+                    placeholder={isFocused || !value ? "Description..." : ""}
                     rows={1}
                     className={cn(
-                        "bg-white/80 border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-center p-3 rounded-2xl text-slate-700 placeholder:text-slate-400 leading-relaxed text-base",
-                        "focus:border-purple-500 focus:bg-white focus:shadow-sm"
+                        "bg-transparent border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-center p-3 rounded-2xl text-slate-700 placeholder:text-slate-400 leading-relaxed text-base",
+                        "focus:border-purple-500"
                     )}
                 />
             )}

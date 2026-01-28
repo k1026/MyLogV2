@@ -1,109 +1,57 @@
-# 実装計画: Card UI (カードUI)
+# カードUI セル追加ボタン（FAB）およびパイメニューの修正計画
 
-本文書は、`docs/specs/05_CardUI.md` に基づくカードUIの実装計画である。
-Cardは複数のCell (Time, Text, Task) を束ねるコンテナであり、ユーザー操作の基本単位となる。
+## 1. 要件定義
 
-## 1. 仕様分析と要件定義
+`docs/specs/05_CardUI.md` の 5.3.2.4.1 および 5.3.2.4.2 に基づき、以下の機能を実装・修正する。
 
-### 1.1 仕様概要
-- **構造**: `Card` 属性のCell。`value` に子セルのIDリストを保持。
-- **状態**:
-  - **折りたたみ (Default)**: プレビュー表示 (Time, Title)。
-  - **展開 (Expanded)**: 子セル詳細表示、編集可能。
-- **自動処理**:
-  - 作成時に `Time` (現在時刻) と `Text` (空) を自動追加。
-  - 折りたたみ時に空の `Task`, `Text` セルを削除 (Clean up)。
-- **ソート機能**:
-  - 生成日時 (Asc/Desc)。
-  - タスク状態 (未完了/完了優先)。
-  - **手動ソート (Drag & Drop)**: `Card.value` の順序を物理的に変更。
-- **UI/UX**:
-  - FAB (Floating Action Button) でセル追加。
-  - 長押しでメニュー (Pie Menu / Context Menu)。
-  - **背景色**: 子セルの平均レア度 (Rarity) に連動。
+### 1.1 カードFABのデザイン修正
+- **形状**: 丸型
+- **背景色**: 薄い紫色 (`bg-purple-200` 相当 / `#DDD6FE` など)
+- **アイコン**: 白色の十字マーク (`lucide-react` の `Plus`)
+- **配置**: カードUIの右下にフローティング配置
 
-### 1.2 依存関係・前提条件
-- **DB層**: `CellRepository` の参照・更新。
-- **既存コンポーネント**: `TimeCell`, `TextCell`, `TaskCell` の再利用。
-- **Rarity**: `useRarity` (または Context) からレア度情報を取得可能であること。
-- **Style**: Tailwind CSS を使用。
+### 1.2 パイメニューの実装修正
+- **起動条件**: ボタンを10ms以上長押し（`onMouseDown` から 10ms 経過）
+- **項目と配置**:
+  - **Text**: FABの **左側** に配置。角丸四角形、薄い紫色背景、白色のメモアイコン (`FileText`)。
+  - **Task**: FABの **上側** に配置。角丸四角形、薄い紫色背景、白色のチェックリストアイコン (`CheckSquare`)。
+- **操作 (ドラッグ＆リリース)**:
+  - 長押しでメニューを表示。
+  - そのまま指/マウスを動かして項目上で離すと、その属性のセルを追加。
+  - 項目以外、または移動せずに離した場合は、短押しと同様に `Text` セルを追加、またはメニューを閉じる。
 
----
+### 1.3 追加後の挙動
+- **フォーカス**: 新規追加されたセルのタイトルフィールドに自動フォーカスする。
+- **全選択**: フォーカス時にタイトルテキストを全選択した状態にする。
 
-## 2. 実装ステップ (SAT-DD)
+## 2. 実装ステップ
 
-### Step 1: Cardコンポーネントの基盤作成と表示
-- **目的**: Cardの基本的な表示 (折りたたみ/展開) とデータ連携を確認する。
-- **Action**:
-  1. `app/components/card/Card.tsx` 作成。
-  2. **Props定義**: `cell: Cell` (Card属性), `onUpdate: (cell: Cell) => void` 等。
-  3. **State管理**: `isExpanded` (boolean)。
-  4. **折りたたみ表示**:
-     - `Card.value` から先頭のセル(Time以外)を取得しタイトル表示。
-     - 右上に生成日時 (`Card.id` 由来) 表示。
-  5. **展開表示 (リスト)**:
-     - `Card.value` に含まれる IDリストを解析。
-     - `CellRepository` (または `useLiveQuery` via Dexie) を使用して子セルデータを取得。
-     - リストレンダリング (仮実装)。
-  6. **テスト**:
-     - 親から渡された `Card` データが正しく表示されるか。
-     - クリックで `isExpanded` が切り替わるか。
+### Step 1: CardFAB コンポーネントの修正 ( app/components/card/CardFAB.tsx )
+1. `lucide-react` から `FileText`, `CheckSquare` をインポート。
+2. 状態管理の追加:
+   - `activeItem`: ドラッグ中にホバーしている項目の追跡 ('Text' | 'Task' | null)
+   - `isLongPress`: 10ms経過したかどうかのフラグ
+3. インタラクション実装:
+   - `onMouseDown`: 10ms のタイマーを開始。
+   - `onMouseUp`: 
+     - 10ms 未満なら `onAdd('Text')` を実行。
+     - 10ms 以上かつ `activeItem` があればその属性で `onAdd` を実行。
+     - タイマー解除、メニュー閉鎖。
+   - `onMouseEnter` / `onMouseLeave` (Menu Item): `activeItem` を更新。
+4. スタイリングの適用。
 
-### Step 2: 自動処理とデータ整合性 (Auto-Element & Clean-up)
-- **目的**: Card作成時のデフォルト状態と、閉じた時のクリーンアップ処理を実装。
-- **Action**:
-  1. **作成時ロジック**:
-     - Card作成関数 (`createCard` helper) を実装。
-     - `Time` セル作成 -> `Text` セル作成 -> `Card` の `value` に追加。
-     - IDが時間順になるよう `1ms` 待機処理。
-  2. **Clean-upロジック**:
-     - `useEffect` または `onCollapse` イベントで発火。
-     - 空の `Task` (name空), `Text` (name&value空) を検出し、DBから削除 & Cardのvalueから除外。
-  3. **テスト**:
-     - `createCard` が正しい初期構造 (Card > Time, Text) を返すか。
-     - 空のセルを持つカードを閉じた時、それらが削除されるか。
+### Step 2: フォーカス制御の実装
+1. `Card.tsx` で最後に作成されたセルIDを保持する状態 (`lastAddedId`) を追加。
+2. `addCellToCard` 完了時に `lastAddedId` を更新。
+3. `CellContainer` に `isNew`: boolean プロップスを追加し、`lastAddedId` と一致する場合に true を渡す。
+4. `TextCell`, `TaskCell` で `isNew` が true の場合、`useEffect` でマウント時に `input.focus()` および `input.select()` を実行。
 
-### Step 3: ソート機能とツールバーの実装
-- **目的**: 複雑なソートロジックと手動並べ替えの下地を作る。
-- **Action**:
-  1. **ツールバーUI**: 展開時にヘッダー部分にアイコン (Sort, Task, Manual) を配置。
-  2. **ソートロジック実装 (Hook: `useCardSort`)**:
-     - `Time` セルは常に先頭維持。
-     - **日時ソート**: ID比較。
-     - **タスクソート**: Taskセルの `value` (done/not done) 比較。
-  3. **手動ソート (Manual)**:
-     - UIライブラリ (dnd-kit 等) 導入検討、またはシンプルな実装。今回は基本実装で進行。
-     - 並べ替え確定時、**`Card.value` のID順序を書き換えて保存**する処理。
-  4. **テスト**:
-     - 各ソートモードで表示順が期待通り変わること。
-     - Manualソート実行後、DB内の `Card.value` が更新されていること。
+### Step 3: テストの更新
+1. `CardFAB.test.tsx` の閾値を 500ms から 10ms に修正。
+2. ドラッグ＆リリース（MouseDown -> Move to Item -> MouseUp）のテストケースを追加。
 
-### Step 4: FABとセル追加機能
-- **目的**: ユーザーがCardに新しい情報を追加できるようにする。
-- **Action**:
-  1. **FAB (Floating Action Button)** 配置 (展開時のみ)。
-  2. **追加ロジック**:
-     - ボタンクリック -> 新規セル (Default: Text?) 追加。
-     - 現在のソート順、または末尾に追加。
-     - **フォーカス制御**: 追加直後にそのセルのタイトル入力欄へフォーカス。
-  3. **パイメニュー (簡易版)**:
-     - 長押し判定フック。
-     - `Text` / `Task` 選択メニュー表示。
-  4. **テスト**:
-     - 追加ボタンでセルが増えるか。
-     - 追加されたセルにフォーカスが当たるか。
+## 3. スケジュール
 
-### Step 5: デザイン研磨とRarity連携
-- **目的**: 仕様書通りの「Wow」なデザインとレア度連携。
-- **Action**:
-  1. **Rarity連携**:
-     - 子セルの平均レア度計算 (Card, Time 除外)。
-     - 背景色への反映 (Gradient)。
-  2. **スタイル調整**:
-     - Glassmorphism, 影, アニメーション (展開時のTransition)。
-     - 削除済み (Remove) 状態のスタイル (打ち消し線)。
-  3. **仮想スクロール (Virtual Scroll)**:
-     - *※Optional/Advanced*: 基本実装完了後に導入検討。
-
----
-
+1. `CardFAB.tsx` のロジックとデザイン修正
+2. `Card.tsx` およびセルコンポーネントのフォーカス制御追加
+3. `CardFAB.test.tsx` の修正と実行確認

@@ -13,26 +13,31 @@ import { cleanupCardCells, addCellToCard } from './cardUtils';
 interface CardProps {
     cell: Cell;
     onUpdate?: (cell: Cell) => void;
+    defaultExpanded?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ cell, onUpdate }) => {
-    const [isExpanded, setIsExpanded] = React.useState(false);
+export const Card: React.FC<CardProps> = ({ cell, onUpdate, defaultExpanded = false }) => {
+    const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
     const { rarityData } = useRarity();
+
+    // Fetch latest card data from DB to ensure we have up-to-date value (list of children)
+    const currentCard = useLiveQuery(() => db.cells.get(cell.id), [cell.id]);
+    const cardValue = currentCard?.V ?? cell.value;
 
     // Fetch child cells for title and list
     const childCells = useLiveQuery(async () => {
-        if (!cell.value) return [];
-        const ids = cell.value.split(' ').filter(id => id.trim() !== '');
+        if (!cardValue) return [];
+        const ids = cardValue.split(' ').filter(id => id.trim() !== '');
         const cells = await db.cells.bulkGet(ids);
         return cells.filter((c): c is CellDB => c !== undefined && c.R === null);
-    }, [cell.value]);
+    }, [cardValue]);
 
     // Sorting Logic
     const sortState = useCardSort(childCells);
 
     // Determine title: First non-Time cell
     const titleCell = childCells?.find(c => c.A !== CellAttribute.Time);
-    const displayTitle = titleCell?.N || 'No Title';
+    const displayTitle = titleCell?.N || cell.name || 'No Title';
 
     // Rarity Calculation
     const rarityAvg = React.useMemo(() => {
@@ -52,16 +57,33 @@ export const Card: React.FC<CardProps> = ({ cell, onUpdate }) => {
     const date = new Date(timestamp);
     const formattedDate = isNaN(timestamp) ? '' : date.toLocaleString();
 
+    const [lastAddedId, setLastAddedId] = React.useState<string | null>(null);
+
     const handleToggle = () => {
         if (isExpanded) {
             cleanupCardCells(cell);
+            setLastAddedId(null); // Reset when closing
         }
         setIsExpanded(!isExpanded);
     };
 
     const handleAddCell = async (attribute: CellAttribute) => {
         const currentIds = sortState.sortedCells.map(c => c.I);
-        await addCellToCard(cell.id, attribute, currentIds);
+        const newCell = await addCellToCard(cell.id, attribute, currentIds);
+        setLastAddedId(newCell.id);
+    };
+
+    const handleCellSave = async (updatedCell: Cell) => {
+        const cellDB: CellDB = {
+            I: updatedCell.id,
+            A: updatedCell.attribute,
+            N: updatedCell.name,
+            V: updatedCell.value,
+            G: updatedCell.geo,
+            R: updatedCell.remove
+        };
+        await db.cells.put(cellDB);
+        if (onUpdate) onUpdate(updatedCell);
     };
 
     const renderCell = (c: CellDB) => {
@@ -75,7 +97,11 @@ export const Card: React.FC<CardProps> = ({ cell, onUpdate }) => {
         };
         return (
             <div key={c.I} className="mb-2">
-                <CellContainer cell={cellModel} />
+                <CellContainer
+                    cell={cellModel}
+                    onSave={handleCellSave}
+                    isNew={c.I === lastAddedId}
+                />
             </div>
         );
     };

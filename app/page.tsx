@@ -70,7 +70,7 @@ export default function Home() {
                     </div>
 
                     <div className="space-y-6">
-                        <Card cell={currentCard} />
+                        <Card key={currentCard.id} cell={currentCard} defaultExpanded={true} />
                     </div>
 
                     <div className="mt-16 flex justify-center">

@@ -13,14 +13,14 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export async function createCard(): Promise<Cell> {
     // 1. Create Card Cell
     const cardId = createCellId();
-    // Wait 1ms to ensure next ID is greater
+    // Spec 5.1.1: Wait 1ms to ensure next ID is greater (using 2ms for safety)
     await sleep(2);
 
-    // 2. Create Time Cell
+    // 2. Create Time Cell (Spec 5.1.1: Default Child Element)
     const timeId = createCellId();
     await sleep(2);
 
-    // 3. Create Text Cell
+    // 3. Create Text Cell (Spec 5.1.1: Default Child Element)
     const textId = createCellId();
 
     const cardCell: Cell = {

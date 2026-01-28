@@ -24,8 +24,14 @@ describe('cardUtils', () => {
 
             expect(timeCell).toBeDefined();
             expect(timeCell?.A).toBe(CellAttribute.Time);
+            expect(timeCell?.N).toBe('Time');
+            // Value is rough timestamp
+            expect(parseInt(timeCell?.V || '0')).toBeGreaterThan(0);
+
             expect(textCell).toBeDefined();
             expect(textCell?.A).toBe(CellAttribute.Text);
+            expect(textCell?.N).toBe('');
+            expect(textCell?.V).toBe('');
         });
 
         it('should ensure IDs are created in chronological order with delay', async () => {
