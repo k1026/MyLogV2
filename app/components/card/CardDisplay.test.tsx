@@ -12,6 +12,15 @@ vi.mock('@/app/contexts/RarityContext', () => ({
     }),
 }));
 
+vi.mock('@/app/contexts/LocationContext', () => ({
+    useLocation: () => ({
+        location: null,
+        geoString: null,
+        status: 'idle',
+        error: null,
+    }),
+}));
+
 // We'll mock useLiveQuery to return data based on the card content
 // But since we can't easily switch mocks per test in parallel mode without factories,
 // We will simulate the "Fresh Card" scenario in this file exclusively.

@@ -8,9 +8,10 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * 新しいCardを作成し、初期セル（Time, Text）を自動生成してDBに保存する
+ * @param geo 位置情報文字列 ("lat lng alt" or null)
  * @returns 作成されたCardセル
  */
-export async function createCard(): Promise<Cell> {
+export async function createCard(geo: string | null = null): Promise<Cell> {
     // 1. Create Card Cell
     const cardId = createCellId();
     // Spec 5.1.1: Wait 1ms to ensure next ID is greater (using 2ms for safety)
@@ -28,7 +29,7 @@ export async function createCard(): Promise<Cell> {
         attribute: CellAttribute.Card,
         name: 'New Card',
         value: `${timeId} ${textId}`,
-        geo: null,
+        geo: geo,
         remove: null
     };
 
@@ -37,7 +38,7 @@ export async function createCard(): Promise<Cell> {
         attribute: CellAttribute.Time,
         name: 'Time',
         value: Date.now().toString(), // Current time
-        geo: null,
+        geo: geo,
         remove: null
     };
 
@@ -46,7 +47,7 @@ export async function createCard(): Promise<Cell> {
         attribute: CellAttribute.Text,
         name: '', // Empty name
         value: '', // Empty value
-        geo: null,
+        geo: geo,
         remove: null
     };
 
@@ -106,8 +107,9 @@ export async function cleanupCardCells(card: Cell): Promise<void> {
  * @param cardId 対象Card ID
  * @param attribute 追加する属性 (Text | Task)
  * @param currentIds 現在の並び順（表示されているIDリスト）- 挿入位置決定に使用
+ * @param geo 位置情報文字列 ("lat lng alt" or null)
  */
-export async function addCellToCard(cardId: string, attribute: CellAttribute, currentIds: string[]): Promise<Cell> {
+export async function addCellToCard(cardId: string, attribute: CellAttribute, currentIds: string[], geo: string | null = null): Promise<Cell> {
     // 1. Create New Cell
     const newCellId = createCellId();
     // Wait a bit to ensure unique timestamp if called rapidly
@@ -118,7 +120,7 @@ export async function addCellToCard(cardId: string, attribute: CellAttribute, cu
         attribute: attribute,
         name: attribute === CellAttribute.Task ? 'New Task' : 'New Text', // Default names? Spec: "推定されたセルタイトルが自動入力される" -> "New Task" etc for now
         value: attribute === CellAttribute.Task ? 'not done' : '',
-        geo: null,
+        geo: geo,
         remove: null
     };
 

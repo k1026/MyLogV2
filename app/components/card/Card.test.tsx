@@ -58,10 +58,19 @@ vi.mock('dexie-react-hooks', () => ({
     }
 }));
 
+vi.mock('@/app/contexts/LocationContext', () => ({
+    useLocation: () => ({
+        location: { latitude: 35.123, longitude: 139.456, altitude: 10 },
+        geoString: '35.123 139.456 10',
+        status: 'active',
+        error: null,
+    }),
+}));
+
 vi.mock('./cardUtils', () => ({
     cleanupCardCells: vi.fn(),
     createCard: vi.fn(),
-    addCellToCard: vi.fn(),
+    addCellToCard: vi.fn().mockResolvedValue({ id: 'new-cell', attribute: 'Text' }),
 }));
 
 import { cleanupCardCells, addCellToCard } from './cardUtils';
@@ -166,5 +175,25 @@ describe('Card Component', () => {
 
         expect(pushStateSpy).toHaveBeenCalled();
         pushStateSpy.mockRestore();
+    });
+
+    it('passes geo information when adding a new cell via FAB', async () => {
+        render(<Card cell={mockCardCell} />);
+        const card = screen.getByTestId('card-container');
+        fireEvent.click(card); // Expand
+
+        // Find FAB (it has aria-label="Add")
+        const fab = screen.getByLabelText('Add');
+        fireEvent.mouseDown(fab);
+        fireEvent.mouseUp(fab); // Click to add Text cell
+
+        await waitFor(() => {
+            expect(addCellToCard).toHaveBeenCalledWith(
+                expect.any(String), // cardId
+                CellAttribute.Text, // attribute
+                expect.any(Array),  // currentIds
+                '35.123 139.456 10' // geoString from mock
+            );
+        });
     });
 });

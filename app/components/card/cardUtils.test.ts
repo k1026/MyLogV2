@@ -113,31 +113,64 @@ describe('cardUtils', () => {
                 { I: existingId2, A: CellAttribute.Text, N: 'Old', V: 'Text', G: null, R: null },
             ]);
 
-            const newCell = await addCellToCard(cardId, CellAttribute.Text, [existingId1, existingId2, 'temp-id']);
-            // 'temp-id' assumes optimistic UI update might pass it, but function should probably use DB state + insertion logic
-            // Spec says: "Cardセルのvalueに記録されている順序の位置に従い追加する" or follows sort.
-            // But Card.value stores the MASTER order.
-            // If we use sorting, the UI list is separated from DB storage order until manually reordered.
-            // However, spec 5.3.2.4.1 says: "セルUIの追加位置はその時点のソート条件に依存する"
-            // And if Manual/Default, it follows Card.value order.
-
-            // The function implementation should essentially:
-            // 1. Create new cell
-            // 2. Add to DB
-            // 3. Append to Card.value (Simple implementation first, or complex insertion?)
-            // Spec says: "手動並べ替え機能が無効かつ、生成時間順のソートが無効...Cardセルのvalueに記録されている順序の位置に従い追加する"
-            // Usually this means Append to end.
+            // geo引数なし（後方互換またはnull）
+            const newCell = await addCellToCard(cardId, CellAttribute.Text, [existingId1, existingId2], null);
 
             expect(newCell).toBeDefined();
             expect(newCell.attribute).toBe(CellAttribute.Text);
+            expect(newCell.geo).toBeNull();
 
             // Verify DB update
             const card = await db.cells.get(cardId);
             expect(card?.V).toContain(newCell.id);
-            expect(card?.V.endsWith(newCell.id)).toBe(true); // Should append by default if no index specified?
+            expect(card?.V.endsWith(newCell.id)).toBe(true);
 
             const addedCell = await db.cells.get(newCell.id);
             expect(addedCell).toBeDefined();
+        });
+
+        it('should record geo information when provided', async () => {
+            const cardId = '3000-CARD';
+            await db.cells.put({ I: cardId, A: CellAttribute.Card, N: 'C', V: '', G: null, R: null });
+
+            const geoString = '35.1234 139.5678 10';
+            const newCell = await addCellToCard(cardId, CellAttribute.Task, [], geoString);
+
+            expect(newCell.geo).toBe(geoString);
+
+            const dbCell = await db.cells.get(newCell.id);
+            expect(dbCell?.G).toBe(geoString);
+        });
+    });
+
+    describe('createCard with Geo', () => {
+        it('should record geo info for Card and its initial children', async () => {
+            const geoString = '35.0000 135.0000 100';
+            const card = await createCard(geoString);
+
+            expect(card.geo).toBe(geoString);
+
+            // DB確認
+            const dbCard = await db.cells.get(card.id);
+            expect(dbCard?.G).toBe(geoString);
+
+            // 子要素確認
+            const childIds = card.value.split(' ').filter(id => id);
+            for (const id of childIds) {
+                const child = await db.cells.get(id);
+                expect(child?.G).toBe(geoString);
+            }
+        });
+
+        it('should handle null geo', async () => {
+            const card = await createCard(null);
+            expect(card.geo).toBeNull();
+
+            const childIds = card.value.split(' ').filter(id => id);
+            for (const id of childIds) {
+                const child = await db.cells.get(id);
+                expect(child?.G).toBeNull();
+            }
         });
     });
 });

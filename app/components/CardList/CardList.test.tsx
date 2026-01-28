@@ -4,6 +4,15 @@ import { RarityProvider } from '@/app/contexts/RarityContext';
 import { Cell, CellAttribute } from '@/app/lib/models/cell';
 import { vi, describe, it, expect } from 'vitest';
 
+vi.mock('@/app/contexts/LocationContext', () => ({
+    useLocation: () => ({
+        location: null,
+        geoString: null,
+        status: 'idle',
+        error: null,
+    }),
+}));
+
 const createDummyCards = (count: number): Cell[] =>
     Array.from({ length: count }, (_, i) => ({
         id: `card-${i}`,

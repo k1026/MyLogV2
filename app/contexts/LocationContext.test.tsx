@@ -1,38 +1,121 @@
-import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
 import { LocationProvider, useLocation } from './LocationContext';
+import React from 'react';
 
-const TestComponent = () => {
-    const { status, toggleLocation } = useLocation();
-    return (
-        <div>
-            <span data-testid="status">{status}</span>
-            <button data-testid="toggle" onClick={toggleLocation}>Toggle</button>
-        </div>
-    );
+// Mock Geolocation API
+const mockWatchPosition = vi.fn();
+const mockClearWatch = vi.fn();
+
+const mockGeolocation = {
+    watchPosition: mockWatchPosition,
+    clearWatch: mockClearWatch,
 };
 
 describe('LocationContext', () => {
-    it('should toggle status correctly', () => {
-        render(
-            <LocationProvider>
-                <TestComponent />
-            </LocationProvider>
-        );
+    beforeAll(() => {
+        vi.stubGlobal('navigator', {
+            geolocation: mockGeolocation,
+        });
+    });
 
-        const statusElement = screen.getByTestId('status');
-        const toggleButton = screen.getByTestId('toggle');
+    afterAll(() => {
+        vi.unstubAllGlobals();
+    });
 
-        expect(statusElement).toHaveTextContent('idle');
+    beforeEach(() => {
+        mockWatchPosition.mockReset();
+        mockClearWatch.mockReset();
+    });
 
-        // First click: idle -> loading -> active (simulated)
-        // Since we are doing TDD, we expect this logic to be implemented later.
-        // For now, we just expect the status to change from 'idle'.
-        fireEvent.click(toggleButton);
+    it('should start with loading status', async () => {
+        const { result } = renderHook(() => useLocation(), {
+            wrapper: ({ children }) => <LocationProvider>{children}</LocationProvider>,
+        });
 
-        // This assertion should fail with the empty implementation
-        expect(statusElement).not.toHaveTextContent('idle');
+        expect(result.current.status).toBe('loading');
+        expect(result.current.location).toBeNull();
+    });
+
+    it('should update location and status on success with altitude', async () => {
+        mockWatchPosition.mockImplementation((successCallback) => {
+            successCallback({
+                coords: {
+                    latitude: 35.6895,
+                    longitude: 139.6917,
+                    altitude: 10.5,
+                },
+                timestamp: Date.now(),
+            });
+            return 123; // watchId
+        });
+
+        const { result } = renderHook(() => useLocation(), {
+            wrapper: ({ children }) => <LocationProvider>{children}</LocationProvider>,
+        });
+
+        await waitFor(() => {
+            expect(result.current.status).toBe('active');
+        });
+
+        expect(result.current.location).toEqual({
+            latitude: 35.6895,
+            longitude: 139.6917,
+            altitude: 10.5,
+        });
+        expect(result.current.geoString).toBe('35.6895 139.6917 10.5');
+    });
+
+    it('should use 0 for altitude if null', async () => {
+        mockWatchPosition.mockImplementation((successCallback) => {
+            successCallback({
+                coords: {
+                    latitude: 40.7128,
+                    longitude: -74.0060,
+                    altitude: null,
+                },
+                timestamp: Date.now(),
+            });
+            return 456;
+        });
+
+        const { result } = renderHook(() => useLocation(), {
+            wrapper: ({ children }) => <LocationProvider>{children}</LocationProvider>,
+        });
+
+        await waitFor(() => {
+            expect(result.current.status).toBe('active');
+        });
+
+        expect(result.current.location).toEqual({
+            latitude: 40.7128,
+            longitude: -74.0060,
+            altitude: null, // The raw object keeps null
+        });
+        // Important: geoString replaces null altitude with 0
+        expect(result.current.geoString).toBe('40.7128 -74.006 0');
+    });
+
+    it('should handle errors', async () => {
+        mockWatchPosition.mockImplementation((_, errorCallback) => {
+            if (errorCallback) {
+                errorCallback({
+                    code: 1,
+                    message: 'User denied Geolocation',
+                });
+            }
+            return 789;
+        });
+
+        const { result } = renderHook(() => useLocation(), {
+            wrapper: ({ children }) => <LocationProvider>{children}</LocationProvider>,
+        });
+
+        await waitFor(() => {
+            expect(result.current.status).toBe('error');
+        });
+
+        expect(result.current.error).toBe('User denied Geolocation');
+        expect(result.current.location).toBeNull();
     });
 });

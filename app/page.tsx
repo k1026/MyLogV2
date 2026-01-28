@@ -9,11 +9,12 @@ import { DbViewer } from './components/db-viewer/DbViewer';
 import { useCardList } from './hooks/useCardList';
 import { Header } from './components/Header/Header';
 import { CardList } from './components/CardList/CardList';
-import { RefreshCw, Database } from 'lucide-react';
+import { useLocation } from './contexts/LocationContext';
 
 export default function Home() {
     const { cards, isLoading, totalCount } = useCardList();
     const { isCalculating } = useRarity();
+    const { geoString } = useLocation();
     const [mounted, setMounted] = useState(false);
     const [isDbViewerOpen, setIsDbViewerOpen] = useState(false);
     const [focusedCardId, setFocusedCardId] = useState<string | null>(null);
@@ -34,10 +35,10 @@ export default function Home() {
         setFocusedCardId(randomCard.id);
     };
 
-    // Keep handleNewCard if we add a FAB later, but unused for now in Header
+    // Keep handleNewCard if we add a FAB later
     const handleNewCard = async () => {
         try {
-            await createCard();
+            await createCard(geoString);
             window.location.reload();
         } catch (error) {
             console.error('Failed to create new card:', error);

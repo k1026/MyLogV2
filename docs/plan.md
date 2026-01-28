@@ -1,87 +1,82 @@
-# ヘッダーUI 実装計画
+# 位置情報取得機能 (Location Service) 実装計画
 
 ## 1. 要件定義・仕様確認
-`docs/specs/11_Header.md` に基づき、ナビゲーションおよびステータス表示を行うヘッダー機能を実装する。
+`docs/specs/14_LocationService.md` に基づき、アプリ全体での位置情報管理機能と、Cell生成時の位置情報記録機能を実装する。
 
-### 主な機能要件
-*   **デザイン**: ライトテーマ、Glassmorphism (背景ぼかし)、勾配テキスト、画面上部固定 (`z-40`以上)。
-*   **タイトルエリア**:
-    *   `MyLog` ロゴ (Deep Purple)。
-    *   DB読み込み進捗を表すアニメーション (ロゴの `clip-path` 制御)。
-    *   バージョン番号 (`v2.0.0` 等)。
-    *   クリックアクション: アプリ状態リセット (フィルタ解除・トップへスクロール)。
-*   **ステータスエリア**:
-    *   **位置情報**: 取得状態 (`active`, `inactive`, `error`, `loading`) の可視化とトグル。
-    *   **カードカウント**: `表示数 / 総数` の形式で表示。
-*   **アクションエリア**:
-    *   **ランダムピック**: 表示中のカードから1つをランダムに選択してフォーカス。
-    *   **DBステータス**: `DbViewer` の開閉、バックグラウンド処理中のインジケータ表示。
-*   **動的表示制御 (UX)**:
-    *   **スクロール監視**: 下方向スクロールで隠し、上方向で表示。
-    *   **フォーカス監視**: 入力要素 (`input`, `textarea`) フォーカス時は隠す。
+### 機能要件
+1.  **位置情報の常時監視**: `navigator.geolocation.watchPosition` を使用して位置情報をリアルタイムに追跡する。
+2.  **ステータス管理**: 位置情報の取得状態（ローディング、アクティブ、エラー、無効）を管理し、UI（Header等）に提供できる状態にする。
+3.  **Cell記録**: 新しいCell（Card, Time, Text, Task）が作成される際、その瞬間の位置情報（緯度、経度、高度）を `geo` 属性に記録する。
 
 ## 2. アーキテクチャ設計
 
 ### ファイル構成
 ```
 app/
-  components/
-    Header/
-      Header.tsx        // メインコンポーネント (Logic & Layout)
-      HeaderTitle.tsx   // タイトル・進捗ロゴ
-      HeaderStatus.tsx  // 位置情報・カウント
-      HeaderActions.tsx // アクションボタン
-      index.ts          // export用
   contexts/
-    LocationContext.tsx // [新規] 位置情報管理
+    LocationContext.tsx // [新規] 位置情報の監視と状態提供
+  components/
+    card/
+      cardUtils.ts      // [修正] 位置情報を受け取るように変更
+      CardFAB.tsx       // [修正] Contextから位置情報を取得しUtilsへ渡す
+  page.tsx              // [修正] Contextから位置情報を取得しUtilsへ渡す
 ```
 
-### ステート管理方針
-1.  **位置情報 (`LocationContext`)**:
-    *   仕様に「取得中/アクティブ/非アクティブ/エラー」の区別があるため、専用コンテキストで管理する。
-    *   API: `status` (state), `toggleLocation` (function)。
-2.  **ヘッダー表示 (`Header.tsx` 内)**:
-    *   `isVisible`: スクロール量と方向、フォーカス状態から算出。
-    *   カスタムフック `useHeaderVisibility` を作成しロジックを分離しても良い。
-3.  **データ連携 (`props`経由)**:
-    *   `Header` は `page.tsx` から `cards` (カウント用), `onDbOpen`, `onReset` 等を受け取る。
+### データフロー
+1.  **LocationContext**: アプリ起動時（Providerマウント時）に `watchPosition` を開始。最新の `Coordinates` と `Status` を保持する。
+2.  **Component (Page, CardFAB)**: `useLocation` フックを使用して `LocationContext` から現在の位置情報データを取得する。
+3.  **Utils (cardUtils.ts)**: Componentから渡された位置情報データ（文字列形式 `lat lng alt` または `null`）を使用して、Cell生成時に `geo` フィールドを設定する。
+
+### 技術的制約・決定事項
+*   **位置情報フォーマット**: データベース（Dexie）の仕様およびモデル定義に従い、`"lat lng alt"` のスペース区切り文字列とする。高度が取得できない場合はそこをどうするかだが、JSの `Coordinates.altitude` は `null` の場合がある。仕様では「3つの値を記録」とあるが、nullの場合はどうするか？ -> `null` なら記録しないか、あるいは `0` などの代替値を入れるか、`lat lng` だけにするか。
+    *   **決定**: `altitude` が `null` の場合は `0` として記録する。これにより常に3つの値（`lat lng alt`）がスペース区切りで記録されることを保証し、パース時の処理を簡潔にする。
+    *   仕様の実例: `"35.6895 139.6917 10.5"` (高度不明時は `"35.6895 139.6917 0"`)
+*   **非同期処理**: `watchPosition` はコールバックベースだが、React State に反映させることでリアクティブにする。
 
 ## 3. 実装ステップ
 
 ### Step 1: LocationContext の実装
-*   **Context作成**: `app/contexts/LocationContext.tsx`
-    *   State: `status` ('idle', 'loading', 'active', 'error')
-    *   Action: `toggle()` - 仮実装でステータスを遷移させる機能のみでも可（実Geolocation API実装は後回しでもよいが、可能なら実装する）。
-*   **Provider配置**: `app/layout.tsx` または `app/page.tsx` でラップ。
+*   **ファイル**: `app/contexts/LocationContext.tsx`
+*   **内容**:
+    *   `LocationContextType` 定義:
+        *   `location`: `{ latitude: number, longitude: number, altitude: number | null } | null`
+        *   `geoString`: `string | null` (整形済みの文字列 `lat lng alt` 便宜上用意すると便利)
+        *   `status`: `'loading' | 'active' | 'error' | 'disabled'`
+        *   `error`: `string | null`
+    *   `LocationProvider`: `navigator.geolocation.watchPosition` を実装。
+        *   Options: `{ enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }`
+    *   `useLocation` フックのエクスポート。
 
-### Step 2: Header コンポーネント (UI) 実装
-*   **コンポーネント作成**: `Header` およびサブコンポーネントを作成する。
-*   **スタイリング (Tailwind)**:
-    *   `backdrop-blur`, `bg-white/70`, `sticky`, `top-0` 等を使用。
-    *   タイトルロゴの `clip-path` アニメーション用CSS/Style実装。
-*   **基本動作**:
-    *   Props 受け渡し (`onReset`, `onRandomPick`, `onDbOpen` 等) の定義。
+### Step 2: cardUtils.ts の修正
+*   **ファイル**: `app/components/card/cardUtils.ts`
+*   **内容**:
+    *   `createCard(geo: string | null): Promise<Cell>` に変更。
+    *   `addCellToCard(cardId: string, attribute: CellAttribute, currentIds: string[], geo: string | null): Promise<Cell>` に変更。
+    *   内部で `Cell` オブジェクト生成時に `geo` プロパティに引数の値をセットするように修正。
+    *   `createCard` 内で生成される子セル (Time, Text) にも同様に `geo` をセットする。
 
-### Step 3: 動的表示制御 (Visibility Logic)
-*   **イベントリスナー**:
-    *   `window.onscroll`: 前回の `scrollY` と比較し `direction` を判定。
-    *   `focusin` / `focusout`: イベントターゲットのタグ名を確認 (`INPUT`, `TEXTAREA`)。
-*   **アニメーション**:
-    *   `transform: translateY(-100%)` 等での隠蔽制御。
+### Step 3: コンポーネントの修正 (連動)
+*   **ファイル**: `app/components/card/CardFAB.tsx`
+    *   `useLocation` をインポート。
+    *   `handleAdd` 内で `addCellToCard` を呼ぶ際に `location.geoString` を渡す。
+*   **ファイル**: `app/page.tsx` (または `app/components/CardList.tsx` 等、Card生成を行っている場所)
+    *   `useLocation` をインポート。
+    *   Card生成呼び出し (`createCard`) 時に `location.geoString` を渡す。
 
-### Step 4: Pageへの統合
-*   **修正対象**: `app/page.tsx`
-*   **作業**:
-    *   既存の `<header>` ブロックを `<Header />` コンポーネントに置換。
-    *   必要なProps (`cards.length`, `totalCount`, `isDbViewerOpen` setter 等) を渡す。
-    *   「ランダムピック」ロジックの簡易実装 (例: `cards`配列からランダムにIDを選び、`document.getElementById` でスクロール)。
+### Step 4: ルートへのProvider配置
+*   **ファイル**: `app/layout.tsx`
+    *   `LocationProvider` でアプリ全体 (`children`) をラップする。
 
 ## 4. 検証・テスト計画
-*   **目視確認**:
-    *   画面遷移時のヘッダー表示。
-    *   スクロール時の隠蔽・再表示動作。
-    *   入力フォームフォーカス時の隠蔽動作。
-    *   各ボタンのクリックフィードバック。
-*   **自動テスト**:
-    *   `Header.test.tsx` (表示テスト)。
-    *   `isVisible` ロジックの単体テスト (余裕があれば)。
+
+### 自動テスト (Vitest)
+*   **Unit Test**: `cardUtils.test.ts` (もしあれば、なければ作成推奨)
+    *   `createCard` や `addCellToCard` が `geo` 引数を正しく反映するかテスト。
+*   **Component Test**:
+    *   `navigator.geolocation` はブラウザAPIなので、Vitest環境ではモックが必要。
+    *   `vi.stubGlobal('navigator', { geolocation: { ... } })` 等を使用して位置情報取得をシミュレートし、生成されたCellに `geo` が含まれているか検証する。
+
+### 動作確認
+*   ブラウザの開発者ツールで「Sensors」タブを開き、GeolocationをOverrideして動作確認する。
+    *   東京、ロンドンなどで座標を変えてCellを作成し、IndexedDB (Applicationタブ) で `geo` カラムが正しく保存されているか確認。
+    *   `Location blocked` などのエラー状態で `null` が保存されるか確認。

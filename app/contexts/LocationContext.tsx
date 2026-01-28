@@ -1,50 +1,84 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type LocationStatus = 'idle' | 'loading' | 'active' | 'error';
+export type LocationStatus = 'idle' | 'loading' | 'active' | 'error' | 'disabled';
 
-interface LocationContextType {
+export type LocationContextType = {
+    location: { latitude: number; longitude: number; altitude: number | null } | null;
+    geoString: string | null;
     status: LocationStatus;
-    toggleLocation: () => void;
-}
+    error: string | null;
+};
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
-export function LocationProvider({ children }: { children: ReactNode }) {
-    const [status, setStatus] = useState<LocationStatus>('idle');
+export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [status, setStatus] = useState<LocationStatus>('loading');
+    const [location, setLocation] = useState<LocationContextType['location']>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const toggleLocation = () => {
-        setStatus(prev => {
-            switch (prev) {
-                case 'idle': return 'loading'; // Mimic starting loading
-                case 'loading': return 'active'; // Mimic success
-                case 'active': return 'error'; // Mimic error
-                case 'error': return 'idle'; // Reset
-                default: return 'idle';
-            }
-        });
+    // Derived state for formatted string
+    const geoString = React.useMemo(() => {
+        if (!location) return null;
+        // Spec 14: 高度不明時は0とする
+        const alt = location.altitude ?? 0;
+        return `${location.latitude} ${location.longitude} ${alt}`;
+    }, [location]);
 
-        // In a real app, this would trigger geolocation API
-        // For now, we simulate async transition if we wanted, but the requirement 
-        // says "toggle" so shifting states is enough for the UI integration.
-        // Actually, let's make it simpler for the toggle: 
-        // if active -> inactive (idle), if idle/error -> active (loading then active)
-        // But for the purpose of the test "toggle status", cycling is fine or specific logic.
-        // Let's implement a cycle to showcase all states in the UI easily.
+    useEffect(() => {
+        if (!('geolocation' in navigator)) {
+            setStatus('error');
+            setError('Geolocation is not supported by your browser');
+            return;
+        }
+
+        const successCallback = (position: GeolocationPosition) => {
+            setLocation({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                altitude: position.coords.altitude,
+            });
+            setStatus('active');
+            setError(null);
+        };
+
+        const errorCallback = (err: GeolocationPositionError) => {
+            setStatus('error');
+            setError(err.message);
+        };
+
+        const options: PositionOptions = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0,
+        };
+
+        const watchId = navigator.geolocation.watchPosition(
+            successCallback,
+            errorCallback,
+            options
+        );
+
+        return () => {
+            navigator.geolocation.clearWatch(watchId);
+        };
+    }, []);
+
+    const value: LocationContextType = {
+        location,
+        geoString,
+        status,
+        error,
     };
 
-    return (
-        <LocationContext.Provider value={{ status, toggleLocation }}>
-            {children}
-        </LocationContext.Provider>
-    );
-}
+    return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
+};
 
-export function useLocation() {
+export const useLocation = () => {
     const context = useContext(LocationContext);
     if (context === undefined) {
         throw new Error('useLocation must be used within a LocationProvider');
     }
     return context;
-}
+};
