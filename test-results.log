@@ -1,21 +1,28 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/lib/db/db.test.ts (3 tests) 11ms
- ✓ app/lib/db/index.test.ts (3 tests) 11ms
- ✓ app/lib/models/task.test.ts (1 test) 6ms
- ✓ app/lib/models/cell.test.ts (23 tests) 45ms
- ✓ app/lib/db/fileOperations.test.ts (3 tests) 57ms
- ✓ app/lib/db/operations.test.ts (15 tests) 122ms
- ✓ components/cell/CellUI.test.tsx (11 tests) 498ms
- ✓ app/page.test.tsx (4 tests) 578ms
-     ✓ renders CellUI and Save button  402ms
- ✓ components/db/DbViewer.test.tsx (5 tests) 1361ms
-     ✓ renders action buttons (Delete, Append, Export)  400ms
-     ✓ navigates pages  534ms
+ ✓ app/lib/models/cell.test.ts (9 tests) 15ms
+ ✓ app/lib/db/operations.test.ts (12 tests) 86ms
+ ✓ app/components/cell/CellContainer.test.tsx (4 tests) 79ms
+stderr | app/components/cell/TextCell.test.tsx > TextCell > Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること
+An update to TextCell inside a test was not wrapped in act(...).
 
- Test Files  9 passed (9)
-      Tests  68 passed (68)
-   Start at  12:35:46
-   Duration  6.93s (transform 1.83s, setup 4.26s, import 6.20s, tests 2.69s, environment 26.27s)
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ app/components/cell/TimeCell.test.tsx (4 tests) 150ms
+ ✓ app/components/cell/TextCell.test.tsx (6 tests) 151ms
+ ✓ app/components/cell/TaskCell.test.tsx (3 tests) 385ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  322ms
+
+ Test Files  6 passed (6)
+      Tests  38 passed (38)
+   Start at  12:29:46
+   Duration  4.73s (transform 1.06s, setup 2.06s, import 4.07s, tests 865ms, environment 14.25s)
 
