@@ -1,5 +1,5 @@
 import { db, CellDB } from './db';
-import { Cell, CellAttribute } from '../models/cell';
+import { Cell, CellAttribute, CellSchema } from '../models/cell';
 
 export const CellRepository = {
     mapToDB(cell: Cell): CellDB {
@@ -71,7 +71,7 @@ export const CellRepository = {
         if (direction === 'prev') {
             collection = collection.reverse();
         }
-        return await collection.primaryKeys() as Promise<string[]>;
+        return collection.primaryKeys() as Promise<string[]>;
     },
 
     async processAllInBatches(batchSize: number, callback: (cells: Cell[]) => Promise<void>): Promise<void> {
@@ -91,5 +91,57 @@ export const CellRepository = {
         if (batch.length > 0) {
             await callback(batch);
         }
+    },
+
+    async exportAsJSONL(): Promise<string> {
+        const docs = await db.cells.orderBy('I').reverse().toArray();
+        return docs.map(doc => JSON.stringify(doc)).join('\n');
+    },
+
+    async importFromJSONL(jsonl: string): Promise<ImportResult> {
+        const lines = jsonl.split('\n');
+        let successCount = 0;
+        let failureCount = 0;
+        const errors: string[] = [];
+
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+
+            try {
+                const rawDoc = JSON.parse(trimmedLine) as Record<string, unknown>;
+
+                // Basic check for minimal required fields roughly
+                if (!rawDoc['I'] || !rawDoc['A']) {
+                    throw new Error('Missing required DB keys (I, A)');
+                }
+
+                // mapFromDB handles the casting from raw object
+                const cell = this.mapFromDB(rawDoc as unknown as CellDB);
+
+                const validation = CellSchema.safeParse(cell);
+                if (!validation.success) {
+                    const errorMsg = validation.error.issues
+                        .map(i => `${i.path.join('.')}: ${i.message}`)
+                        .join(', ');
+                    throw new Error(`Validation error: ${errorMsg}`);
+                }
+
+                await this.save(cell);
+                successCount++;
+            } catch (e: unknown) {
+                failureCount++;
+                const message = e instanceof Error ? e.message : String(e);
+                errors.push(`Line error: ${message}`);
+            }
+        }
+
+        return { successCount, failureCount, errors };
     }
 };
+
+export interface ImportResult {
+    successCount: number;
+    failureCount: number;
+    errors: string[];
+}

@@ -71,41 +71,42 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave }) => {
         <div
             data-testid="time-cell"
             onBlur={handleBlur}
-            className="flex flex-col gap-3 w-full"
+            className="flex flex-col gap-4 w-full flex-1 justify-center p-6"
         >
             <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                placeholder="Entry Title"
                 className={cn(
-                    "bg-transparent border-b border-transparent outline-none w-full transition-colors",
-                    "focus:border-purple-400 placeholder:text-white/30"
+                    "bg-white/40 border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-3 rounded-2xl text-slate-800 font-bold text-lg placeholder:text-slate-300",
+                    "focus:border-purple-400 focus:bg-white focus:shadow-sm"
                 )}
             />
-            <div className="flex gap-2">
-                <div className="flex flex-col flex-1">
-                    <label htmlFor={`date-${cell.id}`} className="text-[10px] text-white/50 uppercase">Date</label>
+            <div className="flex gap-4 justify-center">
+                <div className="flex flex-col flex-1 gap-2 items-center">
+                    <label htmlFor={`date-${cell.id}`} className="text-[11px] font-black tracking-widest text-slate-400 uppercase">Date</label>
                     <input
                         id={`date-${cell.id}`}
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
                         className={cn(
-                            "bg-white/10 p-2 rounded outline-none w-full text-white",
-                            "focus:ring-1 focus:ring-purple-400"
+                            "bg-white/60 border border-indigo-100 p-3 rounded-2xl outline-none w-full text-slate-700 text-sm transition-all text-center font-bold",
+                            "focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-50"
                         )}
                     />
                 </div>
-                <div className="flex flex-col w-32">
-                    <label htmlFor={`time-${cell.id}`} className="text-[10px] text-white/50 uppercase">Time</label>
+                <div className="flex flex-col w-36 gap-2 items-center">
+                    <label htmlFor={`time-${cell.id}`} className="text-[11px] font-black tracking-widest text-slate-400 uppercase">Time</label>
                     <input
                         id={`time-${cell.id}`}
                         type="time"
                         value={time}
                         onChange={(e) => setTime(e.target.value)}
                         className={cn(
-                            "bg-white/10 p-2 rounded outline-none w-full text-white",
-                            "focus:ring-1 focus:ring-purple-400"
+                            "bg-white/60 border border-indigo-100 p-3 rounded-2xl outline-none w-full text-slate-700 text-sm transition-all text-center font-bold",
+                            "focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-50"
                         )}
                     />
                 </div>

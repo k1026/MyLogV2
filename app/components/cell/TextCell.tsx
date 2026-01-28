@@ -31,22 +31,14 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
         }
     }, [value, isFocused]);
 
-    const handleBlur = (e: React.FocusEvent) => {
-        // コンテナ外にフォーカスが移ったかチェック
-        if (!containerRef.current?.contains(e.relatedTarget as Node)) {
-            setIsFocused(false);
-            if (name !== cell.name || value !== cell.value) {
-                onSave?.({ ...cell, name, value });
-            }
-        }
-    };
 
-    const handleContainerClick = (e: React.MouseEvent) => {
-        if (isFocused) return;
-        setIsFocused(true);
+    // フォーカス管理 (仕様 4.2.2)
+    useEffect(() => {
+        if (isFocused) {
+            // レンダリング完了後にフォーカスを設定
+            // 既存の focus check を行って、すでにフォーカスがある場合は何もしない（誤作動防止）
+            if (document.activeElement === nameRef.current || document.activeElement === valueRef.current) return;
 
-        // 仕様 4.2.2: フォーカス制御
-        setTimeout(() => {
             if (!name && !value) {
                 nameRef.current?.focus();
             } else if (name && !value) {
@@ -56,7 +48,22 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
             } else {
                 valueRef.current?.focus();
             }
-        }, 0);
+        }
+    }, [isFocused]); // name, value を依存に入れると入力中にフォーカスが飛ぶ可能性があるので入れない
+
+    const handleBlur = (e: React.FocusEvent) => {
+        // コンテナ外にフォーカスが移ったかチェック (relatedTarget is the new focused element)
+        if (!containerRef.current?.contains(e.relatedTarget as Node)) {
+            setIsFocused(false);
+            if (name !== cell.name || value !== cell.value) {
+                onSave?.({ ...cell, name, value });
+            }
+        }
+    };
+
+    const handleContainerClick = () => {
+        if (isFocused) return;
+        setIsFocused(true);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -77,7 +84,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
             onClick={handleContainerClick}
             onBlur={handleBlur}
             onFocus={() => setIsFocused(true)}
-            className="flex flex-col gap-2 w-full h-full cursor-text"
+            className="flex flex-col gap-2 w-full flex-1 cursor-text min-h-[5rem] justify-center p-6"
         >
             {showName && (
                 <input
@@ -88,8 +95,8 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
                     onKeyDown={handleKeyDown}
                     placeholder={isFocused ? "Title" : ""}
                     className={cn(
-                        "bg-transparent border-b border-transparent outline-none w-full transition-colors",
-                        "focus:border-purple-400 placeholder:text-white/30"
+                        "bg-white/40 border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-3 rounded-2xl text-slate-800 font-bold text-lg placeholder:text-slate-300",
+                        "focus:border-purple-400 focus:bg-white focus:shadow-sm"
                     )}
                 />
             )}
@@ -98,11 +105,11 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave }) => {
                     ref={valueRef}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    placeholder={isFocused ? "Content" : ""}
+                    placeholder={isFocused ? "Description..." : ""}
                     rows={1}
                     className={cn(
-                        "bg-transparent border-b border-transparent outline-none w-full resize-none transition-colors overflow-hidden",
-                        "focus:border-purple-400 placeholder:text-white/30"
+                        "bg-white/20 border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-center p-3 rounded-2xl text-slate-600 placeholder:text-slate-300 leading-relaxed text-base",
+                        "focus:border-purple-400 focus:bg-white focus:shadow-sm"
                     )}
                 />
             )}

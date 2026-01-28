@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TextCell } from './TextCell';
 import { CellAttribute, Cell } from '@/app/lib/models/cell';
 
@@ -55,14 +55,60 @@ describe('TextCell', () => {
     });
 
     describe('フォーカス制御 (仕様 4.2.2)', () => {
-        it('両方空の場合: name にフォーカス', () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it('初期フォーカス: 両方空の場合は name にフォーカス', () => {
             const cell = { ...baseCell, name: '', value: '' };
             render(<TextCell cell={cell} onSave={mockSave} />);
-            // セルをクリックした想定でフォーカスがかかる動きをテストしたいが、
-            // 実際の実装でどうフォーカスを発火させるかに依存する。
-            // ここでは、コンポーネントがマウントされた時（または発火時）のロジックを確認。
+
+            // TextCellのコンテナをクリックしてフォーカス制御を発動させる
+            // Note: 現状の実装は onClick で trigger している
+            fireEvent.click(screen.getByTestId('text-cell'));
+
+            vi.runAllTimers();
+
+            const nameInput = screen.getByPlaceholderText('Title');
+            expect(nameInput).toHaveFocus();
         });
-        // TODO: フォーカスロジックのテストをより具体的に書く（refやuseEffectを考慮）
+
+        it('初期フォーカス: nameのみある場合は value にフォーカス', () => {
+            const cell = { ...baseCell, name: 'Title Only', value: '' };
+            render(<TextCell cell={cell} onSave={mockSave} />);
+
+            fireEvent.click(screen.getByTestId('text-cell'));
+            vi.runAllTimers();
+
+            const valueInput = screen.getByPlaceholderText('Description...');
+            expect(valueInput).toHaveFocus();
+        });
+
+        it('初期フォーカス: valueのみある場合は name にフォーカス', () => {
+            const cell = { ...baseCell, name: '', value: 'Content Only' };
+            render(<TextCell cell={cell} onSave={mockSave} />);
+
+            fireEvent.click(screen.getByTestId('text-cell'));
+            vi.runAllTimers();
+
+            const nameInput = screen.getByPlaceholderText('Title');
+            expect(nameInput).toHaveFocus();
+        });
+
+        it('初期フォーカス: 両方ある場合は value にフォーカス', () => {
+            const cell = { ...baseCell, name: 'Title', value: 'Content' };
+            render(<TextCell cell={cell} onSave={mockSave} />);
+
+            fireEvent.click(screen.getByTestId('text-cell'));
+            vi.runAllTimers();
+
+            const valueInput = screen.getByPlaceholderText('Description...');
+            expect(valueInput).toHaveFocus();
+        });
     });
 
     it('表示制御: フォーカスが外れた状態で空のフィールドが非表示になること', () => {

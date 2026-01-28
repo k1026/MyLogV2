@@ -49,4 +49,19 @@ describe('TaskCell', () => {
             name: 'Updated Task'
         }));
     });
+
+    it('コンテナをクリックするとタイトルのテキストフィールドにフォーカスが当たり、テキストが全選択されること', () => {
+        render(<TaskCell cell={baseCell} onSave={mockSave} />);
+        const nameInput = screen.getByDisplayValue('Task Title') as HTMLInputElement;
+        const container = screen.getByTestId('task-cell');
+
+        fireEvent.click(container);
+
+        expect(nameInput).toHaveFocus();
+        // select()が呼ばれたことを確認 (JSDOMでの簡略的な確認)
+        // 注意: userEvent.click()などを使うとよりリアルだが、fireEventでonClick発火 -> ref.select()の流れを確認
+        // JSDOMでは select() 呼び出しで selectionStart/End が更新される
+        expect(nameInput.selectionStart).toBe(0);
+        expect(nameInput.selectionEnd).toBe(nameInput.value.length);
+    });
 });

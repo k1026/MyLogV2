@@ -1,9 +1,10 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/lib/models/cell.test.ts (9 tests) 15ms
- ✓ app/lib/db/operations.test.ts (12 tests) 86ms
- ✓ app/components/cell/CellContainer.test.tsx (4 tests) 79ms
+ ✓ app/lib/models/cell.test.ts (9 tests) 14ms
+ ✓ app/lib/db/fileIO.test.ts (7 tests) 68ms
+ ✓ app/lib/db/operations.test.ts (12 tests) 85ms
+ ✓ app/components/cell/CellContainer.test.tsx (4 tests) 73ms
 stderr | app/components/cell/TextCell.test.tsx > TextCell > Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること
 An update to TextCell inside a test was not wrapped in act(...).
 
@@ -16,13 +17,15 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/cell/TimeCell.test.tsx (4 tests) 150ms
- ✓ app/components/cell/TextCell.test.tsx (6 tests) 151ms
- ✓ app/components/cell/TaskCell.test.tsx (3 tests) 385ms
-     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  322ms
+ ✓ app/components/cell/TimeCell.test.tsx (4 tests) 149ms
+ ✓ app/components/cell/TextCell.test.tsx (9 tests) 191ms
+ ✓ app/components/cell/TaskCell.test.tsx (4 tests) 413ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  337ms
+ ✓ app/page.test.tsx (2 tests) 586ms
+     ✓ 初期表示で TimeCell, TextCell, TaskCell と Saveボタンが表示されること  405ms
 
- Test Files  6 passed (6)
-      Tests  38 passed (38)
-   Start at  12:29:46
-   Duration  4.73s (transform 1.06s, setup 2.06s, import 4.07s, tests 865ms, environment 14.25s)
+ Test Files  8 passed (8)
+      Tests  51 passed (51)
+   Start at  14:37:04
+   Duration  5.11s (transform 1.59s, setup 3.67s, import 5.81s, tests 1.58s, environment 21.15s)
 
