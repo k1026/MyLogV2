@@ -1,53 +1,75 @@
-# 実装計画: カード追加ボタン機能
+# 実装計画: フッター (12_Footer.md)
 
 ## 1. 概要
-`docs/specs/07_CardListUI.md` の「7.7 カード追加ボタン」および「7.6 リストのソート（追加時の挙動）」に基づき、カード追加機能（FAB）を実装する。
+アプリケーション下部に固定表示される操作バー（フッター）を実装します。ソート切り替え、フィルタ、ビュー切り替えの3つの機能セクションを持ち、スクロール方向や入力フォーカス状態に応じて表示・非表示が自動制御されます。
 
-## 2. 要件
-### 2.1 UI/デザイン
-- **コンポーネント**: `CardAddButton`
-- **形状**: 角丸の白い四角形 (Floating Action Button)
-- **アイコン**: 中央に紫の十字マーク (+)
-- **配置**: カードリストの右下、画面スクロールに追従 (Fixed position)
-- **表示制御**:
-  - カードリスト表示時: 表示
-  - カード詳細展開時 (`focusedId` が存在する場合): 非表示
+## 2. 影響範囲
+- `app/layout.tsx`: 新しいコンテキストプロバイダーの追加
+- `app/components/Header/`: ソート中表示の追加
+- `app/components/CardList/`: ビューモード対応（グリッド表示）
+- `app/hooks/useCardList.ts`: ソートロジックの追加
+- 新規作成: フッターコンポーネント一式、共通状態管理コンテキスト、表示制御用フック
 
-### 2.2 挙動
-- **クリック時**:
-  1. `createCard(geo)` を呼び出し、新規カードとTime/TextセルをDBに作成。
-  2. 作成されたカードをリストの**先頭**（または適切なソート位置）に追加（部分更新）。
-  3. 作成されたカードを即座に「展開状態」にする（`focusedId` を設定）。
-- **データ更新**:
-  - ページのリロード (`window.location.reload()`) は行わず、ReactのState更新でリストに反映させる。
+## 3. 実装ステップ (1ステップ・1ファイル・1関数を原則)
 
-## 3. 実装ステップ (lightSAT-DD準拠)
+### Step 1: UI状態管理の基盤作成 (TDD)
+フッターの操作をアプリ全体に共有するためのコンテキストを作成します。
 
-### Step 1: `CardAddButton` の空実装とテスト作成
-- `app/components/CardList/CardAddButton.tsx` を作成し、型定義と空のコンポーネント（nullを返す、または最小限のdiv）を実装する。
-- `app/components/CardList/CardAddButton.test.tsx` を作成し、以下のテストケースを実装する。
-  - レンダリングされること（classによるstyle適用確認）
-  - クリック時にonClickハンドラが呼ばれること
-  - `visible=false` の場合に非表示になること（またはDOMから消えること）
+1. **[TEST]** `app/contexts/__tests__/UIStateContext.test.tsx` の作成
+   - `sortOrder` の初期値が 'desc' であること
+   - `viewMode` の初期値が 'list' であること
+   - 各トグル関数が正しく状態を更新すること
+2. **[CODE]** `app/contexts/UIStateContext.tsx` の作成
+   - `UIStateProvider` を定義
+   - `sortOrder` ('asc' | 'desc'), `viewMode` ('list' | 'grid'), `filterState` ('off' | 'on' | 'disabled') を管理
+3. **[CODE]** `app/layout.tsx` への適用
+   - `UIStateProvider` で全体をラップする
 
-### Step 2: テスト実行 (Red)
-- テストを実行し、実装が空であるあるいはロジック未実装のため失敗することを確認する。
+### Step 2: 自動表示制御ロジックの共通化
+Headerにあるロジックを抽出し、Footerでも利用可能にします。
 
-### Step 3: `CardAddButton` の実装 (Green)
-- `CardAddButton.tsx` を実装し、Tailwind CSSでのスタイリングとクリックイベントのハンドリングを完了させ、テストをパスさせる。
+1. **[TEST]** `app/hooks/__tests__/useAutoVisibility.test.ts` の作成
+   - スクロールダウンで `isVisible` が false になること
+   - スクロールアップで `isVisible` が true になること
+   - インプットフォーカス中に `isVisible` が false になること
+2. **[CODE]** `app/hooks/useAutoVisibility.ts` の作成
+3. **[CODE]** `app/components/Header/Header.tsx` のリファクタリング
+   - 重複ロジックを `useAutoVisibility` に置き換え
 
-### Step 4: `useCardList` の拡張とテスト
-- `app/hooks/useCardList.ts` に `addCard` メソッドを追加する（まずはインターフェース定義のみ）。
-- `app/hooks/useCardList.test.tsx` (存在しない場合は作成) で `addCard` 呼び出し後に `cards` ステートが増加することを検証するテストを追加。
-- `useCardList` の実装を更新し、テストをパスさせる。
+### Step 3: フッターの基本構造
+1. **[CODE]** `app/components/ui/Footer/Footer.tsx` の作成
+   - 基本レイアウト（左右中セクション）の実装
+   - `useAutoVisibility` によるアニメーション制御
+2. **[CODE]** `app/components/ui/Footer/FooterButton.tsx` の作成
+   - フッター内で共通利用するスタイルのボタンコンポーネント
 
-### Step 5: `app/page.tsx` への統合
-- `app/page.tsx` に `CardAddButton` を配置。
-- `focusedId` に基づく表示切り替えロジックと、`handleNewCard` での保存・追加処理を連携させる。
-- 動作確認を行い、ブラウザでFABの配置と挙動（スクロール追従、展開時非表示）を検証する。
+### Step 4: ソート機能の実装
+1. **[CODE]** `app/components/ui/Footer/SortButton.tsx` の作成
+   - `UIStateContext` の `sortOrder` に応じたアイコン表示とトグル。
+2. **[CODE]** `app/components/Header/HeaderActions.tsx` の更新
+   - `isSorting` プロップを追加し、紫色アイコンと "sorting" 文字の表示に対応。
+3. **[CODE]** `app/hooks/useCardList.ts` の更新
+   - `sortOrder` を監視し、データ読み込み済みのカードをメモリ上で即時ソートするロジックの追加。
 
-## 4. 影響範囲
-- `app/hooks/useCardList.ts`
-- `app/page.tsx`
-- `app/components/CardList/CardAddButton.tsx` (New)
-- `app/components/CardList/CardAddButton.test.tsx` (New)
+### Step 5: ビュー切り替え機能の実装
+1. **[CODE]** `app/components/ui/Footer/ViewModeButton.tsx` の作成
+   - リスト/グリッドのアイコン切り替え。
+2. **[CODE]** `app/components/CardList/CardList.tsx` の更新
+   - `viewMode` が 'grid' の場合に 2列（`grid-cols-2`）になるようレイアウトを調整。
+
+### Step 6: フィルタ機能のモック実装
+1. **[CODE]** `app/components/ui/Footer/FilterButton.tsx` の作成
+   - Off / On / Disabled の3状態のスタイル表示。
+2. **[CODE]** `app/components/Filter/FilterDialog.tsx` の作成 (初期版)
+   - プレースホルダとしてのダイアログ表示。
+
+### Step 7: 最終調整
+1. **[CODE]** `app/page.tsx` への `Footer` 配置。
+2. デザインの微調整（Z-index、背景のブラー効果、余白など）。
+
+## 4. 完了定義
+- [ ] フッターが画面下部に固定されている。
+- [ ] スクロールダウンで隠れ、スクロールアップ/入力フォーカス解除で表示される。
+- [ ] ソートボタンでリストの順序が入れ替わり、ヘッダーに "sorting" が表示される。
+- [ ] ビュー切り替えボタンで 1列と 2列が切り替わる。
+- [ ] フィルタボタンが状態（Off/On/Disabled）に応じて色を変える。
