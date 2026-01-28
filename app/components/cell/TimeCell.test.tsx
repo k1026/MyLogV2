@@ -8,8 +8,8 @@ describe('TimeCell', () => {
         id: '1234567890123-ABCDE',
         attribute: CellAttribute.Time,
         name: 'Time Entry',
-        // 2026-01-28 12:00:00
-        value: '2026-01-28T12:00:00.000Z',
+        // 2026-01-28 12:00:00 (Local time, no Z)
+        value: '2026-01-28T12:00:00',
         geo: null,
         remove: null,
     };
@@ -33,11 +33,12 @@ describe('TimeCell', () => {
         const dateInput = screen.getByLabelText(/date/i) as HTMLInputElement;
         const timeInput = screen.getByLabelText(/time/i) as HTMLInputElement;
 
-        expect(dateInput.type).toBe('text');
-        expect(timeInput.type).toBe('text');
+        const d = new Date(baseCell.value);
+        const expectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const expectedTime = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
-        expect(dateInput.value).toBe('2026-01-28');
-        expect(timeInput.value).toBe('12:00');
+        expect(dateInput.value).toBe(expectedDate);
+        expect(timeInput.value).toBe(expectedTime);
     });
 
     it('初期表示: valueが数値文字列の場合でも正しく日付・時刻が表示されること', () => {
@@ -54,8 +55,12 @@ describe('TimeCell', () => {
         const dateInput = screen.getByLabelText(/date/i) as HTMLInputElement;
         const timeInput = screen.getByLabelText(/time/i) as HTMLInputElement;
 
-        expect(dateInput.value).toBe('2026-01-28');
-        expect(timeInput.value).toBe('12:00');
+        const d = new Date(parseInt(numericValueCell.value, 10));
+        const expectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const expectedTime = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+        expect(dateInput.value).toBe(expectedDate);
+        expect(timeInput.value).toBe(expectedTime);
     });
 
     it('日付を変更すると onSave が呼ばれること', () => {

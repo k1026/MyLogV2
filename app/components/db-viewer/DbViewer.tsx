@@ -150,9 +150,9 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
     return (
         <div
             data-testid="db-viewer-overlay"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 animate-in fade-in duration-300"
         >
-            <div className="relative w-full max-w-6xl h-[92vh] bg-white rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 border border-white/20">
+            <div className="relative w-full max-w-6xl h-[92vh] bg-white rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 border border-slate-200">
                 {/* 閉じるボタン */}
                 <button
                     onClick={onClose}

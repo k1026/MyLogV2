@@ -25,9 +25,24 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
         return d;
     };
 
+    const formatDate = (d: Date) => {
+        if (isNaN(d.getTime())) return '';
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const formatTime = (d: Date) => {
+        if (isNaN(d.getTime())) return '';
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+
     const dateObj = parseDate(cell.value);
-    const initialDate = isNaN(dateObj.getTime()) ? '' : dateObj.toISOString().split('T')[0];
-    const initialTime = isNaN(dateObj.getTime()) ? '' : dateObj.toISOString().split('T')[1].slice(0, 5);
+    const initialDate = formatDate(dateObj);
+    const initialTime = formatTime(dateObj);
 
     const [date, setDate] = useState(initialDate);
     const [time, setTime] = useState(initialTime);
@@ -39,8 +54,8 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
         setName(cell.name);
         const d = parseDate(cell.value);
         if (!isNaN(d.getTime())) {
-            setDate(d.toISOString().split('T')[0]);
-            setTime(d.toISOString().split('T')[1].slice(0, 5));
+            setDate(formatDate(d));
+            setTime(formatTime(d));
         } else {
             setDate('');
             setTime('');
@@ -50,24 +65,19 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
     const handleBlur = () => {
         let newValue = cell.value;
         if (date && time) {
-            const updatedDate = new Date(`${date}T${time}:00.000Z`);
-            if (!isNaN(updatedDate.getTime())) {
-                newValue = updatedDate.toISOString();
-            }
+            // Store as local time string (YYYY-MM-DDTHH:mm:ss) to match tests and user preference
+            newValue = `${date}T${time}:00`;
         } else if (!date && !time) {
             newValue = '';
         } else if (date && !time) {
-            const updatedDate = new Date(`${date}T00:00:00.000Z`);
-            if (!isNaN(updatedDate.getTime())) {
-                newValue = updatedDate.toISOString();
-            }
+            newValue = `${date}T00:00:00`;
         } else if (!date && time) {
             const now = new Date();
-            const currentDate = now.toISOString().split('T')[0];
-            const updatedDate = new Date(`${currentDate}T${time}:00.000Z`);
-            if (!isNaN(updatedDate.getTime())) {
-                newValue = updatedDate.toISOString();
-            }
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const currentDate = `${year}-${month}-${day}`;
+            newValue = `${currentDate}T${time}:00`;
         }
 
         if (name !== cell.name || newValue !== cell.value) {

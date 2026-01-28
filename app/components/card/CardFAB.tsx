@@ -32,9 +32,11 @@ export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
         if (!isLongPressActive.current) {
             // Short press (tap) -> Add Text as default
             onAdd(CellAttribute.Text);
-        } else if (attribute) {
-            // Selection made via pie menu
-            onAdd(attribute);
+        } else {
+            // Long press: 
+            // If an item is hovered/selected, use it. 
+            // Otherwise, default to Text cell as requested.
+            onAdd(attribute || CellAttribute.Text);
         }
 
         setIsMenuOpen(false);

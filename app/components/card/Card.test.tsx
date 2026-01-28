@@ -104,7 +104,9 @@ describe('Card Component', () => {
         const closeBtn = screen.getByTestId('card-close-button');
         fireEvent.click(closeBtn);
 
-        expect(screen.queryByTestId('card-item-list')).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.queryByTestId('card-item-list')).not.toBeInTheDocument();
+        });
     });
 
     it('Child Cell の変更を保存すると db.cells.put が呼ばれること', async () => {
@@ -125,5 +127,44 @@ describe('Card Component', () => {
             I: 'child2',
             N: 'Updated Title'
         }));
+    });
+
+    it('closes the card when Escape key is pressed', async () => {
+        render(<Card cell={mockCardCell} />);
+        const card = screen.getByTestId('card-container');
+        fireEvent.click(card); // Expand
+
+        expect(screen.getByTestId('card-item-list')).toBeInTheDocument();
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+
+        await waitFor(() => {
+            expect(screen.queryByTestId('card-item-list')).not.toBeInTheDocument();
+        });
+    });
+
+    it('closes the card on popstate (back button)', async () => {
+        render(<Card cell={mockCardCell} />);
+        const card = screen.getByTestId('card-container');
+        fireEvent.click(card); // Expand
+
+        expect(screen.getByTestId('card-item-list')).toBeInTheDocument();
+
+        // Simulate popstate
+        fireEvent(window, new PopStateEvent('popstate'));
+
+        await waitFor(() => {
+            expect(screen.queryByTestId('card-item-list')).not.toBeInTheDocument();
+        });
+    });
+
+    it('pushes state to history when expanded', async () => {
+        const pushStateSpy = vi.spyOn(window.history, 'pushState');
+        render(<Card cell={mockCardCell} />);
+        const card = screen.getByTestId('card-container');
+        fireEvent.click(card); // Expand
+
+        expect(pushStateSpy).toHaveBeenCalled();
+        pushStateSpy.mockRestore();
     });
 });

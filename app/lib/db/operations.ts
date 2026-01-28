@@ -137,6 +137,21 @@ export const CellRepository = {
         }
 
         return { successCount, failureCount, errors };
+    },
+
+    async getCards(offset: number, limit: number): Promise<Cell[]> {
+        const docs = await db.cells
+            .orderBy('I')
+            .reverse()
+            .filter(doc => doc.A === 'Card')
+            .offset(offset)
+            .limit(limit)
+            .toArray();
+        return docs.map(doc => this.mapFromDB(doc));
+    },
+
+    async getCardCount(): Promise<number> {
+        return await db.cells.filter(doc => doc.A === 'Card').count();
     }
 };
 

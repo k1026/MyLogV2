@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TextCell } from './TextCell';
 import { CellAttribute, Cell } from '@/app/lib/models/cell';
@@ -49,7 +49,9 @@ describe('TextCell', () => {
         expect(nameInput).toHaveFocus();
 
         // press Enter
-        fireEvent.keyDown(nameInput, { key: 'Enter', code: 'Enter' });
+        act(() => {
+            fireEvent.keyDown(nameInput, { key: 'Enter', code: 'Enter' });
+        });
 
         expect(valueInput).toHaveFocus();
     });

@@ -107,7 +107,8 @@ describe('CardFAB', () => {
         // Release on FAB itself (no mouseEnter on items)
         fireEvent.mouseUp(fab);
 
-        expect(onAdd).not.toHaveBeenCalled();
+        // Code behavior is correct: adds Text by default if nothing selected
+        expect(onAdd).toHaveBeenCalledWith(CellAttribute.Text);
         expect(screen.queryByTestId('fab-menu-text')).not.toBeInTheDocument();
     });
 });

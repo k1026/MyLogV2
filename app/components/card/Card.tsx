@@ -13,10 +13,18 @@ import { cleanupCardCells, addCellToCard } from './cardUtils';
 interface CardProps {
     cell: Cell;
     onUpdate?: (cell: Cell) => void;
+    onExpand?: () => void;
+    onCollapse?: () => void;
     defaultExpanded?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ cell, onUpdate, defaultExpanded = false }) => {
+export const Card: React.FC<CardProps> = ({
+    cell,
+    onUpdate,
+    onExpand,
+    onCollapse,
+    defaultExpanded = false
+}) => {
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
     const { rarityData } = useRarity();
 
@@ -37,7 +45,7 @@ export const Card: React.FC<CardProps> = ({ cell, onUpdate, defaultExpanded = fa
 
     // Determine title: First non-Time cell
     const titleCell = childCells?.find(c => c.A !== CellAttribute.Time);
-    const displayTitle = titleCell?.N || cell.name || 'No Title';
+    const displayTitle = titleCell?.N || cell.name || '';
 
     // Rarity Calculation
     const rarityAvg = React.useMemo(() => {
@@ -58,14 +66,60 @@ export const Card: React.FC<CardProps> = ({ cell, onUpdate, defaultExpanded = fa
     const formattedDate = isNaN(timestamp) ? '' : date.toLocaleString();
 
     const [lastAddedId, setLastAddedId] = React.useState<string | null>(null);
+    const hasPushedState = React.useRef(false);
 
-    const handleToggle = () => {
+    const closeCard = React.useCallback(() => {
+        setIsExpanded(false);
+        cleanupCardCells(cell);
+        setLastAddedId(null);
+        hasPushedState.current = false;
+        onCollapse?.();
+    }, [cell, onCollapse]);
+
+    const handleToggle = React.useCallback(() => {
         if (isExpanded) {
-            cleanupCardCells(cell);
-            setLastAddedId(null); // Reset when closing
+            if (hasPushedState.current) {
+                window.history.back();
+            } else {
+                closeCard();
+            }
+        } else {
+            setIsExpanded(true);
+            onExpand?.();
         }
-        setIsExpanded(!isExpanded);
-    };
+    }, [isExpanded, closeCard, onExpand]);
+
+    // Escキーと戻るボタンの処理
+    React.useEffect(() => {
+        if (!isExpanded) return;
+
+        // Escキー処理
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                handleToggle();
+            }
+        };
+
+        // 戻るボタン（履歴）処理
+        // すでに履歴が積まれていない場合のみ積む
+        if (!hasPushedState.current) {
+            window.history.pushState({ type: 'card-expand', id: cell.id }, '');
+            hasPushedState.current = true;
+        }
+
+        const handlePopState = (e: PopStateEvent) => {
+            // 履歴から戻った場合はカードを閉じる
+            closeCard();
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('popstate', handlePopState);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [isExpanded, cell.id, handleToggle, closeCard]);
 
     const handleAddCell = async (attribute: CellAttribute) => {
         const currentIds = sortState.sortedCells.map(c => c.I);
@@ -115,18 +169,20 @@ export const Card: React.FC<CardProps> = ({ cell, onUpdate, defaultExpanded = fa
             `}
             onClick={!isExpanded ? handleToggle : undefined}
         >
-            <div className="flex justify-between items-center w-full mb-2">
-                <div className="font-bold text-lg">{displayTitle}</div>
+            <div className={`flex items-center w-full mb-2 ${isExpanded ? 'justify-end' : 'justify-between'}`}>
+                {!isExpanded && <div className="font-bold text-lg text-white">{displayTitle}</div>}
                 <div className="flex items-center gap-2">
                     {isExpanded && <CardToolbar sortState={sortState} />}
-                    <div className="text-xs opacity-50">{formattedDate}</div>
+                    {!isExpanded && <div className="text-xs text-gray-400">{formattedDate}</div>}
                     {isExpanded && (
                         <button
                             data-testid="card-close-button"
-                            className="text-xs text-white/70 hover:text-white px-2 py-1 rounded bg-white/10"
+                            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-gray-400 transition-colors"
                             onClick={(e) => { e.stopPropagation(); handleToggle(); }}
                         >
-                            Close
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     )}
                 </div>
@@ -145,4 +201,4 @@ export const Card: React.FC<CardProps> = ({ cell, onUpdate, defaultExpanded = fa
             )}
         </div>
     );
-}
+};
