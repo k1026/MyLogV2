@@ -1,5 +1,6 @@
 import './globals.css';
 import { RarityProvider } from './contexts/RarityContext';
+import { LocationProvider } from './contexts/LocationContext';
 
 export const metadata = {
   title: 'MyLog V2',
@@ -15,7 +16,9 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         <RarityProvider>
-          {children}
+          <LocationProvider>
+            {children}
+          </LocationProvider>
         </RarityProvider>
       </body>
     </html>

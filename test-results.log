@@ -1,15 +1,14 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 13ms
  ✓ app/lib/models/cell.test.ts (9 tests) 23ms
- ✓ app/lib/db/operations.test.ts (12 tests) 137ms
- ✓ app/lib/db/fileIO.test.ts (7 tests) 112ms
- ✓ app/components/card/cardUtils.test.ts (4 tests) 172ms
- ✓ app/components/card/useCardSort.test.ts (5 tests) 98ms
- ✓ app/hooks/useCardList.test.ts (2 tests) 331ms
- ✓ app/components/card/CardToolbar.test.tsx (4 tests) 201ms
- ✓ app/components/cell/CellContainer.test.tsx (2 tests) 230ms
+ ✓ app/components/card/cardUtils.test.ts (4 tests) 164ms
+ ✓ app/lib/db/operations.test.ts (12 tests) 142ms
+ ✓ app/lib/db/fileIO.test.ts (7 tests) 126ms
+ ✓ app/contexts/LocationContext.test.tsx (1 test) 144ms
+ ✓ app/hooks/useCardList.test.ts (2 tests) 318ms
+ ✓ app/components/card/useCardSort.test.ts (5 tests) 97ms
+ ✓ app/components/card/CardToolbar.test.tsx (4 tests) 262ms
 stderr | app/components/cell/TextCell.test.tsx > TextCell > Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること
 An update to TextCell inside a test was not wrapped in act(...).
 
@@ -22,18 +21,28 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/contexts/RarityContext.test.tsx (3 tests) 184ms
- ✓ app/components/cell/TimeCell.test.tsx (7 tests) 316ms
- ✓ app/components/cell/TextCell.test.tsx (9 tests) 324ms
- ✓ app/components/cell/TaskCell.test.tsx (4 tests) 567ms
-     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  474ms
- ✓ app/components/CardList/CardList.test.tsx (1 test) 421ms
-     ✓ should render only a subset of cards (90 limit)  416ms
- ✓ app/components/card/CardFAB.test.tsx (6 tests) 693ms
-     ✓ renders the FAB button  463ms
- ✓ app/components/card/Card.test.tsx (7 tests) 556ms
- ✓ app/components/card/CardDisplay.test.tsx (2 tests) 659ms
-     ✓ renders Time and Text cells for a newly created card  627ms
+ ✓ app/contexts/RarityContext.test.tsx (3 tests) 176ms
+stderr | app/components/Header/Header.test.tsx > Header Component > renders card counts correctly
+Received `true` for a non-boolean attribute `jsx`.
+
+If you want to write it to the DOM, pass a string instead: jsx="true" or jsx={value.toString()}.
+Received `true` for a non-boolean attribute `global`.
+
+If you want to write it to the DOM, pass a string instead: global="true" or global={value.toString()}.
+
+ ✓ app/components/cell/TextCell.test.tsx (9 tests) 354ms
+ ✓ app/components/cell/TimeCell.test.tsx (7 tests) 380ms
+ ✓ app/components/cell/CellContainer.test.tsx (2 tests) 261ms
+ ✓ app/components/Header/Header.test.tsx (5 tests) 393ms
+ ✓ app/components/cell/TaskCell.test.tsx (4 tests) 682ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  580ms
+ ✓ app/components/CardList/CardList.test.tsx (1 test) 514ms
+     ✓ should render only a subset of cards (90 limit)  505ms
+ ✓ app/components/card/Card.test.tsx (7 tests) 690ms
+ ✓ app/components/card/CardFAB.test.tsx (6 tests) 694ms
+     ✓ renders the FAB button  464ms
+ ✓ app/components/card/CardDisplay.test.tsx (2 tests) 796ms
+     ✓ renders Time and Text cells for a newly created card  761ms
 Not implemented: Window's alert() method
 Not implemented: navigation to another Document
 stderr | app/components/db-viewer/DbViewer.test.tsx > DbViewer > 閉じるボタンをクリックすると onClose が呼ばれること
@@ -70,11 +79,12 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1049ms
-     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  695ms
+ ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1346ms
+     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  941ms
+ ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 9ms
 
- Test Files  18 passed (18)
-      Tests  95 passed (95)
-   Start at  20:59:17
-   Duration  8.83s (transform 4.22s, setup 12.48s, import 23.49s, tests 6.09s, environment 83.66s)
+ Test Files  20 passed (20)
+      Tests  101 passed (101)
+   Start at  21:17:01
+   Duration  12.22s (transform 6.88s, setup 15.13s, import 33.03s, tests 7.57s, environment 100.75s)
 

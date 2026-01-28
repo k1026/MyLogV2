@@ -1,76 +1,87 @@
-# CardListUI 実装計画
+# ヘッダーUI 実装計画
 
-`docs/specs/07_CardListUI.md` に基づき、メインビューとなる `CardListUI` を実装する。既存の `page.tsx` の単純な表示を置き換え、大量のデータを扱える高機能なリスト表示を実現する。
+## 1. 要件定義・仕様確認
+`docs/specs/11_Header.md` に基づき、ナビゲーションおよびステータス表示を行うヘッダー機能を実装する。
 
-## 1. 要件定義
+### 主な機能要件
+*   **デザイン**: ライトテーマ、Glassmorphism (背景ぼかし)、勾配テキスト、画面上部固定 (`z-40`以上)。
+*   **タイトルエリア**:
+    *   `MyLog` ロゴ (Deep Purple)。
+    *   DB読み込み進捗を表すアニメーション (ロゴの `clip-path` 制御)。
+    *   バージョン番号 (`v2.0.0` 等)。
+    *   クリックアクション: アプリ状態リセット (フィルタ解除・トップへスクロール)。
+*   **ステータスエリア**:
+    *   **位置情報**: 取得状態 (`active`, `inactive`, `error`, `loading`) の可視化とトグル。
+    *   **カードカウント**: `表示数 / 総数` の形式で表示。
+*   **アクションエリア**:
+    *   **ランダムピック**: 表示中のカードから1つをランダムに選択してフォーカス。
+    *   **DBステータス**: `DbViewer` の開閉、バックグラウンド処理中のインジケータ表示。
+*   **動的表示制御 (UX)**:
+    *   **スクロール監視**: 下方向スクロールで隠し、上方向で表示。
+    *   **フォーカス監視**: 入力要素 (`input`, `textarea`) フォーカス時は隠す。
 
-### 1.1 基本構成
-- **配置**: ヘッダーとフッターの間（`page.tsx`のメインコンテンツエリア）。
-- **表示モード**: リストビュー（1列）のみ。
+## 2. アーキテクチャ設計
 
-### 1.2 データ管理
-- **ソース**: IndexedDB (User Store) から `attribute: 'Card'` を抽出。
-- **読み込み戦略**:
-  - **初期ロード**: 最初の1000件のみ読み込み、UI描画とRarity計算を開始。スプラッシュスクリーン解除。
-  - **バックグラウンドロード**: 残りを1000件ずつ非同期で読み込み、メモリ（State）に追加。
-- **ソート**: タイムスタンプ降順（デフォルト）。編集/追加時の最適化（リスト全体の再ロードを避ける）。
+### ファイル構成
+```
+app/
+  components/
+    Header/
+      Header.tsx        // メインコンポーネント (Logic & Layout)
+      HeaderTitle.tsx   // タイトル・進捗ロゴ
+      HeaderStatus.tsx  // 位置情報・カウント
+      HeaderActions.tsx // アクションボタン
+      index.ts          // export用
+  contexts/
+    LocationContext.tsx // [新規] 位置情報管理
+```
 
-### 1.3 仮想スクロール (Virtual Scroll)
-- **描画範囲**: 常に90件（前30 + 表示30 + 後30）のみDOMに保持。
-- **スクロール**: スクロール位置に応じて描画範囲を更新。
+### ステート管理方針
+1.  **位置情報 (`LocationContext`)**:
+    *   仕様に「取得中/アクティブ/非アクティブ/エラー」の区別があるため、専用コンテキストで管理する。
+    *   API: `status` (state), `toggleLocation` (function)。
+2.  **ヘッダー表示 (`Header.tsx` 内)**:
+    *   `isVisible`: スクロール量と方向、フォーカス状態から算出。
+    *   カスタムフック `useHeaderVisibility` を作成しロジックを分離しても良い。
+3.  **データ連携 (`props`経由)**:
+    *   `Header` は `page.tsx` から `cards` (カウント用), `onDbOpen`, `onReset` 等を受け取る。
 
-### 1.4 インタラクション
-- **展開時**:
-  - 選択したカードの上端を画面上部に合わせる（スクロール調整）。
-  - リストのスクロール範囲を、そのカードの高さ分に制限する（他のカードを見えなくする感覚）。
-  - リストの更新（再ソートや再描画）を一時停止。
-- **折りたたみ時**:
-  - 元の位置に戻る、あるいはリストの整合性を保つ。
-  - パフォーマンス（スクロール位置維持）を重視。
+## 3. 実装ステップ
 
-### 1.5 その他
-- **Empty State**: データなし/フィルタ結果なし時の表示。
-- **Loading**: 1秒以上の処理でローディング表示。
+### Step 1: LocationContext の実装
+*   **Context作成**: `app/contexts/LocationContext.tsx`
+    *   State: `status` ('idle', 'loading', 'active', 'error')
+    *   Action: `toggle()` - 仮実装でステータスを遷移させる機能のみでも可（実Geolocation API実装は後回しでもよいが、可能なら実装する）。
+*   **Provider配置**: `app/layout.tsx` または `app/page.tsx` でラップ。
 
-## 2. 実装計画 (TDD / Step-by-Step)
+### Step 2: Header コンポーネント (UI) 実装
+*   **コンポーネント作成**: `Header` およびサブコンポーネントを作成する。
+*   **スタイリング (Tailwind)**:
+    *   `backdrop-blur`, `bg-white/70`, `sticky`, `top-0` 等を使用。
+    *   タイトルロゴの `clip-path` アニメーション用CSS/Style実装。
+*   **基本動作**:
+    *   Props 受け渡し (`onReset`, `onRandomPick`, `onDbOpen` 等) の定義。
 
-### Step 1: データ取得フックの実装 (`useCardList`)
-IndexedDBからの段階的読み込みロジックを実装する。
-1. **`app/hooks/useCardList.ts` 作成**:
-   - `initialLoad` (1000件) と `backgroundLoad` (残り) を実装。
-   - テスト: モックDBを使用し、1000件取得後に残りが徐々に追加されるか検証。
-   - フィルタリング機能の基礎も含める。
+### Step 3: 動的表示制御 (Visibility Logic)
+*   **イベントリスナー**:
+    *   `window.onscroll`: 前回の `scrollY` と比較し `direction` を判定。
+    *   `focusin` / `focusout`: イベントターゲットのタグ名を確認 (`INPUT`, `TEXTAREA`)。
+*   **アニメーション**:
+    *   `transform: translateY(-100%)` 等での隠蔽制御。
 
-### Step 2: CardList コンポーネントと仮想スクロールの基礎
-仮想スクロールのロジック（ウィンドウ制御）を実装する。
-1. **`app/components/CardList/CardList.tsx` 作成**:
-   - スクロールイベントを監視し、`visibleRange` (start, end) を計算。
-   - 仕様通り「90件」単位での制御を実装。
-2. **`app/components/CardList/CardList.test.tsx`**:
-   - 大量のダミーデータを与え、DOMには90件しか描画されていないことを確認。
+### Step 4: Pageへの統合
+*   **修正対象**: `app/page.tsx`
+*   **作業**:
+    *   既存の `<header>` ブロックを `<Header />` コンポーネントに置換。
+    *   必要なProps (`cards.length`, `totalCount`, `isDbViewerOpen` setter 等) を渡す。
+    *   「ランダムピック」ロジックの簡易実装 (例: `cards`配列からランダムにIDを選び、`document.getElementById` でスクロール)。
 
-### Step 3: カードレンダリング
-1. **Card統合**:
-   - 既存の `Card` コンポーネントをリストアイテムとしてレンダリング。
-
-### Step 4: インタラクション制御 (展開・スクロール制限)
-カード展開時の特殊なスクロール挙動を実装する。
-1. **Scroll Lock & Positioning**:
-   - カード展開(`onExpand`)時に `scrollTo` で位置合わせ。
-   - `overflow: hidden` またはコンテナサイズ制限でスクロールをロック。
-2. **リスト更新停止**:
-   - 展開中は `useCardList` からの更新反映をスキップするフラグ管理。
-
-### Step 5: メインページへの統合と仕上げ
-1. **`app/page.tsx` 修正**:
-   - 既存の単一 `Card` 表示を `CardList` に置き換え。
-   - ヘッダー/フッターとのレイアウト調整。
-2. **Rarity連携**:
-   - 初期ロード完了時に Rarity 計算が走ることを確認。
-3. **Empty State & Loading**:
-   - 「データがありません」表示とローディングスピナーの実装。
-
-## 3. 検証項目
-- 1万件程度のダミーデータを用意し、スクロールがスムーズか。
-- カード展開時に画面がガタつかずに位置合わせされるか。
-- バックグラウンド読み込み中にUI操作が可能か。
+## 4. 検証・テスト計画
+*   **目視確認**:
+    *   画面遷移時のヘッダー表示。
+    *   スクロール時の隠蔽・再表示動作。
+    *   入力フォームフォーカス時の隠蔽動作。
+    *   各ボタンのクリックフィードバック。
+*   **自動テスト**:
+    *   `Header.test.tsx` (表示テスト)。
+    *   `isVisible` ロジックの単体テスト (余裕があれば)。

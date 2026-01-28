@@ -16,6 +16,7 @@ interface CardProps {
     onExpand?: () => void;
     onCollapse?: () => void;
     defaultExpanded?: boolean;
+    externalExpanded?: boolean;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -23,9 +24,17 @@ export const Card: React.FC<CardProps> = ({
     onUpdate,
     onExpand,
     onCollapse,
-    defaultExpanded = false
+    defaultExpanded = false,
+    externalExpanded // New prop
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
+
+    // Sync with external control if provided
+    React.useEffect(() => {
+        if (externalExpanded !== undefined) {
+            setIsExpanded(externalExpanded);
+        }
+    }, [externalExpanded]);
     const { rarityData } = useRarity();
 
     // Fetch latest card data from DB to ensure we have up-to-date value (list of children)

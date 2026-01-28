@@ -5,6 +5,8 @@ import { cn } from '@/app/lib/utils';
 
 interface CardListProps {
     cards: Cell[];
+    focusedId?: string | null;
+    onFocusClear?: () => void;
 }
 
 const ESTIMATED_ITEM_HEIGHT = 150; // px
@@ -12,11 +14,23 @@ const BUFFER_SIZE = 30; // 30 items before and after
 const VISIBLE_COUNT = 30; // Target visible items (approx)
 const WINDOW_SIZE = BUFFER_SIZE * 2 + VISIBLE_COUNT; // 90 items
 
-export function CardList({ cards }: CardListProps) {
+export function CardList({ cards, focusedId, onFocusClear }: CardListProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [scrollTop, setScrollTop] = useState(0);
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
     const lastStartIndexRef = useRef(0);
+
+    // Sync focusedId prop with internal state
+    React.useEffect(() => {
+        if (focusedId) {
+            setExpandedCardId(focusedId);
+        } else if (focusedId === null && expandedCardId) {
+            // If prop cleared, clear internal? 
+            // Logic: Header Reset -> clears focusedId -> CardList should collapse?
+            // Yes.
+            setExpandedCardId(null);
+        }
+    }, [focusedId]);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         if (expandedCardId) return;
@@ -45,17 +59,35 @@ export function CardList({ cards }: CardListProps) {
 
     const handleCollapse = () => {
         setExpandedCardId(null);
+        if (onFocusClear) onFocusClear();
     };
 
     const count = cards.length;
-    const topIndex = Math.floor(scrollTop / ESTIMATED_ITEM_HEIGHT);
-    const startIndex = Math.max(0, topIndex - BUFFER_SIZE);
-    const endIndex = Math.min(count, startIndex + WINDOW_SIZE);
 
-    const visibleCards = cards.slice(startIndex, endIndex);
+    let visibleCards: Cell[] = [];
+    let paddingTop = 0;
+    let paddingBottom = 0;
+    let startIndex = 0; // Needed for expand handler
 
-    const paddingTop = startIndex * (ESTIMATED_ITEM_HEIGHT + 16);
-    const paddingBottom = (count - endIndex) * (ESTIMATED_ITEM_HEIGHT + 16);
+    if (expandedCardId) {
+        // If expanded, show ONLY that card, wherever it is
+        const targetCard = cards.find(c => c.id === expandedCardId);
+        visibleCards = targetCard ? [targetCard] : [];
+        // Padding is 0 because we hide everything else?
+        // Or we should keep layout? Current implementation hides others (return null).
+        // So visually list becomes 1 item.
+        // Padding usually pushes it down, but if we filter the array, it's index 0.
+        // We probably want to remove padding so it's top of screen.
+        paddingTop = 0;
+        paddingBottom = 0;
+    } else {
+        const topIndex = Math.floor(scrollTop / ESTIMATED_ITEM_HEIGHT);
+        startIndex = Math.max(0, topIndex - BUFFER_SIZE);
+        const endIndex = Math.min(count, startIndex + WINDOW_SIZE);
+        visibleCards = cards.slice(startIndex, endIndex);
+        paddingTop = startIndex * (ESTIMATED_ITEM_HEIGHT + 16);
+        paddingBottom = (count - endIndex) * (ESTIMATED_ITEM_HEIGHT + 16);
+    }
 
     return (
         <div
@@ -88,6 +120,7 @@ export function CardList({ cards }: CardListProps) {
                                 cell={card}
                                 onExpand={() => handleExpand(card.id, startIndex + i)}
                                 onCollapse={handleCollapse}
+                                externalExpanded={isExpanded}
                             />
                         </div>
                     );
