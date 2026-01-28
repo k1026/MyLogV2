@@ -10,9 +10,11 @@ import { useCardList } from './hooks/useCardList';
 import { Header } from './components/Header/Header';
 import { CardList } from './components/CardList/CardList';
 import { useLocation } from './contexts/LocationContext';
+import { CardAddButton } from './components/CardList/CardAddButton';
 
 export default function Home() {
-    const { cards, isLoading, totalCount } = useCardList();
+    const useCardListResult = useCardList();
+    const { cards, isLoading, totalCount } = useCardListResult;
     const { isCalculating } = useRarity();
     const { geoString } = useLocation();
     const [mounted, setMounted] = useState(false);
@@ -35,11 +37,13 @@ export default function Home() {
         setFocusedCardId(randomCard.id);
     };
 
-    // Keep handleNewCard if we add a FAB later
     const handleNewCard = async () => {
         try {
-            await createCard(geoString);
-            window.location.reload();
+            const newCard = await createCard(geoString);
+            // Add card to UI immediately
+            useCardListResult.addCard(newCard);
+            // Set focus to the new card immediately
+            setFocusedCardId(newCard.id);
         } catch (error) {
             console.error('Failed to create new card:', error);
         }
@@ -87,6 +91,12 @@ export default function Home() {
             <DbViewer
                 isOpen={isDbViewerOpen}
                 onClose={() => setIsDbViewerOpen(false)}
+            />
+
+            {/* Card Add Button (FAB) */}
+            <CardAddButton
+                onClick={handleNewCard}
+                visible={!focusedCardId}
             />
         </main>
     );

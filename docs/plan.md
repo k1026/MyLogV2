@@ -1,82 +1,53 @@
-# 位置情報取得機能 (Location Service) 実装計画
+# 実装計画: カード追加ボタン機能
 
-## 1. 要件定義・仕様確認
-`docs/specs/14_LocationService.md` に基づき、アプリ全体での位置情報管理機能と、Cell生成時の位置情報記録機能を実装する。
+## 1. 概要
+`docs/specs/07_CardListUI.md` の「7.7 カード追加ボタン」および「7.6 リストのソート（追加時の挙動）」に基づき、カード追加機能（FAB）を実装する。
 
-### 機能要件
-1.  **位置情報の常時監視**: `navigator.geolocation.watchPosition` を使用して位置情報をリアルタイムに追跡する。
-2.  **ステータス管理**: 位置情報の取得状態（ローディング、アクティブ、エラー、無効）を管理し、UI（Header等）に提供できる状態にする。
-3.  **Cell記録**: 新しいCell（Card, Time, Text, Task）が作成される際、その瞬間の位置情報（緯度、経度、高度）を `geo` 属性に記録する。
+## 2. 要件
+### 2.1 UI/デザイン
+- **コンポーネント**: `CardAddButton`
+- **形状**: 角丸の白い四角形 (Floating Action Button)
+- **アイコン**: 中央に紫の十字マーク (+)
+- **配置**: カードリストの右下、画面スクロールに追従 (Fixed position)
+- **表示制御**:
+  - カードリスト表示時: 表示
+  - カード詳細展開時 (`focusedId` が存在する場合): 非表示
 
-## 2. アーキテクチャ設計
+### 2.2 挙動
+- **クリック時**:
+  1. `createCard(geo)` を呼び出し、新規カードとTime/TextセルをDBに作成。
+  2. 作成されたカードをリストの**先頭**（または適切なソート位置）に追加（部分更新）。
+  3. 作成されたカードを即座に「展開状態」にする（`focusedId` を設定）。
+- **データ更新**:
+  - ページのリロード (`window.location.reload()`) は行わず、ReactのState更新でリストに反映させる。
 
-### ファイル構成
-```
-app/
-  contexts/
-    LocationContext.tsx // [新規] 位置情報の監視と状態提供
-  components/
-    card/
-      cardUtils.ts      // [修正] 位置情報を受け取るように変更
-      CardFAB.tsx       // [修正] Contextから位置情報を取得しUtilsへ渡す
-  page.tsx              // [修正] Contextから位置情報を取得しUtilsへ渡す
-```
+## 3. 実装ステップ (lightSAT-DD準拠)
 
-### データフロー
-1.  **LocationContext**: アプリ起動時（Providerマウント時）に `watchPosition` を開始。最新の `Coordinates` と `Status` を保持する。
-2.  **Component (Page, CardFAB)**: `useLocation` フックを使用して `LocationContext` から現在の位置情報データを取得する。
-3.  **Utils (cardUtils.ts)**: Componentから渡された位置情報データ（文字列形式 `lat lng alt` または `null`）を使用して、Cell生成時に `geo` フィールドを設定する。
+### Step 1: `CardAddButton` の空実装とテスト作成
+- `app/components/CardList/CardAddButton.tsx` を作成し、型定義と空のコンポーネント（nullを返す、または最小限のdiv）を実装する。
+- `app/components/CardList/CardAddButton.test.tsx` を作成し、以下のテストケースを実装する。
+  - レンダリングされること（classによるstyle適用確認）
+  - クリック時にonClickハンドラが呼ばれること
+  - `visible=false` の場合に非表示になること（またはDOMから消えること）
 
-### 技術的制約・決定事項
-*   **位置情報フォーマット**: データベース（Dexie）の仕様およびモデル定義に従い、`"lat lng alt"` のスペース区切り文字列とする。高度が取得できない場合はそこをどうするかだが、JSの `Coordinates.altitude` は `null` の場合がある。仕様では「3つの値を記録」とあるが、nullの場合はどうするか？ -> `null` なら記録しないか、あるいは `0` などの代替値を入れるか、`lat lng` だけにするか。
-    *   **決定**: `altitude` が `null` の場合は `0` として記録する。これにより常に3つの値（`lat lng alt`）がスペース区切りで記録されることを保証し、パース時の処理を簡潔にする。
-    *   仕様の実例: `"35.6895 139.6917 10.5"` (高度不明時は `"35.6895 139.6917 0"`)
-*   **非同期処理**: `watchPosition` はコールバックベースだが、React State に反映させることでリアクティブにする。
+### Step 2: テスト実行 (Red)
+- テストを実行し、実装が空であるあるいはロジック未実装のため失敗することを確認する。
 
-## 3. 実装ステップ
+### Step 3: `CardAddButton` の実装 (Green)
+- `CardAddButton.tsx` を実装し、Tailwind CSSでのスタイリングとクリックイベントのハンドリングを完了させ、テストをパスさせる。
 
-### Step 1: LocationContext の実装
-*   **ファイル**: `app/contexts/LocationContext.tsx`
-*   **内容**:
-    *   `LocationContextType` 定義:
-        *   `location`: `{ latitude: number, longitude: number, altitude: number | null } | null`
-        *   `geoString`: `string | null` (整形済みの文字列 `lat lng alt` 便宜上用意すると便利)
-        *   `status`: `'loading' | 'active' | 'error' | 'disabled'`
-        *   `error`: `string | null`
-    *   `LocationProvider`: `navigator.geolocation.watchPosition` を実装。
-        *   Options: `{ enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }`
-    *   `useLocation` フックのエクスポート。
+### Step 4: `useCardList` の拡張とテスト
+- `app/hooks/useCardList.ts` に `addCard` メソッドを追加する（まずはインターフェース定義のみ）。
+- `app/hooks/useCardList.test.tsx` (存在しない場合は作成) で `addCard` 呼び出し後に `cards` ステートが増加することを検証するテストを追加。
+- `useCardList` の実装を更新し、テストをパスさせる。
 
-### Step 2: cardUtils.ts の修正
-*   **ファイル**: `app/components/card/cardUtils.ts`
-*   **内容**:
-    *   `createCard(geo: string | null): Promise<Cell>` に変更。
-    *   `addCellToCard(cardId: string, attribute: CellAttribute, currentIds: string[], geo: string | null): Promise<Cell>` に変更。
-    *   内部で `Cell` オブジェクト生成時に `geo` プロパティに引数の値をセットするように修正。
-    *   `createCard` 内で生成される子セル (Time, Text) にも同様に `geo` をセットする。
+### Step 5: `app/page.tsx` への統合
+- `app/page.tsx` に `CardAddButton` を配置。
+- `focusedId` に基づく表示切り替えロジックと、`handleNewCard` での保存・追加処理を連携させる。
+- 動作確認を行い、ブラウザでFABの配置と挙動（スクロール追従、展開時非表示）を検証する。
 
-### Step 3: コンポーネントの修正 (連動)
-*   **ファイル**: `app/components/card/CardFAB.tsx`
-    *   `useLocation` をインポート。
-    *   `handleAdd` 内で `addCellToCard` を呼ぶ際に `location.geoString` を渡す。
-*   **ファイル**: `app/page.tsx` (または `app/components/CardList.tsx` 等、Card生成を行っている場所)
-    *   `useLocation` をインポート。
-    *   Card生成呼び出し (`createCard`) 時に `location.geoString` を渡す。
-
-### Step 4: ルートへのProvider配置
-*   **ファイル**: `app/layout.tsx`
-    *   `LocationProvider` でアプリ全体 (`children`) をラップする。
-
-## 4. 検証・テスト計画
-
-### 自動テスト (Vitest)
-*   **Unit Test**: `cardUtils.test.ts` (もしあれば、なければ作成推奨)
-    *   `createCard` や `addCellToCard` が `geo` 引数を正しく反映するかテスト。
-*   **Component Test**:
-    *   `navigator.geolocation` はブラウザAPIなので、Vitest環境ではモックが必要。
-    *   `vi.stubGlobal('navigator', { geolocation: { ... } })` 等を使用して位置情報取得をシミュレートし、生成されたCellに `geo` が含まれているか検証する。
-
-### 動作確認
-*   ブラウザの開発者ツールで「Sensors」タブを開き、GeolocationをOverrideして動作確認する。
-    *   東京、ロンドンなどで座標を変えてCellを作成し、IndexedDB (Applicationタブ) で `geo` カラムが正しく保存されているか確認。
-    *   `Location blocked` などのエラー状態で `null` が保存されるか確認。
+## 4. 影響範囲
+- `app/hooks/useCardList.ts`
+- `app/page.tsx`
+- `app/components/CardList/CardAddButton.tsx` (New)
+- `app/components/CardList/CardAddButton.test.tsx` (New)

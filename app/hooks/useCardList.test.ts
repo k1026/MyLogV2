@@ -78,4 +78,31 @@ describe('useCardList', () => {
             expect(result.current.cards.length).toBe(1500);
         }, { timeout: 3000 });
     });
+
+    it('should add a card when addCard is called', async () => {
+        const { result } = renderHook(() => useCardList());
+
+        // Wait for initial load
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        const initialCount = result.current.cards.length;
+        const initialTotal = result.current.totalCount;
+
+        const newCard: Cell = {
+            id: 'new-card-id',
+            attribute: CellAttribute.Card,
+            name: 'New Card',
+            value: '',
+            geo: null,
+            remove: null
+        };
+
+        const { act } = await import('@testing-library/react');
+        await act(async () => {
+            result.current.addCard(newCard);
+        });
+
+        expect(result.current.cards.length).toBe(initialCount + 1);
+        expect(result.current.cards[0]).toEqual(newCard); // Spec 7.6: Insert at proper position (newest first by default)
+        expect(result.current.totalCount).toBe(initialTotal + 1);
+    });
 });

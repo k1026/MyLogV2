@@ -6,6 +6,7 @@ export interface UseCardListResult {
     cards: Cell[];
     isLoading: boolean;
     totalCount: number;
+    addCard: (card: Cell) => void;
 }
 
 const BATCH_SIZE = 1000;
@@ -63,9 +64,15 @@ export function useCardList(): UseCardListResult {
         };
     }, []);
 
+    const addCard = (card: Cell) => {
+        setCards(prev => [card, ...prev]);
+        setTotalCount(prev => prev + 1);
+    };
+
     return {
         cards,
         isLoading,
-        totalCount
+        totalCount,
+        addCard
     };
 }
