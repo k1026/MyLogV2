@@ -8,6 +8,7 @@ interface CardListProps {
     cards: Cell[];
     focusedId?: string | null;
     onFocusClear?: () => void;
+    onFocus?: (id: string) => void;
 }
 
 const ESTIMATED_ITEM_HEIGHT = 150; // px
@@ -16,7 +17,7 @@ const BUFFER_SIZE = 30; // 30 items before and after
 const VISIBLE_COUNT = 30; // Target visible items (approx)
 const WINDOW_SIZE = BUFFER_SIZE * 2 + VISIBLE_COUNT; // 90 items
 
-export function CardList({ cards, focusedId, onFocusClear }: CardListProps) {
+export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [scrollTop, setScrollTop] = useState(0);
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
@@ -49,14 +50,17 @@ export function CardList({ cards, focusedId, onFocusClear }: CardListProps) {
 
     const handleExpand = (id: string, index: number) => {
         setExpandedCardId(id);
+        if (onFocus) onFocus(id);
         if (containerRef.current) {
             // Adjust scroll position to align card top with screen top
             const rowIndex = Math.floor(index / cols);
             const targetScrollTop = rowIndex * (ESTIMATED_ITEM_HEIGHT + GAP);
-            containerRef.current.scrollTo({
-                top: targetScrollTop,
-                behavior: 'smooth'
-            });
+            if (containerRef.current.scrollTo) {
+                containerRef.current.scrollTo({
+                    top: targetScrollTop,
+                    behavior: 'smooth'
+                });
+            }
         }
     };
 

@@ -82,6 +82,7 @@ export default function Home() {
                         cards={cards}
                         focusedId={focusedCardId}
                         onFocusClear={() => setFocusedCardId(null)}
+                        onFocus={setFocusedCardId}
                     />
                 )}
             </div>

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CardList } from './CardList';
 import { RarityProvider } from '@/app/contexts/RarityContext';
 import { UIStateProvider } from '@/app/contexts/UIStateContext';
@@ -12,6 +12,21 @@ vi.mock('@/app/contexts/LocationContext', () => ({
         status: 'idle',
         error: null,
     }),
+}));
+
+vi.mock('dexie-react-hooks', () => ({
+    useLiveQuery: (querier: () => any) => {
+        return [];
+    },
+}));
+
+vi.mock('@/app/lib/db/db', () => ({
+    db: {
+        cells: {
+            get: vi.fn(),
+            bulkGet: vi.fn().mockResolvedValue([]),
+        }
+    }
 }));
 
 const createDummyCards = (count: number): Cell[] =>
@@ -38,12 +53,53 @@ describe('CardList Virtual Scroll', () => {
         const items = screen.queryAllByTestId('card-item-wrapper');
 
         // Assertions for Virtual Scroll
-        // In empty implementation this will fail because items.length is 0
-        // Correct implementation should render ~30-90 items
         expect(items.length).toBeGreaterThan(0);
         expect(items.length).toBeLessThanOrEqual(90);
+    });
 
-        // Also verify that the container is scrollable (has height)
-        // This is tricky in JSDOM, we usually check if spacer elements exist
+    it('should call onFocus when a card is expanded', () => {
+        const cards = createDummyCards(5);
+        const onFocus = vi.fn();
+
+        // Mock scrollTo
+        const scrollToSpy = vi.fn();
+        HTMLDivElement.prototype.scrollTo = scrollToSpy;
+
+        render(
+            <RarityProvider>
+                <UIStateProvider>
+                    <CardList cards={cards} onFocus={onFocus} />
+                </UIStateProvider>
+            </RarityProvider>
+        );
+
+        const cardContainers = screen.getAllByTestId('card-container');
+        fireEvent.click(cardContainers[0]);
+        expect(onFocus).toHaveBeenCalledWith(cards[0].id);
+    });
+
+    it('should call onFocusClear when a card is collapsed', async () => {
+        const cards = createDummyCards(5);
+        const onFocusClear = vi.fn();
+
+        render(
+            <RarityProvider>
+                <UIStateProvider>
+                    <CardList cards={cards} onFocusClear={onFocusClear} />
+                </UIStateProvider>
+            </RarityProvider>
+        );
+
+        // Expand first
+        const cardContainers = screen.getAllByTestId('card-container');
+        fireEvent.click(cardContainers[0]);
+
+        // Find and click close button
+        const closeBtn = screen.getByTestId('card-close-button');
+        fireEvent.click(closeBtn);
+
+        await waitFor(() => {
+            expect(onFocusClear).toHaveBeenCalled();
+        });
     });
 });
