@@ -207,4 +207,77 @@ describe('Card Component', () => {
         expect(fabContainer).toHaveClass('absolute');
         expect(fabContainer).not.toHaveClass('fixed');
     });
+
+    // --- Style & Design Spec Tests ---
+
+    it('Card Container should have correct styles (rounded-3xl, p-[12px], shadow-sm)', () => {
+        render(<Card cell={mockCardCell} />);
+        const card = screen.getByTestId('card-container');
+
+        expect(card).toHaveClass('rounded-3xl');
+        // p-[12px] matches Tailwind p-[12px] or p-3 (3 * 4px = 12px)
+        // Code uses p-[12px]
+        expect(card).toHaveClass('p-[12px]');
+        expect(card).toHaveClass('shadow-sm');
+        expect(card).toHaveClass('border');
+    });
+
+    it('Card Title should be text-lg and font-bold', async () => {
+        render(<Card cell={mockCardCell} />);
+        // Title is only visible when collapsed
+        await waitFor(() => {
+            const title = screen.getByText('Child Title').closest('div');
+            expect(title).toHaveClass('text-lg');
+            expect(title).toHaveClass('font-bold');
+        });
+    });
+
+    it('Card Created Date should be text-xs', async () => {
+        render(<Card cell={mockCardCell} />);
+        // The date is formatted, so we search for text content.
+        // In mock, date is from '1700000000000'.
+        // "11/15/2023, 5:46:40 AM" (depends on locale, but we can search for the element container)
+        const dateDiv = screen.getByText(/2023/).closest('div'); // Rough match
+        expect(dateDiv).toHaveClass('text-xs');
+    });
+
+    it('Card Expanded state should have backdrop-blur-md and ring-2', () => {
+        render(<Card cell={mockCardCell} />);
+        const card = screen.getByTestId('card-container');
+        fireEvent.click(card); // Expand
+
+        expect(card).toHaveClass('backdrop-blur-md');
+        expect(card).toHaveClass('ring-2');
+        expect(card).toHaveClass('ring-white/20');
+        expect(card).toHaveClass('bg-white/10');
+    });
+
+    it('Card Removed state: should have gray background and strikethrough text', async () => {
+        const removedCell = new Cell({
+            ...mockCardCell,
+            remove: '1700000099999' // Removed
+        });
+
+        render(<Card cell={removedCell} />);
+        const card = screen.getByTestId('card-container');
+
+        // Spec: 薄いグレー背景 (bg-gray-**?)
+        // Let's assume a class like bg-gray-500/20 or similar for now, 
+        // or we check if it DOES NOT have the gradient style?
+        // Actually, we should probably implement it with a class override.
+        // Let's check for 'bg-gray-800' (dark mode gray) or 'bg-gray-100' (light)?
+        // Since the app seems dark/glassy (white/5), "gray" might mean gray color.
+        // Let's look for 'line-through' on title.
+
+        await waitFor(() => {
+            const title = screen.getByText('Child Title').closest('div');
+            expect(title).toHaveClass('line-through');
+        });
+
+        // For background, we might check if style is NOT applied or if a specific class like 'bg-gray-800/50' is present.
+        // Given existing code uses `style={rarityStyle}`, we might need to override it.
+        // Let's expect 'bg-gray-500/50' as a starting point for "thin gray" in a dark theme or similar.
+        // Or "gray" usually implies `bg-gray-*`.
+        expect(card).toHaveClass('bg-gray-500/20'); // Proposed implementation
+    });
 });

@@ -150,17 +150,32 @@ export const Card: React.FC<CardProps> = ({
     // renderCell 関数は不要になるため削除し、直接マップ内でレンダリングする
 
 
+    // Check if cell is removed
+    const isRemoved = !!cell.remove;
+
+    // Use rarity style only if not removed
+    const containerStyle = isRemoved ? undefined : rarityStyle;
+
     return (
         <div
             data-testid="card-container"
-            style={rarityStyle}
+            style={containerStyle}
             className={`flex flex-col p-[12px] border rounded-3xl shadow-sm transition-all duration-300 relative
-                ${isExpanded ? 'bg-white/10 backdrop-blur-md ring-2 ring-white/20' : 'bg-white/5 hover:bg-white/10 cursor-pointer'}
+                ${isExpanded
+                    ? 'bg-white/10 backdrop-blur-md ring-2 ring-white/20'
+                    : isRemoved
+                        ? 'bg-gray-500/20 cursor-default' // Removed style
+                        : 'bg-white/5 hover:bg-white/10 cursor-pointer'
+                }
             `}
-            onClick={!isExpanded ? handleToggle : undefined}
+            onClick={!isExpanded && !isRemoved ? handleToggle : undefined}
         >
             <div className={`flex items-center w-full mb-2 ${isExpanded ? 'justify-end' : 'justify-between'}`}>
-                {!isExpanded && <div className="font-bold text-lg text-white">{highlightText(displayTitle, highlightKeywords)}</div>}
+                {!isExpanded && (
+                    <div className={`font-bold text-lg text-white ${isRemoved ? 'line-through opacity-70' : ''}`}>
+                        {highlightText(displayTitle, highlightKeywords)}
+                    </div>
+                )}
                 <div className="flex items-center gap-2">
                     {isExpanded && <CardToolbar sortState={sortState} />}
                     {!isExpanded && <div className="text-xs text-gray-400">{formattedDate}</div>}

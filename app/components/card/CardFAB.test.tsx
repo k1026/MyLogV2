@@ -111,4 +111,37 @@ describe('CardFAB', () => {
         expect(onAdd).toHaveBeenCalledWith(CellAttribute.Text);
         expect(screen.queryByTestId('fab-menu-text')).not.toBeInTheDocument();
     });
+
+    // --- Style & Design Spec Tests ---
+
+    it('FAB should have correct dimensions (60x60) and color', () => {
+        render(<CardFAB onAdd={vi.fn()} />);
+        const fab = screen.getByRole('button', { name: /add/i });
+
+        expect(fab).toHaveClass('w-[60px]');
+        expect(fab).toHaveClass('h-[60px]');
+        expect(fab).toHaveClass('rounded-full');
+        expect(fab).toHaveClass('bg-purple-200');
+        expect(fab).toHaveClass('shadow-lg');
+    });
+
+    it('Pie Menu items should have correct dimensions (48x48) and Position', () => {
+        render(<CardFAB onAdd={vi.fn()} />);
+        const fab = screen.getByRole('button', { name: /add/i });
+        fireEvent.mouseDown(fab);
+        act(() => { vi.advanceTimersByTime(15); });
+
+        const taskItem = screen.getByTestId('fab-menu-task');
+        const textItem = screen.getByTestId('fab-menu-text');
+
+        expect(taskItem).toHaveClass('w-12'); // w-12 is 48px
+        expect(taskItem).toHaveClass('h-12');
+        expect(taskItem).toHaveClass('rounded-xl');
+        expect(taskItem).toHaveClass('bottom-16'); // Position spec
+
+        expect(textItem).toHaveClass('w-12');
+        expect(textItem).toHaveClass('h-12');
+        expect(textItem).toHaveClass('rounded-xl');
+        expect(textItem).toHaveClass('right-16'); // Position spec
+    });
 });
