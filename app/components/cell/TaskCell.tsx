@@ -30,9 +30,11 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                 if (results.length > 0) {
                     setShowCandidates(true);
                     // 新規追加時は自動的に1位をセット
-                    if (!name) {
-                        setName(results[0].title);
-                    }
+                    setName(currentName => {
+                        // ユーザーが既に入力済みの場合は上書きしない
+                        if (currentName) return currentName;
+                        return results[0].title;
+                    });
                 }
             });
         }
@@ -79,7 +81,7 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
         <div
             data-testid="task-cell"
             onClick={handleContainerClick}
-            className="flex items-center justify-center gap-3 w-full flex-1 cursor-text p-3"
+            className="flex items-center justify-start gap-3 w-full flex-1 cursor-text p-3"
         >
             <div className="flex items-center">
                 <input
@@ -110,7 +112,7 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                     onBlur={handleBlur}
                     placeholder="To-do Task"
                     className={cn(
-                        "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-center font-bold text-[20px] p-3 rounded-none placeholder:text-slate-400 flex-1 w-full",
+                        "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-left font-bold text-[20px] p-3 rounded-none placeholder:text-slate-400 flex-1 w-full",
                         "focus:border-purple-500",
                         isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"
                     )}

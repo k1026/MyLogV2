@@ -132,25 +132,19 @@ export const Card: React.FC<CardProps> = ({
         learn(updatedCell);
     };
 
-    const renderCell = (c: CellDB) => {
-        const cellModel = new Cell({
+    const cellModels = React.useMemo(() => {
+        return sortState.sortedCells.map(c => new Cell({
             id: c.I,
             attribute: c.A as CellAttribute,
             name: c.N,
             value: c.V,
             geo: c.G,
             remove: c.R
-        });
-        return (
-            <div key={c.I} className="mb-2">
-                <CellContainer
-                    cell={cellModel}
-                    onSave={handleCellSave}
-                    isNew={c.I === lastAddedId}
-                />
-            </div>
-        );
-    };
+        }));
+    }, [sortState.sortedCells]);
+
+    // renderCell 関数は不要になるため削除し、直接マップ内でレンダリングする
+
 
     return (
         <div
@@ -183,7 +177,15 @@ export const Card: React.FC<CardProps> = ({
             {isExpanded && (
                 <div data-testid="card-item-list" className="mt-2 text-sm w-full relative">
                     <div className="flex flex-col gap-2 pb-12">
-                        {sortState.sortedCells.map(renderCell)}
+                        {cellModels.map(cellModel => (
+                            <div key={cellModel.id} className="mb-2">
+                                <CellContainer
+                                    cell={cellModel}
+                                    onSave={handleCellSave}
+                                    isNew={cellModel.id === lastAddedId}
+                                />
+                            </div>
+                        ))}
                     </div>
 
                     <div className="fixed bottom-[76px] right-[16px] z-[100]">

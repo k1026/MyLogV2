@@ -136,7 +136,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
             onClick={handleContainerClick}
             onBlur={handleBlur}
             onFocus={() => setIsFocused(true)}
-            className="flex flex-col gap-3 w-full flex-1 cursor-text min-h-[4rem] justify-center p-3"
+            className="flex flex-col gap-3 w-full flex-1 cursor-text min-h-[4rem] justify-start p-3"
         >
             {showName && (
                 <div className="flex flex-col gap-1">
@@ -159,7 +159,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
                         onKeyDown={handleKeyDown}
                         placeholder={isFocused || !name ? "Title" : ""}
                         className={cn(
-                            "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
+                            "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-left p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
                             "focus:border-purple-500"
                         )}
                     />
@@ -173,7 +173,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
                     placeholder={isFocused || !value ? "Description..." : ""}
                     rows={1}
                     className={cn(
-                        "bg-transparent border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-center p-2 rounded-none text-slate-700 placeholder:text-slate-400 leading-relaxed text-[18px]",
+                        "bg-transparent border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-left p-2 rounded-none text-slate-700 placeholder:text-slate-400 leading-relaxed text-[18px]",
                         "focus:border-purple-500"
                     )}
                 />

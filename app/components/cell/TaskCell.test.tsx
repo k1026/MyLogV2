@@ -127,4 +127,30 @@ describe('TaskCell', () => {
             expect(screen.queryByText('Task Est 1')).not.toBeInTheDocument();
         });
     });
+
+    it('競合状態の防止: 推定処理中にユーザーが入力を開始した場合、推定結果で上書きされないこと', async () => {
+        // estimateが少し遅れるように遅延させる
+        mockEstimate.mockImplementation(async () => {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            return [
+                { title: 'Delayed Est', score: 10, details: {} }
+            ];
+        });
+
+        const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-race' });
+        render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+
+        // まだ推定結果は来ていない（空文字であること）
+        const input = screen.getByPlaceholderText('To-do Task');
+        expect(input).toHaveValue('');
+
+        // ユーザーが入力を開始
+        fireEvent.change(input, { target: { value: 'User Typed' } });
+
+        // 推定完了まで待つ
+        await waitFor(() => new Promise(r => setTimeout(r, 150)));
+
+        // ユーザー入力が維持されていること（Delayed Estで上書きされていないこと）
+        expect(input).toHaveValue('User Typed');
+    });
 });
