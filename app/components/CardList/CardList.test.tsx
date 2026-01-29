@@ -14,6 +14,13 @@ vi.mock('@/app/contexts/LocationContext', () => ({
     }),
 }));
 
+// Mock ResizeObserver for JSDOM
+global.ResizeObserver = class ResizeObserver {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+};
+
 vi.mock('dexie-react-hooks', () => ({
     useLiveQuery: (querier: () => any) => {
         return [];
@@ -103,8 +110,8 @@ describe('CardList Virtual Scroll', () => {
         });
     });
 
-    it('should have correct padding for header and footer', () => {
-        const cards = createDummyCards(5);
+    it('should maintain other cards in DOM when a card is expanded', () => {
+        const cards = createDummyCards(10);
         render(
             <RarityProvider>
                 <UIStateProvider>
@@ -113,8 +120,10 @@ describe('CardList Virtual Scroll', () => {
             </RarityProvider>
         );
 
-        const container = screen.getByTestId('card-list-container');
-        expect(container.className).toContain('pt-[64px]');
-        expect(container.className).toContain('pb-[80px]');
+        const cardContainers = screen.getAllByTestId('card-container');
+        fireEvent.click(cardContainers[0]);
+
+        const wrappers = screen.getAllByTestId('card-item-wrapper');
+        expect(wrappers.length).toBeGreaterThan(1);
     });
 });

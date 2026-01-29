@@ -19,8 +19,10 @@ const WINDOW_SIZE = BUFFER_SIZE * 2 + VISIBLE_COUNT; // 90 items
 
 export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListProps) {
     const containerRef = useRef<HTMLDivElement>(null);
+    const expandedRef = useRef<HTMLDivElement>(null);
     const [scrollTop, setScrollTop] = useState(0);
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+    const [clampRange, setClampRange] = useState<[number, number] | null>(null);
     const lastStartIndexRef = useRef(0);
     const { viewMode } = useUIState();
 
@@ -36,9 +38,22 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
     }, [focusedId]);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const container = e.currentTarget;
+        const newTop = container.scrollTop;
+
+        if (expandedCardId && clampRange) {
+            const [min, max] = clampRange;
+            if (newTop < min) {
+                container.scrollTop = min;
+                return;
+            } else if (newTop > max) {
+                container.scrollTop = max;
+                return;
+            }
+        }
+
         if (expandedCardId) return;
 
-        const newTop = e.currentTarget.scrollTop;
         const newTopIndex = Math.floor(newTop / (ESTIMATED_ITEM_HEIGHT + GAP));
         const newStartItemIndex = Math.max(0, (newTopIndex - BUFFER_SIZE) * cols);
 
@@ -47,6 +62,45 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
             setScrollTop(newTop);
         }
     };
+
+    // Update clamp range when expanded card changes or resizes
+    React.useEffect(() => {
+        if (!expandedCardId || !expandedRef.current || !containerRef.current) {
+            setClampRange(null);
+            return;
+        }
+
+        const updateRange = () => {
+            if (!expandedRef.current || !containerRef.current) return;
+            const container = containerRef.current;
+            const el = expandedRef.current;
+
+            const rect = el.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            const currentScroll = container.scrollTop;
+            const absoluteTop = rect.top - containerRect.top + currentScroll;
+            const absoluteBottom = absoluteTop + rect.height;
+
+            // Clamping range: Align card's top with header bottom (64px) 
+            // and card's bottom with footer top (80px from screen bottom)
+            const minScroll = absoluteTop - 64;
+            const maxScroll = absoluteBottom - containerRect.height + 80;
+
+            // If card is smaller than available viewport, allow minimal movement or lock to top
+            if (maxScroll < minScroll) {
+                setClampRange([minScroll, minScroll]);
+            } else {
+                setClampRange([minScroll, maxScroll]);
+            }
+        };
+
+        const observer = new ResizeObserver(updateRange);
+        observer.observe(expandedRef.current);
+        updateRange();
+
+        return () => observer.disconnect();
+    }, [expandedCardId]);
 
     const handleExpand = (id: string, index: number) => {
         setExpandedCardId(id);
@@ -71,30 +125,17 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
 
     const count = cards.length;
 
-    let visibleCards: Cell[] = [];
-    let paddingTop = 0;
-    let paddingBottom = 0;
-    let startIndex = 0;
+    const rowHeight = ESTIMATED_ITEM_HEIGHT + GAP;
+    const topRowIndex = Math.floor(scrollTop / rowHeight);
+    const startRowIndex = Math.max(0, topRowIndex - BUFFER_SIZE);
+    const startIndex = startRowIndex * cols;
+    const endItemIndex = Math.min(count, startIndex + WINDOW_SIZE);
+    const visibleCards = cards.slice(startIndex, endItemIndex);
 
-    if (expandedCardId) {
-        const targetCard = cards.find(c => c.id === expandedCardId);
-        visibleCards = targetCard ? [targetCard] : [];
-        // Keep some space for scroll buffer
-        paddingTop = 0;
-        paddingBottom = 40; // 40px estimated bottom buffer
-    } else {
-        const rowHeight = ESTIMATED_ITEM_HEIGHT + GAP;
-        const topRowIndex = Math.floor(scrollTop / rowHeight);
-        const startRowIndex = Math.max(0, topRowIndex - BUFFER_SIZE);
-        startIndex = startRowIndex * cols;
-        const endItemIndex = Math.min(count, startIndex + WINDOW_SIZE);
-        visibleCards = cards.slice(startIndex, endItemIndex);
-
-        paddingTop = startRowIndex * rowHeight;
-        const remainingItems = count - endItemIndex;
-        const remainingRows = Math.ceil(remainingItems / cols);
-        paddingBottom = remainingRows * rowHeight;
-    }
+    const paddingTop = startRowIndex * rowHeight;
+    const remainingItems = count - endItemIndex;
+    const remainingRows = Math.ceil(remainingItems / cols);
+    const paddingBottom = remainingRows * rowHeight;
 
     return (
         <div
@@ -106,20 +147,18 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
                 expandedCardId ? "overflow-y-auto" : "overflow-y-auto"
             )}
         >
-            <div style={{ height: expandedCardId ? 0 : paddingTop }} />
+            <div style={{ height: paddingTop }} />
             <div className={cn(
                 "grid gap-4 p-4",
                 cols === 1 ? "grid-cols-1" : "grid-cols-2"
             )}>
                 {visibleCards.map((card, i) => {
                     const isExpanded = card.id === expandedCardId;
-                    const shouldHide = expandedCardId !== null && !isExpanded;
-
-                    if (shouldHide) return null;
 
                     return (
                         <div
                             key={card.id}
+                            ref={isExpanded ? expandedRef : null}
                             data-testid="card-item-wrapper"
                             className={cn(
                                 "transition-all duration-500",
@@ -136,7 +175,7 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
                     );
                 })}
             </div>
-            <div style={{ height: expandedCardId ? 0 : paddingBottom }} />
+            <div style={{ height: paddingBottom }} />
         </div>
     );
 }
