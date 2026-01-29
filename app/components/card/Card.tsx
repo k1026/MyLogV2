@@ -75,60 +75,38 @@ export const Card: React.FC<CardProps> = ({
     const formattedDate = isNaN(timestamp) ? '' : date.toLocaleString();
 
     const [lastAddedId, setLastAddedId] = React.useState<string | null>(null);
-    const hasPushedState = React.useRef(false);
-
     const closeCard = React.useCallback(() => {
         setIsExpanded(false);
         cleanupCardCells(cell);
         setLastAddedId(null);
-        hasPushedState.current = false;
         onCollapse?.();
     }, [cell, onCollapse]);
 
     const handleToggle = React.useCallback(() => {
         if (isExpanded) {
-            if (hasPushedState.current) {
-                window.history.back();
-            } else {
-                closeCard();
-            }
+            closeCard();
         } else {
             setIsExpanded(true);
             onExpand?.();
         }
     }, [isExpanded, closeCard, onExpand]);
 
-    // Escキーと戻るボタンの処理
+    // Escキーの処理 (履歴操作は削除)
     React.useEffect(() => {
         if (!isExpanded) return;
 
-        // Escキー処理
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 handleToggle();
             }
         };
 
-        // 戻るボタン（履歴）処理
-        // すでに履歴が積まれていない場合のみ積む
-        if (!hasPushedState.current) {
-            window.history.pushState({ type: 'card-expand', id: cell.id }, '');
-            hasPushedState.current = true;
-        }
-
-        const handlePopState = (e: PopStateEvent) => {
-            // 履歴から戻った場合はカードを閉じる
-            closeCard();
-        };
-
         window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('popstate', handlePopState);
 
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('popstate', handlePopState);
         };
-    }, [isExpanded, cell.id, handleToggle, closeCard]);
+    }, [isExpanded, handleToggle]);
 
     const handleAddCell = async (attribute: CellAttribute) => {
         const currentIds = sortState.sortedCells.map(c => c.I);

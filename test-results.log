@@ -1,16 +1,13 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/components/card/cardUtils.test.ts (6 tests) 209ms
- ✓ app/lib/db/operations.test.ts (12 tests) 149ms
- ✓ app/contexts/LocationContext.test.tsx (4 tests) 126ms
- ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 147ms
- ✓ app/contexts/UIStateContext.test.tsx (4 tests) 163ms
- ✓ app/components/card/useCardSort.test.ts (5 tests) 117ms
- ✓ app/components/cell/CellContainer.test.tsx (2 tests) 262ms
- ✓ app/hooks/useCardList.test.ts (3 tests) 546ms
- ✓ app/components/card/CardToolbar.test.tsx (4 tests) 209ms
- ✓ app/components/cell/TimeCell.test.tsx (7 tests) 321ms
+ ✓ app/lib/db/operations.test.ts (12 tests) 138ms
+ ✓ app/components/card/cardUtils.test.ts (6 tests) 195ms
+ ✓ app/contexts/LocationContext.test.tsx (4 tests) 113ms
+ ✓ app/contexts/UIStateContext.test.tsx (5 tests) 212ms
+ ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 181ms
+ ✓ app/components/card/useCardSort.test.ts (5 tests) 101ms
+ ✓ app/components/card/CardToolbar.test.tsx (4 tests) 244ms
 stderr | app/components/cell/TextCell.test.tsx > TextCell > Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること
 An update to TextCell inside a test was not wrapped in act(...).
 
@@ -23,6 +20,11 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
+ ✓ app/contexts/RarityContext.test.tsx (3 tests) 213ms
+ ✓ app/components/cell/TimeCell.test.tsx (7 tests) 342ms
+ ✓ app/components/cell/CellContainer.test.tsx (2 tests) 314ms
+ ✓ app/components/cell/TextCell.test.tsx (9 tests) 411ms
+ ✓ app/hooks/useCardList.test.ts (3 tests) 543ms
 stderr | app/components/Header/Header.test.tsx > Header Component > renders card counts correctly
 Received `true` for a non-boolean attribute `jsx`.
 
@@ -31,18 +33,17 @@ Received `true` for a non-boolean attribute `global`.
 
 If you want to write it to the DOM, pass a string instead: global="true" or global={value.toString()}.
 
- ✓ app/contexts/RarityContext.test.tsx (3 tests) 268ms
- ✓ app/components/cell/TextCell.test.tsx (9 tests) 403ms
- ✓ app/components/card/CardFAB.test.tsx (6 tests) 970ms
-     ✓ renders the FAB button  542ms
- ✓ app/components/cell/TaskCell.test.tsx (4 tests) 942ms
-     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  786ms
- ✓ app/components/Header/Header.test.tsx (5 tests) 483ms
-     ✓ renders card counts correctly  328ms
- ✓ app/components/CardList/CardList.test.tsx (3 tests) 720ms
-     ✓ should render only a subset of cards (90 limit)  558ms
- ✓ app/components/card/Card.test.tsx (8 tests) 806ms
-     ✓ renders the card container  314ms
+ ✓ app/components/Header/Header.test.tsx (5 tests) 457ms
+     ✓ renders card counts correctly  309ms
+ ✓ app/components/cell/TaskCell.test.tsx (4 tests) 783ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  672ms
+ ✓ app/components/card/Card.test.tsx (8 tests) 794ms
+ ✓ app/components/CardList/CardList.test.tsx (4 tests) 720ms
+     ✓ should render only a subset of cards (90 limit)  537ms
+ ✓ app/components/card/CardFAB.test.tsx (6 tests) 922ms
+     ✓ renders the FAB button  587ms
+ ✓ app/components/card/CardDisplay.test.tsx (2 tests) 877ms
+     ✓ renders Time and Text cells for a newly created card  843ms
 Not implemented: Window's alert() method
 Not implemented: navigation to another Document
 stderr | app/components/db-viewer/DbViewer.test.tsx > DbViewer > 閉じるボタンをクリックすると onClose が呼ばれること
@@ -79,18 +80,16 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/card/CardDisplay.test.tsx (2 tests) 954ms
-     ✓ renders Time and Text cells for a newly created card  897ms
- ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1575ms
-     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  1039ms
+ ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1461ms
+     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  973ms
  ✓ app/lib/db/fileIO.test.ts (7 tests) 70ms
- ✓ app/lib/services/LocationService.test.ts (4 tests) 6ms
- ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 8ms
+ ✓ app/lib/services/LocationService.test.ts (4 tests) 7ms
  ✓ app/lib/models/cell.test.ts (8 tests) 13ms
+ ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 8ms
  ✓ app/hooks/useAutoVisibility.test.ts (4 tests) 64ms
 
  Test Files  24 passed (24)
-      Tests  125 passed (125)
-   Start at  11:29:18
-   Duration  12.78s (transform 6.27s, setup 15.15s, import 33.63s, tests 9.53s, environment 108.70s)
+      Tests  127 passed (127)
+   Start at  12:31:14
+   Duration  12.41s (transform 6.95s, setup 15.20s, import 34.19s, tests 9.18s, environment 104.41s)
 

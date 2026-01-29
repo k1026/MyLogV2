@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Header } from './Header';
 import { LocationProvider } from '../../contexts/LocationContext';
+import { UIStateProvider } from '../../contexts/UIStateContext';
 import { vi, describe, it, expect } from 'vitest';
 
 // Mock LocationContext since Header might use it
@@ -27,8 +28,16 @@ describe('Header Component', () => {
         isDbLoading: false,
     };
 
+    const renderHeader = (props = defaultProps) => {
+        return render(
+            <UIStateProvider>
+                <Header {...props} />
+            </UIStateProvider>
+        );
+    };
+
     it('renders card counts correctly', () => {
-        render(<Header {...defaultProps} />);
+        renderHeader();
         // improved regex to match flexible spacing/formatting if needed, 
         // but simplest expectation is "Cards: 10 / Total: 100" based on specs
         expect(screen.getByText(/Cards:\s*10/i)).toBeInTheDocument();
@@ -36,26 +45,26 @@ describe('Header Component', () => {
     });
 
     it('renders title', () => {
-        render(<Header {...defaultProps} />);
+        renderHeader();
         expect(screen.getByText('MyLog')).toBeInTheDocument();
     });
 
     it('calls onReset when title is clicked', () => {
-        render(<Header {...defaultProps} />);
+        renderHeader();
         const title = screen.getByText('MyLog');
         fireEvent.click(title);
         expect(defaultProps.onReset).toHaveBeenCalled();
     });
 
     it('calls onRandomPick when random button is clicked', () => {
-        render(<Header {...defaultProps} />);
+        renderHeader();
         const button = screen.getByLabelText('Random Pick');
         fireEvent.click(button);
         expect(defaultProps.onRandomPick).toHaveBeenCalled();
     });
 
     it('calls onDbOpen when db button is clicked', () => {
-        render(<Header {...defaultProps} />);
+        renderHeader();
         const button = screen.getByLabelText('Database Viewer');
         fireEvent.click(button);
         expect(defaultProps.onDbOpen).toHaveBeenCalled();

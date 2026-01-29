@@ -152,28 +152,28 @@ describe('Card Component', () => {
         });
     });
 
-    it('closes the card on popstate (back button)', async () => {
+    it('should NOT close the card on popstate if history management is disabled', async () => {
         render(<Card cell={mockCardCell} />);
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
         expect(screen.getByTestId('card-item-list')).toBeInTheDocument();
 
-        // Simulate popstate
+        // Simulate popstate - it should NOT close the card anymore
         fireEvent(window, new PopStateEvent('popstate'));
 
-        await waitFor(() => {
-            expect(screen.queryByTestId('card-item-list')).not.toBeInTheDocument();
-        });
+        // Wait a bit to ensure it stays open
+        await new Promise(r => setTimeout(r, 100));
+        expect(screen.getByTestId('card-item-list')).toBeInTheDocument();
     });
 
-    it('pushes state to history when expanded', async () => {
+    it('should NOT push state to history when expanded', async () => {
         const pushStateSpy = vi.spyOn(window.history, 'pushState');
         render(<Card cell={mockCardCell} />);
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
-        expect(pushStateSpy).toHaveBeenCalled();
+        expect(pushStateSpy).not.toHaveBeenCalled();
         pushStateSpy.mockRestore();
     });
 

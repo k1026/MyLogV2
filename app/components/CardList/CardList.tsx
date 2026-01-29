@@ -79,8 +79,9 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
     if (expandedCardId) {
         const targetCard = cards.find(c => c.id === expandedCardId);
         visibleCards = targetCard ? [targetCard] : [];
+        // Keep some space for scroll buffer
         paddingTop = 0;
-        paddingBottom = 0;
+        paddingBottom = 40; // 40px estimated bottom buffer
     } else {
         const rowHeight = ESTIMATED_ITEM_HEIGHT + GAP;
         const topRowIndex = Math.floor(scrollTop / rowHeight);
@@ -101,7 +102,7 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
             ref={containerRef}
             onScroll={handleScroll}
             className={cn(
-                "h-full w-full overflow-y-auto relative scroll-smooth",
+                "h-full w-full overflow-y-auto relative scroll-smooth pt-[64px] pb-[80px]",
                 expandedCardId ? "overflow-y-auto" : "overflow-y-auto"
             )}
         >

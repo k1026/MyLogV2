@@ -3,7 +3,7 @@ import { cn } from '../../lib/utils';
 import { HeaderTitle } from './HeaderTitle';
 import { HeaderStatus } from './HeaderStatus';
 import { HeaderActions } from './HeaderActions';
-import { useAutoVisibility } from '../../hooks/useAutoVisibility';
+import { useUIState } from '../../contexts/UIStateContext';
 
 interface HeaderProps {
     cardCount: number;
@@ -24,14 +24,14 @@ export const Header: React.FC<HeaderProps> = ({
     isDbLoading = false,
     isSorting = false,
 }) => {
-    const isVisible = useAutoVisibility(50);
+    const { headerVisible } = useUIState();
 
     return (
         <header
             data-testid="app-header"
             className={cn(
                 "fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out",
-                isVisible ? "translate-y-0" : "-translate-y-full"
+                headerVisible ? "translate-y-0" : "-translate-y-full"
             )}
         >
             <div className="absolute inset-0 bg-white/70 backdrop-blur-md border-b border-slate-200 shadow-sm" />

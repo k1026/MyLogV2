@@ -102,4 +102,19 @@ describe('CardList Virtual Scroll', () => {
             expect(onFocusClear).toHaveBeenCalled();
         });
     });
+
+    it('should have correct padding for header and footer', () => {
+        const cards = createDummyCards(5);
+        render(
+            <RarityProvider>
+                <UIStateProvider>
+                    <CardList cards={cards} />
+                </UIStateProvider>
+            </RarityProvider>
+        );
+
+        const container = screen.getByTestId('card-list-container');
+        expect(container.className).toContain('pt-[64px]');
+        expect(container.className).toContain('pb-[80px]');
+    });
 });

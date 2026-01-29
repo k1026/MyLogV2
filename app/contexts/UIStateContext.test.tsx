@@ -12,7 +12,11 @@ const TestComponent = () => {
         viewMode,
         toggleViewMode,
         filterState,
-        toggleFilterState
+        toggleFilterState,
+        headerVisible,
+        setHeaderVisible,
+        footerVisible,
+        setFooterVisible
     } = useUIState();
 
     return (
@@ -25,6 +29,12 @@ const TestComponent = () => {
 
             <div data-testid="filter-state">{filterState}</div>
             <button data-testid="toggle-filter" onClick={toggleFilterState}>Toggle Filter</button>
+
+            <div data-testid="header-visible">{headerVisible ? 'visible' : 'hidden'}</div>
+            <button data-testid="set-header-hide" onClick={() => setHeaderVisible(false)}>Hide Header</button>
+
+            <div data-testid="footer-visible">{footerVisible ? 'visible' : 'hidden'}</div>
+            <button data-testid="set-footer-hide" onClick={() => setFooterVisible(false)}>Hide Footer</button>
         </div>
     );
 };
@@ -104,5 +114,29 @@ describe('UIStateContext', () => {
             getByTestId('toggle-filter').click();
         });
         expect(getByTestId('filter-state').textContent).toBe('off');
+    });
+
+    it('ヘッダーとフッターの表示状態が更新されること', () => {
+        const { getByTestId } = render(
+            <UIStateProvider>
+                <TestComponent />
+            </UIStateProvider>
+        );
+
+        // Initial: visible
+        expect(getByTestId('header-visible').textContent).toBe('visible');
+        expect(getByTestId('footer-visible').textContent).toBe('visible');
+
+        // Hide header
+        act(() => {
+            getByTestId('set-header-hide').click();
+        });
+        expect(getByTestId('header-visible').textContent).toBe('hidden');
+
+        // Hide footer
+        act(() => {
+            getByTestId('set-footer-hide').click();
+        });
+        expect(getByTestId('footer-visible').textContent).toBe('hidden');
     });
 });

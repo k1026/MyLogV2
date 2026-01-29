@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { useAutoVisibility } from '../../hooks/useAutoVisibility';
 import { useUIState } from '../../contexts/UIStateContext';
 import { SortButton } from './SortButton';
 import { FilterButton } from './FilterButton';
@@ -10,9 +9,8 @@ import { ViewModeButton } from './ViewModeButton';
 import { FilterDialog } from '../Filter/FilterDialog';
 
 export const Footer: React.FC = () => {
-    const isVisible = useAutoVisibility(50);
     const [isFilterOpen, setIsFilterOpen] = React.useState(false);
-    const { filterState, toggleFilterState } = useUIState();
+    const { filterState, toggleFilterState, footerVisible } = useUIState();
 
     const handleFilterClick = () => {
         if (filterState === 'on') {
@@ -28,7 +26,7 @@ export const Footer: React.FC = () => {
                 data-testid="app-footer"
                 className={cn(
                     "fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out",
-                    isVisible ? "translate-y-0" : "translate-y-full"
+                    footerVisible ? "translate-y-0" : "translate-y-full"
                 )}
             >
                 {/* Glassmorphism Background */}
