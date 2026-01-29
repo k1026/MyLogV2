@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Cell } from '@/app/lib/models/cell';
 import { cn } from '@/app/lib/utils';
+import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
+import { EstimationCandidate } from '@/app/lib/services/estimation/types';
 
 interface TextCellProps {
     cell: Cell;
@@ -13,6 +15,26 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
     const [name, setName] = useState(cell.name);
     const [value, setValue] = useState(cell.value);
     const [isFocused, setIsFocused] = useState(false);
+
+    // Estimation Hook
+    const { estimate } = useCellTitleEstimation();
+    const [candidates, setCandidates] = useState<EstimationCandidate[]>([]);
+    const datalistId = `list-${cell.id}`;
+
+    useEffect(() => {
+        if (isFocused && !name) {
+            estimate().then(setCandidates);
+        }
+    }, [isFocused, name, estimate]);
+
+    // ... focus management code ...
+    // Note: Inserting hook calls must be at top level, before returns.
+
+    // ... (Keep existing Effect blocks) ... But I am replacing lines 12-16?
+    // I need to use replace_file carefully.
+
+    // Let's insert hook calls at the beginning of component.
+
 
     const nameRef = useRef<HTMLInputElement>(null);
     const valueRef = useRef<HTMLTextAreaElement>(null);
@@ -67,7 +89,8 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
         if (!containerRef.current?.contains(e.relatedTarget as Node)) {
             setIsFocused(false);
             if (name !== cell.name || value !== cell.value) {
-                onSave?.({ ...cell, name, value });
+                // Fix lint: Create new Cell instance because onSave expects Cell, not POJO
+                onSave?.(new Cell({ ...cell, name, value }));
             }
         }
     };
@@ -98,18 +121,26 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
             className="flex flex-col gap-3 w-full flex-1 cursor-text min-h-[4rem] justify-center p-3"
         >
             {showName && (
-                <input
-                    ref={nameRef}
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={isFocused || !name ? "Title" : ""}
-                    className={cn(
-                        "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
-                        "focus:border-purple-500"
-                    )}
-                />
+                <>
+                    <input
+                        ref={nameRef}
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder={isFocused || !name ? "Title" : ""}
+                        list={datalistId}
+                        className={cn(
+                            "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
+                            "focus:border-purple-500"
+                        )}
+                    />
+                    <datalist id={datalistId}>
+                        {candidates.map(candidate => (
+                            <option key={candidate.title} value={candidate.title} />
+                        ))}
+                    </datalist>
+                </>
             )}
             {showValue && (
                 <textarea

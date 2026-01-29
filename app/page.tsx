@@ -12,6 +12,7 @@ import { CardList } from './components/CardList/CardList';
 import { CardAddButton } from './components/CardList/CardAddButton';
 import { Footer } from './components/Footer/Footer';
 import { useUIState } from './contexts/UIStateContext';
+import { useCellTitleEstimation } from './lib/hooks/useCellTitleEstimation';
 
 export default function Home() {
     const { sortOrder } = useUIState();
@@ -22,9 +23,12 @@ export default function Home() {
     const [isDbViewerOpen, setIsDbViewerOpen] = useState(false);
     const [focusedCardId, setFocusedCardId] = useState<string | null>(null);
 
+    const { init: initEstimation } = useCellTitleEstimation();
+
     useEffect(() => {
         setMounted(true);
-    }, []);
+        initEstimation();
+    }, [initEstimation]);
 
     const handleReset = () => {
         setFocusedCardId(null);

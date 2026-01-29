@@ -152,6 +152,17 @@ export const CellRepository = {
 
     async getCardCount(): Promise<number> {
         return await db.cells.filter(doc => doc.A === 'Card').count();
+    },
+
+    async getRecentCells(limit: number, excludeAttributes: CellAttribute[]): Promise<Cell[]> {
+        const excludeSet = new Set(excludeAttributes);
+        const docs = await db.cells
+            .orderBy('I')
+            .reverse()
+            .filter(doc => !excludeSet.has(doc.A as CellAttribute))
+            .limit(limit)
+            .toArray();
+        return docs.map(doc => this.mapFromDB(doc));
     }
 };
 

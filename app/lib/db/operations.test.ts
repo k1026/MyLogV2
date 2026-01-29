@@ -207,4 +207,36 @@ describe('CellRepository', () => {
             expect(processedIds.sort()).toEqual(cells.map(c => c.id).sort());
         });
     });
+
+    describe('Context Retrieval', () => {
+        it('should get recent cells excluding specified attributes', async () => {
+            // Create cells with timestamps embedded in IDs (since ID sort is time sort)
+            // 1: Older, Text
+            // 2: Older, Card (Exclude)
+            // 3: Newer, Time (Exclude)
+            // 4: Newest, Text (Include)
+            // 5: Newest+, Text (Include)
+
+            // IDs: 
+            // cell-005 (Text) -> Should be 1st
+            // cell-004 (Text) -> Should be 2nd
+            // cell-003 (Time) -> Exclude
+            // cell-002 (Card) -> Exclude
+            // cell-001 (Text) -> Should be 3rd
+
+            await CellRepository.save(new Cell({ ...mockCell1, id: 'cell-001', attribute: CellAttribute.Text }));
+            await CellRepository.save(new Cell({ ...mockCell1, id: 'cell-002', attribute: CellAttribute.Card }));
+            await CellRepository.save(new Cell({ ...mockCell1, id: 'cell-003', attribute: CellAttribute.Time }));
+            await CellRepository.save(new Cell({ ...mockCell1, id: 'cell-004', attribute: CellAttribute.Text }));
+            await CellRepository.save(new Cell({ ...mockCell1, id: 'cell-005', attribute: CellAttribute.Text }));
+
+            // Get 3 recent cells, exclude Card and Time
+            const results = await CellRepository.getRecentCells(3, [CellAttribute.Card, CellAttribute.Time]);
+
+            expect(results).toHaveLength(3);
+            expect(results[0].id).toBe('cell-005');
+            expect(results[1].id).toBe('cell-004');
+            expect(results[2].id).toBe('cell-001'); // Skipped 003 and 002
+        });
+    });
 });

@@ -9,6 +9,7 @@ import { CardFAB } from './CardFAB';
 import { getRarityStyle } from '@/app/lib/rarity/RarityColor';
 import { CellContainer } from '../cell/CellContainer';
 import { cleanupCardCells, addCellToCard } from './cardUtils';
+import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
 
 interface CardProps {
     cell: Cell;
@@ -114,6 +115,8 @@ export const Card: React.FC<CardProps> = ({
         setLastAddedId(newCell.id);
     };
 
+    const { learn } = useCellTitleEstimation();
+
     const handleCellSave = async (updatedCell: Cell) => {
         const cellDB: CellDB = {
             I: updatedCell.id,
@@ -125,6 +128,8 @@ export const Card: React.FC<CardProps> = ({
         };
         await db.cells.put(cellDB);
         if (onUpdate) onUpdate(updatedCell);
+
+        learn(updatedCell);
     };
 
     const renderCell = (c: CellDB) => {
