@@ -19,8 +19,6 @@ interface CardProps {
     externalExpanded?: boolean;
 }
 
-import { useLocation } from '@/app/contexts/LocationContext';
-
 export const Card: React.FC<CardProps> = ({
     cell,
     onUpdate,
@@ -30,7 +28,6 @@ export const Card: React.FC<CardProps> = ({
     externalExpanded // New prop
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
-    const { geoString } = useLocation();
 
     // Sync with external control if provided
     React.useEffect(() => {
@@ -135,7 +132,7 @@ export const Card: React.FC<CardProps> = ({
 
     const handleAddCell = async (attribute: CellAttribute) => {
         const currentIds = sortState.sortedCells.map(c => c.I);
-        const newCell = await addCellToCard(cell.id, attribute, currentIds, geoString);
+        const newCell = await addCellToCard(cell.id, attribute, currentIds);
         setLastAddedId(newCell.id);
     };
 

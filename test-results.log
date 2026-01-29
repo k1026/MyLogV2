@@ -1,13 +1,13 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/components/card/cardUtils.test.ts (7 tests) 221ms
- ✓ app/lib/db/operations.test.ts (12 tests) 153ms
- ✓ app/contexts/LocationContext.test.tsx (4 tests) 142ms
- ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 146ms
- ✓ app/contexts/UIStateContext.test.tsx (4 tests) 193ms
- ✓ app/components/card/CardToolbar.test.tsx (4 tests) 266ms
- ✓ app/components/card/useCardSort.test.ts (5 tests) 114ms
+ ✓ app/components/card/cardUtils.test.ts (6 tests) 200ms
+ ✓ app/lib/db/operations.test.ts (12 tests) 154ms
+ ✓ app/contexts/UIStateContext.test.tsx (4 tests) 190ms
+ ✓ app/contexts/LocationContext.test.tsx (4 tests) 118ms
+ ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 141ms
+ ✓ app/components/card/useCardSort.test.ts (5 tests) 100ms
+ ✓ app/components/card/CardToolbar.test.tsx (4 tests) 208ms
 stderr | app/components/cell/TextCell.test.tsx > TextCell > Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること
 An update to TextCell inside a test was not wrapped in act(...).
 
@@ -20,11 +20,11 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/cell/TextCell.test.tsx (9 tests) 335ms
- ✓ app/contexts/RarityContext.test.tsx (3 tests) 217ms
- ✓ app/hooks/useCardList.test.ts (3 tests) 425ms
- ✓ app/components/cell/CellContainer.test.tsx (2 tests) 291ms
- ✓ app/components/cell/TimeCell.test.tsx (7 tests) 377ms
+ ✓ app/components/cell/TimeCell.test.tsx (7 tests) 378ms
+ ✓ app/contexts/RarityContext.test.tsx (3 tests) 191ms
+ ✓ app/components/cell/CellContainer.test.tsx (2 tests) 331ms
+ ✓ app/components/cell/TextCell.test.tsx (9 tests) 431ms
+ ✓ app/hooks/useCardList.test.ts (3 tests) 571ms
 stderr | app/components/Header/Header.test.tsx > Header Component > renders card counts correctly
 Received `true` for a non-boolean attribute `jsx`.
 
@@ -33,15 +33,16 @@ Received `true` for a non-boolean attribute `global`.
 
 If you want to write it to the DOM, pass a string instead: global="true" or global={value.toString()}.
 
- ✓ app/components/Header/Header.test.tsx (5 tests) 414ms
- ✓ app/components/cell/TaskCell.test.tsx (4 tests) 794ms
-     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  655ms
- ✓ app/components/CardList/CardList.test.tsx (1 test) 553ms
-     ✓ should render only a subset of cards (90 limit)  547ms
- ✓ app/components/card/CardFAB.test.tsx (6 tests) 897ms
-     ✓ renders the FAB button  618ms
- ✓ app/components/card/Card.test.tsx (8 tests) 759ms
-     ✓ renders the card container  312ms
+ ✓ app/components/Header/Header.test.tsx (5 tests) 382ms
+ ✓ app/components/cell/TaskCell.test.tsx (4 tests) 736ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  615ms
+ ✓ app/components/card/CardFAB.test.tsx (6 tests) 969ms
+     ✓ renders the FAB button  650ms
+ ✓ app/components/CardList/CardList.test.tsx (1 test) 567ms
+     ✓ should render only a subset of cards (90 limit)  561ms
+ ✓ app/components/card/Card.test.tsx (8 tests) 729ms
+ ✓ app/components/card/CardDisplay.test.tsx (2 tests) 870ms
+     ✓ renders Time and Text cells for a newly created card  814ms
 Not implemented: Window's alert() method
 Not implemented: navigation to another Document
 stderr | app/components/db-viewer/DbViewer.test.tsx > DbViewer > 閉じるボタンをクリックすると onClose が呼ばれること
@@ -78,17 +79,16 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1448ms
-     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  1001ms
- ✓ app/components/card/CardDisplay.test.tsx (2 tests) 777ms
-     ✓ renders Time and Text cells for a newly created card  745ms
- ✓ app/lib/db/fileIO.test.ts (7 tests) 66ms
- ✓ app/lib/models/cell.test.ts (6 tests) 12ms
- ✓ app/hooks/useAutoVisibility.test.ts (4 tests) 62ms
+ ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1497ms
+     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  1024ms
+ ✓ app/lib/db/fileIO.test.ts (7 tests) 82ms
+ ✓ app/lib/services/LocationService.test.ts (4 tests) 7ms
+ ✓ app/hooks/useAutoVisibility.test.ts (4 tests) 73ms
+ ✓ app/lib/models/cell.test.ts (8 tests) 12ms
  ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 8ms
 
- Test Files  23 passed (23)
-      Tests  118 passed (118)
-   Start at  10:28:17
-   Duration  12.14s (transform 6.25s, setup 15.19s, import 35.09s, tests 8.67s, environment 102.95s)
+ Test Files  24 passed (24)
+      Tests  123 passed (123)
+   Start at  11:19:27
+   Duration  13.33s (transform 6.72s, setup 18.50s, import 38.46s, tests 8.94s, environment 113.70s)
 

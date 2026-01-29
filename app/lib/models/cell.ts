@@ -1,5 +1,6 @@
 
 import { z } from 'zod';
+import { LocationService } from '../services/LocationService';
 
 // Cellの属性定義
 export enum CellAttribute {
@@ -30,12 +31,16 @@ export class Cell {
     geo: string | null;
     remove: string | null;
 
-    constructor(data: z.infer<typeof CellSchema>) {
+    constructor(data: Omit<z.infer<typeof CellSchema>, 'geo'> & { geo?: string | null }) {
         this.id = data.id;
         this.attribute = data.attribute;
         this.name = data.name;
         this.value = data.value;
-        this.geo = data.geo;
+        // Spec 14: Auto-fill geo if not provided (undefined)
+        // If explicitly null (e.g. from DB), keep it null
+        this.geo = data.geo === undefined
+            ? LocationService.getInstance().getCurrentGeoString()
+            : data.geo;
         this.remove = data.remove;
     }
 

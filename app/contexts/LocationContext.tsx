@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { LocationService } from '../lib/services/LocationService';
 
 export type LocationStatus = 'idle' | 'loading' | 'active' | 'error' | 'disabled';
 
@@ -41,6 +42,13 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             });
             setStatus('active');
             setError(null);
+
+            // Update Singleton Service for non-React access
+            LocationService.getInstance().updateLocation(
+                position.coords.latitude,
+                position.coords.longitude,
+                position.coords.altitude
+            );
         };
 
         const errorCallback = (err: GeolocationPositionError) => {

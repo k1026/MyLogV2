@@ -9,7 +9,6 @@ import { DbViewer } from './components/db-viewer/DbViewer';
 import { useCardList } from './hooks/useCardList';
 import { Header } from './components/Header/Header';
 import { CardList } from './components/CardList/CardList';
-import { useLocation } from './contexts/LocationContext';
 import { CardAddButton } from './components/CardList/CardAddButton';
 import { Footer } from './components/Footer/Footer';
 import { useUIState } from './contexts/UIStateContext';
@@ -19,7 +18,6 @@ export default function Home() {
     const useCardListResult = useCardList(sortOrder);
     const { cards, isLoading, isSorting, totalCount } = useCardListResult;
     const { isCalculating } = useRarity();
-    const { geoString } = useLocation();
     const [mounted, setMounted] = useState(false);
     const [isDbViewerOpen, setIsDbViewerOpen] = useState(false);
     const [focusedCardId, setFocusedCardId] = useState<string | null>(null);
@@ -42,7 +40,7 @@ export default function Home() {
 
     const handleNewCard = async () => {
         try {
-            const newCard = await createCard(geoString);
+            const newCard = await createCard();
             // Add card to UI immediately
             useCardListResult.addCard(newCard);
             // Set focus to the new card immediately

@@ -177,7 +177,7 @@ describe('Card Component', () => {
         pushStateSpy.mockRestore();
     });
 
-    it('passes geo information when adding a new cell via FAB', async () => {
+    it('calls addCellToCard when adding a new cell via FAB', async () => {
         render(<Card cell={mockCardCell} />);
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
@@ -191,8 +191,7 @@ describe('Card Component', () => {
             expect(addCellToCard).toHaveBeenCalledWith(
                 expect.any(String), // cardId
                 CellAttribute.Text, // attribute
-                expect.any(Array),  // currentIds
-                '35.123 139.456 10' // geoString from mock
+                expect.any(Array)   // currentIds
             );
         });
     });

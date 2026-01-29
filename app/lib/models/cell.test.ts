@@ -1,6 +1,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { Cell, CellSchema, CellAttribute, createCellId } from './cell';
+import { LocationService } from '../services/LocationService';
 
 describe('Cell Model', () => {
     describe('createCellId', () => {
@@ -24,6 +25,39 @@ describe('Cell Model', () => {
             expect(cell).toBeInstanceOf(Cell);
             expect(cell.id).toBe(data.id);
             expect(cell.attribute).toBe(CellAttribute.Card);
+        });
+
+        it('should automatically set geo from LocationService if not provided', () => {
+            // Setup mock location
+            LocationService.getInstance().updateLocation(35.1, 139.1, 10);
+
+            const data = {
+                id: '1700000000000-AUTO1',
+                attribute: CellAttribute.Card,
+                name: 'Auto Geo Card',
+                value: '',
+                // geo is undefined
+                remove: null,
+            };
+            const cell = new Cell(data);
+
+            expect(cell.geo).toBe('35.1 139.1 10');
+        });
+
+        it('should respect provided geo even if LocationService has value', () => {
+            LocationService.getInstance().updateLocation(35.1, 139.1, 10);
+
+            const data = {
+                id: '1700000000000-FIXED',
+                attribute: CellAttribute.Card,
+                name: 'Fixed Geo Card',
+                value: '',
+                geo: '0 0 0', // Explicitly provided
+                remove: null,
+            };
+            const cell = new Cell(data);
+
+            expect(cell.geo).toBe('0 0 0');
         });
 
         it('should support addCellId for Card attribute', () => {
