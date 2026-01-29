@@ -14,12 +14,6 @@ vi.mock('@/app/contexts/LocationContext', () => ({
     }),
 }));
 
-// Mock ResizeObserver for JSDOM
-global.ResizeObserver = class ResizeObserver {
-    observe = vi.fn();
-    unobserve = vi.fn();
-    disconnect = vi.fn();
-};
 
 vi.mock('dexie-react-hooks', () => ({
     useLiveQuery: (querier: () => any) => {
@@ -68,9 +62,6 @@ describe('CardList Virtual Scroll', () => {
         const cards = createDummyCards(5);
         const onFocus = vi.fn();
 
-        // Mock scrollTo
-        const scrollToSpy = vi.fn();
-        HTMLDivElement.prototype.scrollTo = scrollToSpy;
 
         render(
             <RarityProvider>

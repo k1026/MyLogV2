@@ -21,6 +21,7 @@ describe('DbViewer', () => {
     beforeEach(() => {
         // 各テストの前にモックをリセットし、デフォルトの戻り値を設定
         vi.clearAllMocks();
+
         // 型安全なモック呼び出し
         (CellRepository.getCount as ReturnType<typeof vi.fn>).mockResolvedValue(0);
         (CellRepository.getRange as ReturnType<typeof vi.fn>).mockResolvedValue([]);
@@ -99,7 +100,7 @@ describe('DbViewer', () => {
 
     it('DeleteDBボタンをクリックすると確認後に CellRepository.clearAll が呼ばれること', async () => {
         (CellRepository.getCount as any).mockResolvedValue(10);
-        window.confirm = vi.fn().mockReturnValue(true);
+        // window.confirm は beforeEach で mock 済み
 
         await act(async () => {
             render(<DbViewer isOpen={true} onClose={mockOnClose} />);
@@ -116,9 +117,7 @@ describe('DbViewer', () => {
 
     it('Exportボタンをクリックすると CellRepository.exportAsJSONL が呼ばれ、ダウンロードが行われること', async () => {
         (CellRepository.exportAsJSONL as any).mockResolvedValue('{"I":"1"}');
-        // URL.createObjectURL と revorkeObjectURL をモック
-        window.URL.createObjectURL = vi.fn().mockReturnValue('blob:url');
-        window.URL.revokeObjectURL = vi.fn();
+        (CellRepository.getCount as any).mockResolvedValue(1);
 
         await act(async () => {
             render(<DbViewer isOpen={true} onClose={mockOnClose} />);
@@ -131,10 +130,15 @@ describe('DbViewer', () => {
 
         expect(CellRepository.exportAsJSONL).toHaveBeenCalled();
         expect(window.URL.createObjectURL).toHaveBeenCalled();
+        // a.click() は test/setup.ts でモック済み
+        // 通知の検証
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('エクスポート完了'));
     });
 
-    it('閉じるボタンをクリックすると onClose が呼ばれること', () => {
-        render(<DbViewer isOpen={true} onClose={mockOnClose} />);
+    it('閉じるボタンをクリックすると onClose が呼ばれること', async () => {
+        await act(async () => {
+            render(<DbViewer isOpen={true} onClose={mockOnClose} />);
+        });
         const closeButton = screen.getByLabelText('閉じる');
 
         fireEvent.click(closeButton);

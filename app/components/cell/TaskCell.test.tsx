@@ -86,33 +86,38 @@ describe('TaskCell', () => {
 
     it('過剰なフォーカス奪取の防止: isNew=trueでも、一度フォーカスが外れたら再取得しないこと', () => {
         vi.useFakeTimers();
-        const cell = new Cell({ ...baseCell, name: 'New Task', value: 'false', id: 'new-task-1' });
+        try {
+            const cell = new Cell({ ...baseCell, name: 'New Task', value: 'false', id: 'new-task-1' });
 
-        // 初回レンダリング (isNew=true)
-        const { rerender } = render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+            // 初回レンダリング (isNew=true)
+            const { rerender } = render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
 
-        // useEffect内のsetTimeoutを処理
-        act(() => {
-            vi.runAllTimers();
-        });
+            // useEffect内のsetTimeoutを処理
+            act(() => {
+                vi.runAllTimers();
+            });
 
-        const nameInput = screen.getByDisplayValue('New Task');
-        expect(nameInput).toHaveFocus();
+            const nameInput = screen.getByDisplayValue('New Task');
+            expect(nameInput).toHaveFocus();
 
-        // ユーザーが脱出
-        fireEvent.blur(nameInput);
-        expect(nameInput).not.toHaveFocus();
+            // ユーザーが脱出 (actを使って確実にDOM更新を反映)
+            act(() => {
+                nameInput.blur();
+            });
+            expect(nameInput).not.toHaveFocus();
 
-        // 再レンダリング (isNew=true のまま)
-        rerender(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+            // 再レンダリング (isNew=true のまま)
+            rerender(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
 
-        act(() => {
-            vi.runAllTimers();
-        });
+            act(() => {
+                vi.runAllTimers();
+            });
 
-        // フォーカスが戻らないこと
-        expect(nameInput).not.toHaveFocus();
-        vi.useRealTimers();
+            // フォーカスが戻らないこと
+            expect(nameInput).not.toHaveFocus();
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     describe('推定機能 (Estimation)', () => {
@@ -160,28 +165,35 @@ describe('TaskCell', () => {
     });
 
     it('競合状態の防止: 推定処理中にユーザーが入力を開始した場合、推定結果で上書きされないこと', async () => {
-        // estimateが少し遅れるように遅延させる
-        mockEstimate.mockImplementation(async () => {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            return [
-                { title: 'Delayed Est', score: 10, details: {} }
-            ];
-        });
+        vi.useFakeTimers();
+        try {
+            // estimateが少し遅れるように遅延させる
+            mockEstimate.mockImplementation(async () => {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                return [
+                    { title: 'Delayed Est', score: 10, details: {} }
+                ];
+            });
 
-        const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-race' });
-        render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+            const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-race' });
+            render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
 
-        // まだ推定結果は来ていない（空文字であること）
-        const input = screen.getByPlaceholderText('To-do Task');
-        expect(input).toHaveValue('');
+            // まだ推定結果は来ていない（空文字であること）
+            const input = screen.getByPlaceholderText('To-do Task');
+            expect(input).toHaveValue('');
 
-        // ユーザーが入力を開始
-        fireEvent.change(input, { target: { value: 'User Typed' } });
+            // ユーザーが入力を開始
+            fireEvent.change(input, { target: { value: 'User Typed' } });
 
-        // 推定完了まで待つ
-        await waitFor(() => new Promise(r => setTimeout(r, 150)));
+            // タイマーを進めて推定処理を完了させる
+            await act(async () => {
+                vi.advanceTimersByTime(150);
+            });
 
-        // ユーザー入力が維持されていること（Delayed Estで上書きされていないこと）
-        expect(input).toHaveValue('User Typed');
+            // ユーザー入力が維持されていること（Delayed Estで上書きされていないこと）
+            expect(input).toHaveValue('User Typed');
+        } finally {
+            vi.useRealTimers();
+        }
     });
 });

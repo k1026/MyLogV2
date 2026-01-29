@@ -58,13 +58,15 @@ describe('TextCell', () => {
         expect(mockSave).toHaveBeenCalledWith(expect.objectContaining({ value: 'Updated Value' }));
     });
 
-    it('Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること', () => {
+    it('Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること', async () => {
         render(<TextCell cell={baseCell} onSave={mockSave} />);
         const nameInput = screen.getByDisplayValue('Initial Name');
         const valueInput = screen.getByDisplayValue('Initial Value');
 
         // focus name
-        nameInput.focus();
+        act(() => {
+            nameInput.focus();
+        });
         expect(nameInput).toHaveFocus();
 
         // press Enter
@@ -72,7 +74,9 @@ describe('TextCell', () => {
             fireEvent.keyDown(nameInput, { key: 'Enter', code: 'Enter' });
         });
 
-        expect(valueInput).toHaveFocus();
+        await waitFor(() => {
+            expect(valueInput).toHaveFocus();
+        });
     });
 
     describe('フォーカス制御 (仕様 4.2.2)', () => {
@@ -84,58 +88,73 @@ describe('TextCell', () => {
             vi.useRealTimers();
         });
 
-        it('初期フォーカス: 両方空の場合は name にフォーカス', () => {
+        it('初期フォーカス: 両方空の場合は name にフォーカス', async () => {
             const cell = new Cell({ ...baseCell, name: '', value: '' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             // TextCellのコンテナをクリックしてフォーカス制御を発動させる
             fireEvent.click(screen.getByTestId('text-cell'));
 
-            vi.runAllTimers();
+            act(() => {
+                vi.runAllTimers();
+            });
+            await act(async () => { await Promise.resolve(); });
 
             const nameInput = screen.getByPlaceholderText('Title');
             expect(nameInput).toHaveFocus();
         });
 
-        it('初期フォーカス: nameのみある場合は value にフォーカス', () => {
+        it('初期フォーカス: nameのみある場合は value にフォーカス', async () => {
             const cell = new Cell({ ...baseCell, name: 'Title Only', value: '' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             fireEvent.click(screen.getByTestId('text-cell'));
-            vi.runAllTimers();
+            act(() => {
+                vi.runAllTimers();
+            });
+            await act(async () => { await Promise.resolve(); });
 
             const valueInput = screen.getByPlaceholderText('Description...');
             expect(valueInput).toHaveFocus();
         });
 
-        it('初期フォーカス: valueのみある場合は name にフォーカス', () => {
+        it('初期フォーカス: valueのみある場合は name にフォーカス', async () => {
             const cell = new Cell({ ...baseCell, name: '', value: 'Content Only' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             fireEvent.click(screen.getByTestId('text-cell'));
-            vi.runAllTimers();
+            act(() => {
+                vi.runAllTimers();
+            });
+            await act(async () => { await Promise.resolve(); });
 
             const nameInput = screen.getByPlaceholderText('Title');
             expect(nameInput).toHaveFocus();
         });
 
-        it('初期フォーカス: 両方ある場合は value にフォーカス', () => {
+        it('初期フォーカス: 両方ある場合は value にフォーカス', async () => {
             const cell = new Cell({ ...baseCell, name: 'Title', value: 'Content' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             fireEvent.click(screen.getByTestId('text-cell'));
-            vi.runAllTimers();
+            act(() => {
+                vi.runAllTimers();
+            });
+            await act(async () => { await Promise.resolve(); });
 
             const valueInput = screen.getByPlaceholderText('Description...');
             expect(valueInput).toHaveFocus();
         });
 
-        it('過剰なフォーカス奪取の防止: isNew=trueでも、一度フォーカスが外れたら再取得しないこと', () => {
+        it('過剰なフォーカス奪取の防止: isNew=trueでも、一度フォーカスが外れたら再取得しないこと', async () => {
             const cell = new Cell({ ...baseCell, name: '', value: '', id: 'new-cell-1' });
             // 初回レンダリング (isNew=true)
             const { rerender } = render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
 
-            vi.runAllTimers();
+            act(() => {
+                vi.runAllTimers();
+            });
+            await act(async () => { await Promise.resolve(); });
             const nameInput = screen.getByPlaceholderText('Title');
             expect(nameInput).toHaveFocus();
 
@@ -147,7 +166,10 @@ describe('TextCell', () => {
 
             // 何らかの理由で再レンダリングが発生 (propsは変わらず isNew=true のまま)
             rerender(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
-            vi.runAllTimers();
+            act(() => {
+                vi.runAllTimers();
+            });
+            await act(async () => { await Promise.resolve(); });
 
             // それでもフォーカスは戻らないこと
             expect(nameInput).not.toHaveFocus();

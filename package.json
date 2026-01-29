@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:ai": "set NO_COLOR=1 && vitest run > test-results.log 2>&1"
+    "test:full-log": "set NO_COLOR=1 && vitest run > test_full.log 2>&1",
+    "test:error-log": "set NO_COLOR=1 && vitest run --reporter=dot --silent > test_error.log 2>&1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

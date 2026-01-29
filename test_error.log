@@ -1,0 +1,10 @@
+
+ RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
+
+·························································································································································
+
+ Test Files  27 passed (27)
+      Tests  153 passed (153)
+   Start at  23:22:40
+   Duration  13.00s (transform 6.85s, setup 17.43s, import 37.17s, tests 10.60s, environment 112.89s)
+

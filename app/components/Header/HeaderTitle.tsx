@@ -37,7 +37,7 @@ export const HeaderTitle: React.FC<HeaderTitleProps> = ({
                 <div
                     className={cn(
                         "absolute inset-0 text-xl font-black text-purple-600 font-sans tracking-tight overflow-hidden transition-all duration-300",
-                        isDbLoading ? "animate-[clip-loading_2s_ease-in-out_infinite]" : "h-0"
+                        isDbLoading ? "animate-clip-loading" : "h-0"
                     )}
                     style={{ clipPath: 'inset(0 0 0 0)' }} // This would be dynamic with %
                 >
@@ -49,13 +49,7 @@ export const HeaderTitle: React.FC<HeaderTitleProps> = ({
                 {version}
             </span>
 
-            <style jsx global>{`
-                @keyframes clip-loading {
-                    0% { clip-path: inset(100% 0 0 0); }
-                    50% { clip-path: inset(0 0 0 0); }
-                    100% { clip-path: inset(0 0 0 0); opacity: 0; }
-                }
-            `}</style>
+
         </div>
     );
 };
