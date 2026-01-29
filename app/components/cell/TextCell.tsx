@@ -72,11 +72,14 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
     }, [value, isFocused]);
 
 
-    // フォーカス管理 (仕様 4.2.2)
+    // フォーカス管理 (仕様 4.2.2 & 修正計画)
+    const hasAutoFocusedRef = useRef(false);
+
     useEffect(() => {
-        if (isNew) {
+        // 新規作成時の自動フォーカス (初回のみ)
+        if (isNew && !hasAutoFocusedRef.current) {
+            hasAutoFocusedRef.current = true;
             setIsFocused(true);
-            // We need a short timeout to ensure the element is rendered and can be selected
             setTimeout(() => {
                 nameRef.current?.focus();
                 nameRef.current?.select();
@@ -99,7 +102,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
                 valueRef.current?.focus();
             }
         }
-    }, [isFocused, isNew]);
+    }, [isFocused, isNew, name, value]); // name, value を依存配列に追加して入力時の挙動も安定させる
 
     const handleBlur = (e: React.FocusEvent) => {
         // コンテナ外にフォーカスが移ったかチェック (relatedTarget is the new focused element)

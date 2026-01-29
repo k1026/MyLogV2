@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskCell } from './TaskCell';
 import { CellAttribute, Cell } from '@/app/lib/models/cell';
@@ -82,6 +82,37 @@ describe('TaskCell', () => {
         // JSDOMでは select() 呼び出しで selectionStart/End が更新される
         expect(nameInput.selectionStart).toBe(0);
         expect(nameInput.selectionEnd).toBe(nameInput.value.length);
+    });
+
+    it('過剰なフォーカス奪取の防止: isNew=trueでも、一度フォーカスが外れたら再取得しないこと', () => {
+        vi.useFakeTimers();
+        const cell = new Cell({ ...baseCell, name: 'New Task', value: 'false', id: 'new-task-1' });
+
+        // 初回レンダリング (isNew=true)
+        const { rerender } = render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+
+        // useEffect内のsetTimeoutを処理
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        const nameInput = screen.getByDisplayValue('New Task');
+        expect(nameInput).toHaveFocus();
+
+        // ユーザーが脱出
+        fireEvent.blur(nameInput);
+        expect(nameInput).not.toHaveFocus();
+
+        // 再レンダリング (isNew=true のまま)
+        rerender(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // フォーカスが戻らないこと
+        expect(nameInput).not.toHaveFocus();
+        vi.useRealTimers();
     });
 
     describe('推定機能 (Estimation)', () => {

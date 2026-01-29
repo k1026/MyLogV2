@@ -188,7 +188,10 @@ export const Card: React.FC<CardProps> = ({
                         ))}
                     </div>
 
-                    <div className="fixed bottom-[76px] right-[16px] z-[100]">
+                    <div
+                        data-testid="card-fab-container"
+                        className="absolute bottom-[16px] right-[16px] z-[100]"
+                    >
                         <CardFAB onAdd={handleAddCell} />
                     </div>
                 </div>

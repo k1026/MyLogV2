@@ -195,4 +195,16 @@ describe('Card Component', () => {
             );
         });
     });
+
+    it('CardFAB rendering position: should be absolute, not fixed', () => {
+        render(<Card cell={mockCardCell} />);
+        const cardContainer = screen.getByTestId('card-container');
+        fireEvent.click(cardContainer); // Expand
+
+        const fabContainer = screen.getByTestId('card-fab-container');
+
+        // 修正前は 'fixed' があるはずだが、修正後は 'absolute' になるべき
+        expect(fabContainer).toHaveClass('absolute');
+        expect(fabContainer).not.toHaveClass('fixed');
+    });
 });

@@ -46,8 +46,11 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
         nameRef.current?.focus();
     };
 
+    const hasAutoFocusedRef = useRef(false);
+
     useEffect(() => {
-        if (isNew) {
+        if (isNew && !hasAutoFocusedRef.current) {
+            hasAutoFocusedRef.current = true;
             setTimeout(() => {
                 nameRef.current?.focus();
                 nameRef.current?.select();

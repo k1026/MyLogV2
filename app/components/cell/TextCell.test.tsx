@@ -89,7 +89,6 @@ describe('TextCell', () => {
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             // TextCellのコンテナをクリックしてフォーカス制御を発動させる
-            // Note: 現状の実装は onClick で trigger している
             fireEvent.click(screen.getByTestId('text-cell'));
 
             vi.runAllTimers();
@@ -129,6 +128,29 @@ describe('TextCell', () => {
 
             const valueInput = screen.getByPlaceholderText('Description...');
             expect(valueInput).toHaveFocus();
+        });
+
+        it('過剰なフォーカス奪取の防止: isNew=trueでも、一度フォーカスが外れたら再取得しないこと', () => {
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: 'new-cell-1' });
+            // 初回レンダリング (isNew=true)
+            const { rerender } = render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            vi.runAllTimers();
+            const nameInput = screen.getByPlaceholderText('Title');
+            expect(nameInput).toHaveFocus();
+
+            // ユーザーが別の要素 (bodyなど) にフォーカスを移動
+            act(() => {
+                nameInput.blur();
+            });
+            expect(nameInput).not.toHaveFocus();
+
+            // 何らかの理由で再レンダリングが発生 (propsは変わらず isNew=true のまま)
+            rerender(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+            vi.runAllTimers();
+
+            // それでもフォーカスは戻らないこと
+            expect(nameInput).not.toHaveFocus();
         });
     });
 
