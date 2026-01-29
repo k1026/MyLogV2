@@ -176,12 +176,13 @@ describe('TextCell', () => {
         });
     });
 
-    it('表示制御: フォーカスが外れた状態で空のフィールドが非表示になること', () => {
-        const cell = new Cell({ ...baseCell, name: '', value: 'Something' });
-        const { rerender } = render(<TextCell cell={cell} onSave={mockSave} />);
+    it('表示制御: フォーカスが外れた状態で空のフィールドが非表示になること (仕様 4.2.2)', () => {
+        const cell = new Cell({ ...baseCell, name: '', value: '' });
+        render(<TextCell cell={cell} onSave={mockSave} />);
 
-        // name は空なので非表示（または存在しない）
-        expect(screen.queryByDisplayValue('')).not.toBeInTheDocument();
+        // 両方空かつ非フォーカス時は、プレースホルダーも見えないはず（input/textareaがレンダリングされないため）
+        expect(screen.queryByPlaceholderText('Title')).not.toBeInTheDocument();
+        expect(screen.queryByPlaceholderText('Description...')).not.toBeInTheDocument();
     });
 
     describe('推定機能 (Estimation)', () => {

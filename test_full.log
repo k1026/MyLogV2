@@ -1,42 +1,42 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/lib/db/operations.test.ts (13 tests) 141ms
- ✓ app/components/card/cardUtils.test.ts (6 tests) 198ms
- ✓ app/components/cell/TitleCandidates.test.tsx (3 tests) 124ms
- ✓ app/contexts/LocationContext.test.tsx (4 tests) 130ms
- ✓ app/contexts/UIStateContext.test.tsx (5 tests) 227ms
- ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 218ms
- ✓ app/components/card/CardToolbar.test.tsx (4 tests) 238ms
- ✓ app/contexts/RarityContext.test.tsx (3 tests) 222ms
- ✓ app/hooks/useCardList.test.ts (2 tests) 420ms
- ✓ app/components/cell/TimeCell.test.tsx (7 tests) 385ms
- ✓ app/components/cell/CellContainer.test.tsx (2 tests) 281ms
- ✓ app/components/Header/Header.test.tsx (5 tests) 327ms
- ✓ app/components/cell/TextCell.test.tsx (14 tests) 724ms
- ✓ app/components/cell/TaskCell.test.tsx (10 tests) 1130ms
-     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  717ms
- ✓ app/components/card/CardFAB.test.tsx (6 tests) 999ms
-     ✓ renders the FAB button  627ms
- ✓ app/components/card/Card.test.tsx (9 tests) 934ms
-     ✓ renders the card container  304ms
- ✓ app/components/CardList/CardList.test.tsx (4 tests) 972ms
-     ✓ should render only a subset of cards (90 limit)  673ms
- ✓ app/components/card/CardDisplay.test.tsx (2 tests) 1041ms
-     ✓ renders Time and Text cells for a newly created card  987ms
- ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1664ms
-     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  1024ms
- ✓ app/lib/db/fileIO.test.ts (7 tests) 70ms
- ✓ app/lib/services/LocationService.test.ts (4 tests) 10ms
- ✓ app/hooks/useAutoVisibility.test.ts (4 tests) 105ms
- ✓ app/lib/models/cell.test.ts (8 tests) 20ms
- ✓ app/lib/services/estimation/CellTitleEstimationService.test.ts (4 tests) 40ms
+ ✓ app/lib/db/operations.test.ts (13 tests) 157ms
+ ✓ app/components/card/cardUtils.test.ts (6 tests) 191ms
+ ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 171ms
+ ✓ app/components/cell/TitleCandidates.test.tsx (3 tests) 134ms
+ ✓ app/contexts/LocationContext.test.tsx (4 tests) 107ms
+ ✓ app/contexts/UIStateContext.test.tsx (5 tests) 216ms
+ ✓ app/hooks/useCardList.test.ts (2 tests) 308ms
+ ✓ app/components/Header/Header.test.tsx (5 tests) 438ms
+ ✓ app/components/card/CardToolbar.test.tsx (4 tests) 262ms
+ ✓ app/components/cell/TimeCell.test.tsx (7 tests) 404ms
+ ✓ app/contexts/RarityContext.test.tsx (3 tests) 338ms
+ ✓ app/components/cell/CellContainer.test.tsx (3 tests) 272ms
+ ✓ app/components/card/CardFAB.test.tsx (6 tests) 972ms
+     ✓ renders the FAB button  594ms
+ ✓ app/components/cell/TextCell.test.tsx (14 tests) 642ms
+ ✓ app/components/cell/TaskCell.test.tsx (10 tests) 1138ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  716ms
+ ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1716ms
+     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  1066ms
+ ✓ app/components/CardList/CardList.test.tsx (4 tests) 922ms
+     ✓ should render only a subset of cards (90 limit)  641ms
+ ✓ app/components/card/Card.test.tsx (9 tests) 920ms
+     ✓ renders the card container  301ms
+ ✓ app/components/card/CardDisplay.test.tsx (2 tests) 855ms
+     ✓ renders Time and Text cells for a newly created card  803ms
+ ✓ app/lib/db/fileIO.test.ts (7 tests) 74ms
+ ✓ app/lib/models/cell.test.ts (8 tests) 14ms
+ ✓ app/hooks/useAutoVisibility.test.ts (4 tests) 81ms
  ✓ app/lib/filter/cardFilter.test.ts (7 tests) 11ms
+ ✓ app/lib/services/estimation/CellTitleEstimationService.test.ts (4 tests) 37ms
+ ✓ app/lib/services/LocationService.test.ts (4 tests) 7ms
  ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 8ms
- ✓ app/components/card/useCardSort.test.ts (5 tests) 55ms
+ ✓ app/components/card/useCardSort.test.ts (5 tests) 56ms
 
  Test Files  27 passed (27)
-      Tests  153 passed (153)
-   Start at  23:27:42
-   Duration  12.81s (transform 8.44s, setup 18.53s, import 35.58s, tests 10.69s, environment 110.40s)
+      Tests  154 passed (154)
+   Start at  04:16:52
+   Duration  12.76s (transform 5.69s, setup 17.54s, import 34.14s, tests 10.45s, environment 112.63s)
 

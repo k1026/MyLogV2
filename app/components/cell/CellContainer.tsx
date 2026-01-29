@@ -51,7 +51,7 @@ export const CellContainer: React.FC<CellContainerProps> = ({ cell, onSave, isNe
                 "group relative overflow-hidden transition-all duration-500 w-full flex flex-col",
                 isTimeCell
                     ? "rounded-none border-transparent shadow-none backdrop-blur-none min-h-[auto]"
-                    : "rounded-3xl border border-white/80 shadow-sm backdrop-blur-md min-h-[5rem]"
+                    : "rounded-[32px] border border-white/80 shadow-sm backdrop-blur-md min-h-[5rem]"
             )}
         >
             <div className="relative z-10 flex-1 flex flex-col">

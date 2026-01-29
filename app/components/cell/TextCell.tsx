@@ -132,8 +132,8 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
         }
     };
 
-    // 表示判定: 両方空の場合は、場所を明示するために常にタイトルを表示する
-    const showName = isFocused || !!name || (!name && !value);
+    // 表示判定: 未入力かつ非フォーカス時は非表示にする (仕様 4.2.2)
+    const showName = isFocused || !!name;
     const showValue = isFocused || !!value;
 
     return (
