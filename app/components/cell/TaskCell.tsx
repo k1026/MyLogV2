@@ -3,7 +3,9 @@ import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Cell } from '@/app/lib/models/cell';
 import { cn } from '@/app/lib/utils';
-// import { Checkbox } from "@/app/components/ui/checkbox"; // もし作成済みならこれを使うが、現状は標準かRadix直接
+import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
+import { EstimationCandidate } from '@/app/lib/services/estimation/types';
+import { TitleCandidates } from './TitleCandidates';
 
 interface TaskCellProps {
     cell: Cell;
@@ -15,6 +17,32 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
     const [name, setName] = useState(cell.name);
     const isChecked = cell.value === 'true';
     const nameRef = useRef<HTMLInputElement>(null);
+
+    // Estimation Hook
+    const { estimate } = useCellTitleEstimation();
+    const [candidates, setCandidates] = useState<EstimationCandidate[]>([]);
+    const [showCandidates, setShowCandidates] = useState(false);
+
+    useEffect(() => {
+        if (isNew && !name) {
+            estimate().then(results => {
+                setCandidates(results);
+                if (results.length > 0) {
+                    setShowCandidates(true);
+                    // 新規追加時は自動的に1位をセット
+                    if (!name) {
+                        setName(results[0].title);
+                    }
+                }
+            });
+        }
+    }, [isNew, name, estimate]);
+
+    const handleSelectCandidate = (title: string) => {
+        setName(title);
+        setShowCandidates(false);
+        nameRef.current?.focus();
+    };
 
     useEffect(() => {
         if (isNew) {
@@ -30,12 +58,13 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
     }, [cell.name]);
 
     const handleCheckboxChange = (checked: boolean) => {
-        onSave?.({ ...cell, value: checked ? 'true' : 'false' });
+        onSave?.(new Cell({ ...cell, value: checked ? 'true' : 'false' }));
     };
 
     const handleBlur = () => {
+        setShowCandidates(false);
         if (name !== cell.name) {
-            onSave?.({ ...cell, name });
+            onSave?.(new Cell({ ...cell, name }));
         }
     };
 
@@ -61,19 +90,32 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                         checked:after:content-['✓'] checked:after:absolute checked:after:text-white checked:after:text-base checked:after:font-bold checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 hover:border-purple-400 ring-offset-2 focus:ring-4 focus:ring-purple-500/10"
                 />
             </div>
-            <input
-                ref={nameRef}
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onBlur={handleBlur}
-                placeholder="To-do Task"
-                className={cn(
-                    "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-center font-bold text-[20px] p-3 rounded-none placeholder:text-slate-400 flex-1",
-                    "focus:border-purple-500",
-                    isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"
+            <div className="flex-1 flex flex-col gap-1">
+                {showCandidates && candidates.length > 0 && (
+                    <div className="px-2">
+                        <TitleCandidates
+                            candidates={candidates}
+                            onSelect={handleSelectCandidate}
+                        />
+                    </div>
                 )}
-            />
+                <input
+                    ref={nameRef}
+                    type="text"
+                    value={name}
+                    onChange={(e) => {
+                        setName(e.target.value);
+                        setShowCandidates(false);
+                    }}
+                    onBlur={handleBlur}
+                    placeholder="To-do Task"
+                    className={cn(
+                        "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-center font-bold text-[20px] p-3 rounded-none placeholder:text-slate-400 flex-1 w-full",
+                        "focus:border-purple-500",
+                        isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"
+                    )}
+                />
+            </div>
         </div>
     );
 };

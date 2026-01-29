@@ -4,6 +4,7 @@ import { Cell } from '@/app/lib/models/cell';
 import { cn } from '@/app/lib/utils';
 import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
 import { EstimationCandidate } from '@/app/lib/services/estimation/types';
+import { TitleCandidates } from './TitleCandidates';
 
 interface TextCellProps {
     cell: Cell;
@@ -19,13 +20,29 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
     // Estimation Hook
     const { estimate } = useCellTitleEstimation();
     const [candidates, setCandidates] = useState<EstimationCandidate[]>([]);
-    const datalistId = `list-${cell.id}`;
+    const [showCandidates, setShowCandidates] = useState(false);
 
     useEffect(() => {
-        if (isFocused && !name) {
-            estimate().then(setCandidates);
+        if ((isFocused || isNew) && !name) {
+            estimate().then(results => {
+                setCandidates(results);
+                if (results.length > 0) {
+                    setShowCandidates(true);
+                    // 新規追加時は自動的に1位をセット
+                    if (isNew && !name) {
+                        setName(results[0].title);
+                    }
+                }
+            });
         }
-    }, [isFocused, name, estimate]);
+    }, [isFocused, isNew, name, estimate]);
+
+    const handleSelectCandidate = (title: string) => {
+        setName(title);
+        setShowCandidates(false);
+        // フォーカスを維持しつつ値を更新
+        nameRef.current?.focus();
+    };
 
     // ... focus management code ...
     // Note: Inserting hook calls must be at top level, before returns.
@@ -88,6 +105,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
         // コンテナ外にフォーカスが移ったかチェック (relatedTarget is the new focused element)
         if (!containerRef.current?.contains(e.relatedTarget as Node)) {
             setIsFocused(false);
+            setShowCandidates(false);
             if (name !== cell.name || value !== cell.value) {
                 // Fix lint: Create new Cell instance because onSave expects Cell, not POJO
                 onSave?.(new Cell({ ...cell, name, value }));
@@ -121,26 +139,31 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
             className="flex flex-col gap-3 w-full flex-1 cursor-text min-h-[4rem] justify-center p-3"
         >
             {showName && (
-                <>
+                <div className="flex flex-col gap-1">
+                    {showCandidates && candidates.length > 0 && (
+                        <div className="px-2">
+                            <TitleCandidates
+                                candidates={candidates}
+                                onSelect={handleSelectCandidate}
+                            />
+                        </div>
+                    )}
                     <input
                         ref={nameRef}
                         type="text"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setShowCandidates(false); // 手動入力時は閉じる
+                        }}
                         onKeyDown={handleKeyDown}
                         placeholder={isFocused || !name ? "Title" : ""}
-                        list={datalistId}
                         className={cn(
                             "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-center p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
                             "focus:border-purple-500"
                         )}
                     />
-                    <datalist id={datalistId}>
-                        {candidates.map(candidate => (
-                            <option key={candidate.title} value={candidate.title} />
-                        ))}
-                    </datalist>
-                </>
+                </div>
             )}
             {showValue && (
                 <textarea

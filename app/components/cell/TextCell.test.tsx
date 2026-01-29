@@ -1,7 +1,13 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TextCell } from './TextCell';
 import { CellAttribute, Cell } from '@/app/lib/models/cell';
+import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
+
+// Mock the hook
+vi.mock('@/app/lib/hooks/useCellTitleEstimation', () => ({
+    useCellTitleEstimation: vi.fn(),
+}));
 
 describe('TextCell', () => {
     const baseCell = new Cell({
@@ -13,7 +19,20 @@ describe('TextCell', () => {
         remove: null,
     });
 
+    const mockEstimate = vi.fn();
+    const mockLearn = vi.fn();
     const mockSave = vi.fn();
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        (useCellTitleEstimation as any).mockReturnValue({
+            estimate: mockEstimate.mockResolvedValue([
+                { title: 'Est 1', score: 10, details: {} },
+                { title: 'Est 2', score: 8, details: {} },
+            ]),
+            learn: mockLearn,
+        });
+    });
 
     it('初期表示: name と value が正しく表示されること', () => {
         render(<TextCell cell={baseCell} onSave={mockSave} />);
@@ -119,5 +138,49 @@ describe('TextCell', () => {
 
         // name は空なので非表示（または存在しない）
         expect(screen.queryByDisplayValue('')).not.toBeInTheDocument();
+    });
+
+    describe('推定機能 (Estimation)', () => {
+        it('新規セル追加時に自動で推定結果の1位がセットされること', async () => {
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-new' });
+            render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            await waitFor(() => {
+                expect(screen.getByDisplayValue('Est 1')).toBeInTheDocument();
+            });
+        });
+
+        it('新規セル追加時に候補チップが表示されること', async () => {
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-new' });
+            render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            await waitFor(() => {
+                expect(screen.getByText('Est 2')).toBeInTheDocument();
+            });
+        });
+
+        it('候補チップをクリックするとタイトルが更新され、チップが消えること', async () => {
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-new' });
+            render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            await waitFor(() => expect(screen.getByText('Est 2')).toBeInTheDocument());
+
+            fireEvent.click(screen.getByText('Est 2'));
+
+            expect(screen.getByDisplayValue('Est 2')).toBeInTheDocument();
+            expect(screen.queryByText('Est 1')).not.toBeInTheDocument();
+        });
+
+        it('手動で入力すると候補チップが消えること', async () => {
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-new' });
+            render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            await waitFor(() => expect(screen.getByText('Est 1')).toBeInTheDocument());
+
+            const nameInput = screen.getByDisplayValue('Est 1');
+            fireEvent.change(nameInput, { target: { value: 'User Input' } });
+
+            expect(screen.queryByText('Est 1')).not.toBeInTheDocument();
+        });
     });
 });
