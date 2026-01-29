@@ -120,7 +120,7 @@ describe('TimeCell', () => {
 
         // コンテナの配置確認 (左詰め、gap-1 (4px))
         expect(container).toHaveClass('items-start');
-        expect(container).toHaveClass('gap-1');
+        expect(container).toHaveClass('gap-[2px]');
 
         // デザイン確認: 背景透明、文字色白、枠線なし、可変幅
         [nameInput, dateInput, timeInput].forEach(input => {

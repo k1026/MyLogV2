@@ -176,7 +176,7 @@ export const Card: React.FC<CardProps> = ({
         <div
             data-testid="card-container"
             style={rarityStyle}
-            className={`flex flex-col p-4 border rounded-3xl shadow-sm transition-all duration-300 relative
+            className={`flex flex-col p-[12px] border rounded-3xl shadow-sm transition-all duration-300 relative
                 ${isExpanded ? 'bg-white/10 backdrop-blur-md ring-2 ring-white/20' : 'bg-white/5 hover:bg-white/10 cursor-pointer'}
             `}
             onClick={!isExpanded ? handleToggle : undefined}
@@ -206,7 +206,7 @@ export const Card: React.FC<CardProps> = ({
                         {sortState.sortedCells.map(renderCell)}
                     </div>
 
-                    <div className="absolute bottom-0 right-0 p-2">
+                    <div className="fixed bottom-[76px] right-[16px] z-[100]">
                         <CardFAB onAdd={handleAddCell} />
                     </div>
                 </div>

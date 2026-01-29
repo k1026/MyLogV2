@@ -7,34 +7,34 @@ interface CardToolbarProps {
 
 export const CardToolbar: React.FC<CardToolbarProps> = ({ sortState }) => {
     return (
-        <div className="flex gap-2 p-2 bg-white/5 backdrop-blur-sm rounded-lg">
-            {/* Time Sort */}
+        <div className="flex gap-1 h-[28px] items-center bg-white/5 backdrop-blur-sm rounded-lg px-1">
+            {/* Manual Sort */}
             <button
-                aria-label="Sort by Time"
-                onClick={sortState.toggleSort}
-                className={`p-1.5 rounded transition-colors ${sortState.sortMode !== 'none' ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
+                aria-label="Manual Sort"
+                onClick={sortState.setManualSort}
+                className={`flex items-center justify-center w-6 h-6 rounded transition-colors ${sortState.isManualSort ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
             >
-                <Clock size={16} />
-                {sortState.sortMode === 'asc' && <span className="text-[10px] ml-1">OLD</span>}
-                {sortState.sortMode === 'desc' && <span className="text-[10px] ml-1">NEW</span>}
+                <ArrowDownUp size={20} />
             </button>
 
             {/* Task Sort */}
             <button
                 aria-label="Sort by Task"
                 onClick={sortState.toggleTaskSort}
-                className={`p-1.5 rounded transition-colors ${sortState.taskSortMode !== 'none' ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
+                className={`flex items-center justify-center w-6 h-6 rounded transition-colors ${sortState.taskSortMode !== 'none' ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
             >
-                <CheckSquare size={16} />
+                <CheckSquare size={20} />
             </button>
 
-            {/* Manual Sort */}
+            {/* Time Sort */}
             <button
-                aria-label="Manual Sort"
-                onClick={sortState.setManualSort}
-                className={`p-1.5 rounded transition-colors ${sortState.isManualSort ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
+                aria-label="Sort by Time"
+                onClick={sortState.toggleSort}
+                className={`flex items-center justify-center h-6 px-1 rounded transition-colors ${sortState.sortMode !== 'none' ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
             >
-                <ArrowDownUp size={16} />
+                <Clock size={20} />
+                {sortState.sortMode === 'asc' && <span className="text-[10px] ml-1">OLD</span>}
+                {sortState.sortMode === 'desc' && <span className="text-[10px] ml-1">NEW</span>}
             </button>
         </div>
     );

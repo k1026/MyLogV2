@@ -95,7 +95,7 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
         className: string = "",
         onClick?: () => void
     ) => (
-        <div className="inline-grid items-center">
+        <div className="inline-grid items-center m-0 p-0">
             <input
                 type="text"
                 value={value}
@@ -106,7 +106,7 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
                 className={cn(inputBaseClass, "col-start-1 row-start-1 w-full", className)}
                 onClick={onClick}
             />
-            <span className={cn(inputBaseClass, "col-start-1 row-start-1 invisible whitespace-pre px-0 min-w-[1ch]", className)}>
+            <span className={cn(inputBaseClass, "col-start-1 row-start-1 invisible whitespace-pre px-0", className)}>
                 {value || placeholder}
             </span>
         </div>
@@ -115,22 +115,22 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
     return (
         <div
             data-testid="time-cell"
-            className="flex flex-col gap-1 w-full flex-1 items-start justify-start p-4"
+            className="flex flex-col gap-[2px] items-start justify-start"
         >
             {renderAutoWidthInput(
                 name,
                 (e) => setName(e.target.value),
                 "Entry Title",
                 "",
-                "font-bold text-lg placeholder:text-white/40"
+                "font-medium text-[14px] text-white placeholder:text-white/40 leading-none"
             )}
-            <div className="flex gap-2 items-center flex-wrap">
+            <div className="flex gap-[2px] items-center flex-wrap">
                 {renderAutoWidthInput(
                     date,
                     (e) => setDate(e.target.value),
                     "",
                     "Date",
-                    "text-sm font-medium w-auto",
+                    "text-[18px] text-white font-normal w-auto leading-none",
                     () => dateInputRef.current?.showPicker()
                 )}
                 {renderAutoWidthInput(
@@ -138,7 +138,7 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
                     (e) => setTime(e.target.value),
                     "",
                     "Time",
-                    "text-sm font-medium w-auto",
+                    "text-[18px] text-white font-normal w-auto leading-none",
                     () => timeInputRef.current?.showPicker()
                 )}
                 {/* Hidden pickers */}

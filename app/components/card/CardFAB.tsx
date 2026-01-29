@@ -104,7 +104,7 @@ export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
                     }
                 }}
                 className={cn(
-                    "w-14 h-14 flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 z-50",
+                    "w-[60px] h-[60px] flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 z-50",
                     "bg-purple-200 text-white" // Spec: 薄い紫の背景に白い十字
                 )}
             >
