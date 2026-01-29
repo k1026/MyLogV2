@@ -4,7 +4,7 @@ import { TimeCell } from './TimeCell';
 import { CellAttribute, Cell } from '@/app/lib/models/cell';
 
 describe('TimeCell', () => {
-    const baseCell: Cell = {
+    const baseCell = new Cell({
         id: '1234567890123-ABCDE',
         attribute: CellAttribute.Time,
         name: 'Time Entry',
@@ -12,7 +12,7 @@ describe('TimeCell', () => {
         value: '2026-01-28T12:00:00',
         geo: null,
         remove: null,
-    };
+    });
 
     const mockSave = vi.fn();
 
@@ -42,13 +42,13 @@ describe('TimeCell', () => {
     });
 
     it('初期表示: valueが数値文字列の場合でも正しく日付・時刻が表示されること', () => {
-        const numericValueCell: Cell = {
+        const numericValueCell = new Cell({
             ...baseCell,
             // 2026-01-28T12:00:00.000Z in milliseconds (approximate)
             // 1769572800000 -> 2026-01-28T04:00:00.000Z (UTC) for simpler math
             // Let's use specific timestamp: 1769601600000 (2026-01-28T12:00:00.000Z)
             value: '1769601600000'
-        };
+        });
 
         render(<TimeCell cell={numericValueCell} onSave={mockSave} />);
 

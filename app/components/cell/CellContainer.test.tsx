@@ -5,23 +5,23 @@ import { CellAttribute, Cell } from '@/app/lib/models/cell';
 import { RarityProvider } from '@/app/contexts/RarityContext';
 
 describe('CellContainer', () => {
-    const timeCell: Cell = {
+    const timeCell = new Cell({
         id: '1',
         attribute: CellAttribute.Time,
         name: 'Time',
         value: new Date().toISOString(),
         geo: null,
         remove: null,
-    };
+    });
 
-    const textCell: Cell = {
+    const textCell = new Cell({
         id: '2',
         attribute: CellAttribute.Text,
         name: 'Text',
         value: 'Hello',
         geo: null,
         remove: null,
-    };
+    });
 
     it('Timeセルの場合、背景色が透明であること', () => {
         render(

@@ -4,14 +4,14 @@ import { TaskCell } from './TaskCell';
 import { CellAttribute, Cell } from '@/app/lib/models/cell';
 
 describe('TaskCell', () => {
-    const baseCell: Cell = {
+    const baseCell = new Cell({
         id: '1234567890123-ABCDE',
         attribute: CellAttribute.Task,
         name: 'Task Title',
         value: 'false',
         geo: null,
         remove: null,
-    };
+    });
 
     const mockSave = vi.fn();
 
@@ -22,7 +22,7 @@ describe('TaskCell', () => {
         const checkbox = screen.getByRole('checkbox') as HTMLInputElement;
         expect(checkbox.checked).toBe(false);
 
-        const checkedCell = { ...baseCell, value: 'true' };
+        const checkedCell = new Cell({ ...baseCell, value: 'true' });
         rerender(<TaskCell cell={checkedCell} onSave={mockSave} />);
         expect(checkbox.checked).toBe(true);
     });

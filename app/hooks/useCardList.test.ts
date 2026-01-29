@@ -5,7 +5,7 @@ import { Cell, CellAttribute } from '@/app/lib/models/cell';
 import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 
 // Helper to create mock cells
-const createMockCard = (id: string, timestamp: string): Cell => ({
+const createMockCard = (id: string, timestamp: string): Cell => new Cell({
     id,
     attribute: 'Card' as CellAttribute,
     name: 'Test Card',
@@ -87,14 +87,14 @@ describe('useCardList', () => {
         const initialCount = result.current.cards.length;
         const initialTotal = result.current.totalCount;
 
-        const newCard: Cell = {
+        const newCard = new Cell({
             id: 'new-card-id',
             attribute: CellAttribute.Card,
             name: 'New Card',
             value: '',
             geo: null,
             remove: null
-        };
+        });
 
         const { act } = await import('@testing-library/react');
         await act(async () => {

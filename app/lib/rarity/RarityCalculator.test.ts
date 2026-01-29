@@ -1,8 +1,9 @@
+import { describe, it, expect } from 'vitest';
 import { RarityCalculator } from './RarityCalculator';
 import { Cell, CellAttribute } from '../models/cell';
 
 describe('RarityCalculator', () => {
-    const createMockCell = (id: string, name: string, attribute: CellAttribute): Cell => ({
+    const createMockCell = (id: string, name: string, attribute: CellAttribute): Cell => new Cell({
         id: `${id}-XXXXX`,
         name,
         attribute,

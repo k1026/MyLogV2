@@ -75,14 +75,14 @@ vi.mock('./cardUtils', () => ({
 
 import { cleanupCardCells, addCellToCard } from './cardUtils';
 
-const mockCardCell: Cell = {
+const mockCardCell = new Cell({
     id: '1700000000000-ABCDE',
     attribute: CellAttribute.Card,
     name: 'Test Card',
     value: 'child1 child2',
     geo: null,
     remove: null,
-};
+});
 
 describe('Card Component', () => {
     beforeEach(() => {

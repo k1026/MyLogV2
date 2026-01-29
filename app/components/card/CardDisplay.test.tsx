@@ -41,14 +41,14 @@ vi.mock('./cardUtils', () => ({
     addCellToCard: vi.fn(),
 }));
 
-const mockNewCard: Cell = {
+const mockNewCard = new Cell({
     id: '9999-CARD',
     attribute: CellAttribute.Card,
     name: 'New Card',
     value: '1000-TIME 1001-TEXT',
     geo: null,
     remove: null,
-};
+});
 
 describe('Card Display - Default Content', () => {
     it('renders Time and Text cells for a newly created card', async () => {

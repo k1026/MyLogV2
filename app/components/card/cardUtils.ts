@@ -1,5 +1,6 @@
 import { Cell, CellAttribute, createCellId } from '@/app/lib/models/cell';
 import { db } from '@/app/lib/db/db';
+import { CellRepository } from '@/app/lib/db/operations';
 
 /**
  * Helper to sleep for ms
@@ -24,39 +25,37 @@ export async function createCard(geo: string | null = null): Promise<Cell> {
     // 3. Create Text Cell (Spec 5.1.1: Default Child Element)
     const textId = createCellId();
 
-    const cardCell: Cell = {
+    const cardCell = new Cell({
         id: cardId,
         attribute: CellAttribute.Card,
         name: 'New Card',
         value: `${timeId} ${textId}`,
         geo: geo,
         remove: null
-    };
+    });
 
-    const timeCell: Cell = {
+    const timeCell = new Cell({
         id: timeId,
         attribute: CellAttribute.Time,
         name: 'Time',
         value: Date.now().toString(), // Current time
         geo: geo,
         remove: null
-    };
+    });
 
-    const textCell: Cell = {
+    const textCell = new Cell({
         id: textId,
         attribute: CellAttribute.Text,
         name: '', // Empty name
         value: '', // Empty value
         geo: geo,
         remove: null
-    };
+    });
 
-    // Save to DB
-    await db.cells.bulkPut([
-        { I: cardCell.id, A: cardCell.attribute, N: cardCell.name, V: cardCell.value, G: cardCell.geo, R: cardCell.remove },
-        { I: timeCell.id, A: timeCell.attribute, N: timeCell.name, V: timeCell.value, G: timeCell.geo, R: timeCell.remove },
-        { I: textCell.id, A: textCell.attribute, N: textCell.name, V: textCell.value, G: textCell.geo, R: textCell.remove }
-    ]);
+    // Save to DB using Repository to ensure consistency
+    await CellRepository.save(cardCell);
+    await CellRepository.save(timeCell);
+    await CellRepository.save(textCell);
 
     return cardCell;
 }
@@ -72,13 +71,15 @@ export async function cleanupCardCells(card: Cell): Promise<void> {
     if (childIds.length === 0) return;
 
     // Fetch all child cells
+    // Use Repository to get instances, but lightweight bulkGet from DB is faster for checking properties.
+    // However, keeping consistent with "Entity" pattern:
     const childCells = await db.cells.bulkGet(childIds);
 
     const idsToRemove: string[] = [];
     const idsToKeep: string[] = [];
 
     childCells.forEach(cellDB => {
-        if (!cellDB) return; // Should not happen usually
+        if (!cellDB) return;
 
         const shouldRemove =
             (cellDB.A === CellAttribute.Text && cellDB.N === '' && cellDB.V === '') ||
@@ -95,10 +96,14 @@ export async function cleanupCardCells(card: Cell): Promise<void> {
         // 1. Delete from DB
         await db.cells.bulkDelete(idsToRemove);
 
-        // 2. Update Card value
-        await db.cells.update(card.id, {
-            V: idsToKeep.join(' ')
-        });
+        // 2. Update Card value using Cell method
+        // We need to ensure we work on the existing 'card' instance logic
+        // But simply updating the value string is what validation expects.
+        // Actually, we can just replace the value property.
+        // Or if we use removeCellId iteratively. using join is faster.
+
+        card.value = idsToKeep.join(' ');
+        await CellRepository.save(card);
     }
 }
 
@@ -115,49 +120,35 @@ export async function addCellToCard(cardId: string, attribute: CellAttribute, cu
     // Wait a bit to ensure unique timestamp if called rapidly
     await sleep(2);
 
-    const newCell: Cell = {
-        id: newCellId,
-        attribute: attribute,
-        name: attribute === CellAttribute.Task ? 'New Task' : 'New Text', // Default names? Spec: "推定されたセルタイトルが自動入力される" -> "New Task" etc for now
-        value: attribute === CellAttribute.Task ? 'not done' : '',
-        geo: geo,
-        remove: null
-    };
+    let name = attribute === CellAttribute.Task ? 'New Task' : 'New Text';
+    let value = attribute === CellAttribute.Task ? 'not done' : '';
 
     if (attribute === CellAttribute.Text) {
-        newCell.name = '';
-        newCell.value = '';
+        name = '';
+        value = '';
     }
     if (attribute === CellAttribute.Task) {
-        newCell.name = '';
-        newCell.value = 'not done';
+        name = '';
+        value = 'not done';
     }
 
-    // 2. Save Cell to DB
-    await db.cells.put({
-        I: newCell.id,
-        A: newCell.attribute,
-        N: newCell.name,
-        V: newCell.value,
-        G: newCell.geo,
-        R: newCell.remove
+    const newCell = new Cell({
+        id: newCellId,
+        attribute: attribute,
+        name: name,
+        value: value,
+        geo: geo,
+        remove: null
     });
 
+    // 2. Save Cell to DB
+    await CellRepository.save(newCell);
+
     // 3. Update Card Value
-    // We need to fetch the LATEST card value from DB to be safe, 
-    // but we also need to respect the 'insertion position' if logic dictates.
-    // Spec: "手動並べ替え機能が無効かつ...Cardセルのvalueに記録されている順序の位置に従い追加する"
-    // Usually means append.
-
-    // For now, always append to the end of the DB list.
-    const card = await db.cells.get(cardId);
+    const card = await CellRepository.getById(cardId);
     if (card) {
-        const currentDbIds = card.V.split(' ').filter(id => id.trim() !== '');
-        currentDbIds.push(newCellId);
-
-        await db.cells.update(cardId, {
-            V: currentDbIds.join(' ')
-        });
+        card.addCellId(newCellId);
+        await CellRepository.save(card);
     }
 
     return newCell;

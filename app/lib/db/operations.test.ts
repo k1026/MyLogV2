@@ -7,32 +7,33 @@ import { CellRepository } from './operations';
 import { Cell, CellAttribute } from '../models/cell';
 
 // Mock data
-const mockCell1: Cell = {
+// Mock data
+const mockCell1 = new Cell({
     id: 'cell-001',
     attribute: CellAttribute.Text,
     name: 'Test Cell 1',
     value: 'Value 1',
     geo: null,
     remove: null
-};
+});
 
-const mockCell2: Cell = {
+const mockCell2 = new Cell({
     id: 'cell-002',
     attribute: CellAttribute.Time,
     name: 'Test Cell 2',
     value: 'Value 2 with geo',
     geo: '35.6895,139.6917',
     remove: null
-};
+});
 
-const mockCell3: Cell = {
+const mockCell3 = new Cell({
     id: 'cell-003',
     attribute: CellAttribute.Task,
     name: 'Test Cell 3',
     value: 'Value 3',
     geo: null,
     remove: '2023-01-01T00:00:00.000Z'
-};
+});
 
 describe('CellRepository', () => {
 
@@ -83,6 +84,7 @@ describe('CellRepository', () => {
             await CellRepository.save(mockCell1);
             const retrieved = await CellRepository.getById(mockCell1.id);
             expect(retrieved).toEqual(mockCell1);
+            expect(retrieved).toBeInstanceOf(Cell);
         });
 
         it('should return undefined for non-existent cell', async () => {
@@ -92,11 +94,13 @@ describe('CellRepository', () => {
 
         it('should update an existing cell', async () => {
             await CellRepository.save(mockCell1);
-            const updated = { ...mockCell1, value: "Updated Value" };
+            // new Cell() to ensure it's a valid instance with methods, because spread syntax on class instance returns POJO in JS/TS
+            const updated = new Cell({ ...mockCell1, value: "Updated Value" });
             await CellRepository.save(updated);
 
             const retrieved = await CellRepository.getById(mockCell1.id);
             expect(retrieved).toEqual(updated);
+            expect(retrieved).toBeInstanceOf(Cell);
 
             // Verify count is still 1
             const count = await CellRepository.getCount();
@@ -150,7 +154,7 @@ describe('CellRepository', () => {
         it('should get cells with pagination (key range)', async () => {
             // Insert 5 cells
             for (let i = 1; i <= 5; i++) {
-                await CellRepository.save({ ...mockCell1, id: `cell-00${i}`, value: `V${i}` });
+                await CellRepository.save(new Cell({ ...mockCell1, id: `cell-00${i}`, value: `V${i}` }));
             }
             // Descending order of IDs: 005, 004, 003, 002, 001
 
@@ -189,7 +193,7 @@ describe('CellRepository', () => {
             // Insert 5 cells
             const cells = [];
             for (let i = 1; i <= 5; i++) {
-                const c = { ...mockCell1, id: `cell-00${i}`, value: `V${i}` };
+                const c = new Cell({ ...mockCell1, id: `cell-00${i}`, value: `V${i}` });
                 await CellRepository.save(c);
                 cells.push(c);
             }

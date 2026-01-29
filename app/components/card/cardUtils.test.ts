@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createCard, cleanupCardCells, addCellToCard } from './cardUtils';
 import { db } from '@/app/lib/db/db';
-import { CellAttribute } from '@/app/lib/models/cell';
+import { Cell, CellAttribute } from '@/app/lib/models/cell';
 
 describe('cardUtils', () => {
     beforeEach(async () => {
@@ -71,14 +71,15 @@ describe('cardUtils', () => {
             if (!card) throw new Error("Card setup failed");
 
             // Cell型に変換して渡す（擬似的にキャスト）
-            const cardModel = {
+            // Cell型に変換して渡す（擬似的にキャスト）
+            const cardModel = new Cell({
                 id: card.I,
                 attribute: card.A as CellAttribute,
                 name: card.N,
                 value: card.V,
                 geo: card.G,
                 remove: card.R
-            };
+            });
 
             await cleanupCardCells(cardModel);
 

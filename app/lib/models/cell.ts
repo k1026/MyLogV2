@@ -21,8 +21,38 @@ export const CellSchema = z.object({
     remove: z.string().nullable(),
 });
 
-// TypeScript型定義
-export type Cell = z.infer<typeof CellSchema>;
+// TypeScript型定義 (Classとして再定義)
+export class Cell {
+    id: string;
+    attribute: CellAttribute;
+    name: string;
+    value: string;
+    geo: string | null;
+    remove: string | null;
+
+    constructor(data: z.infer<typeof CellSchema>) {
+        this.id = data.id;
+        this.attribute = data.attribute;
+        this.name = data.name;
+        this.value = data.value;
+        this.geo = data.geo;
+        this.remove = data.remove;
+    }
+
+    // 子セルID追加 (Card用)
+    addCellId(childId: string): void {
+        const ids = this.value.split(' ').filter(id => id.length > 0);
+        ids.push(childId);
+        this.value = ids.join(' ');
+    }
+
+    // 子セルID削除 (Card用)
+    removeCellId(childId: string): void {
+        const ids = this.value.split(' ').filter(id => id.length > 0);
+        const newIds = ids.filter(id => id !== childId);
+        this.value = newIds.join(' ');
+    }
+}
 
 // Cell ID生成関数
 // フォーマット: [Unix timestamp in ms]-[5-digit random uppercase alphanumeric]

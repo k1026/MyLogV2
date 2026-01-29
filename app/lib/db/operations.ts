@@ -14,14 +14,14 @@ export const CellRepository = {
     },
 
     mapFromDB(doc: CellDB): Cell {
-        return {
+        return new Cell({
             id: doc.I,
             attribute: doc.A as CellAttribute,
             name: doc.N,
             value: doc.V,
             geo: doc.G,
             remove: doc.R
-        };
+        });
     },
 
     async save(cell: Cell): Promise<void> {

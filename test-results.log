@@ -1,13 +1,13 @@
 
  RUN  v4.0.18 C:/tojiro/programming/AG/MyLogV2
 
- ✓ app/lib/db/fileIO.test.ts (7 tests) 114ms
- ✓ app/lib/db/operations.test.ts (12 tests) 141ms
- ✓ app/components/card/cardUtils.test.ts (7 tests) 232ms
- ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 144ms
- ✓ app/contexts/LocationContext.test.tsx (4 tests) 132ms
- ✓ app/contexts/UIStateContext.test.tsx (4 tests) 190ms
- ✓ app/components/card/CardToolbar.test.tsx (4 tests) 185ms
+ ✓ app/components/card/cardUtils.test.ts (7 tests) 221ms
+ ✓ app/lib/db/operations.test.ts (12 tests) 153ms
+ ✓ app/contexts/LocationContext.test.tsx (4 tests) 142ms
+ ✓ app/components/CardList/CardAddButton.test.tsx (4 tests) 146ms
+ ✓ app/contexts/UIStateContext.test.tsx (4 tests) 193ms
+ ✓ app/components/card/CardToolbar.test.tsx (4 tests) 266ms
+ ✓ app/components/card/useCardSort.test.ts (5 tests) 114ms
 stderr | app/components/cell/TextCell.test.tsx > TextCell > Enterキー操作: name フィールドで Enter を押すと value フィールドへ移動すること
 An update to TextCell inside a test was not wrapped in act(...).
 
@@ -20,11 +20,11 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/cell/CellContainer.test.tsx (2 tests) 273ms
- ✓ app/contexts/RarityContext.test.tsx (3 tests) 215ms
- ✓ app/components/cell/TextCell.test.tsx (9 tests) 372ms
- ✓ app/components/cell/TimeCell.test.tsx (7 tests) 371ms
- ✓ app/hooks/useCardList.test.ts (3 tests) 506ms
+ ✓ app/components/cell/TextCell.test.tsx (9 tests) 335ms
+ ✓ app/contexts/RarityContext.test.tsx (3 tests) 217ms
+ ✓ app/hooks/useCardList.test.ts (3 tests) 425ms
+ ✓ app/components/cell/CellContainer.test.tsx (2 tests) 291ms
+ ✓ app/components/cell/TimeCell.test.tsx (7 tests) 377ms
 stderr | app/components/Header/Header.test.tsx > Header Component > renders card counts correctly
 Received `true` for a non-boolean attribute `jsx`.
 
@@ -33,15 +33,15 @@ Received `true` for a non-boolean attribute `global`.
 
 If you want to write it to the DOM, pass a string instead: global="true" or global={value.toString()}.
 
- ✓ app/components/Header/Header.test.tsx (5 tests) 382ms
- ✓ app/components/cell/TaskCell.test.tsx (4 tests) 770ms
-     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  632ms
- ✓ app/components/CardList/CardList.test.tsx (1 test) 564ms
-     ✓ should render only a subset of cards (90 limit)  558ms
- ✓ app/components/card/CardFAB.test.tsx (6 tests) 895ms
-     ✓ renders the FAB button  624ms
- ✓ app/components/card/Card.test.tsx (8 tests) 749ms
-     ✓ renders the card container  308ms
+ ✓ app/components/Header/Header.test.tsx (5 tests) 414ms
+ ✓ app/components/cell/TaskCell.test.tsx (4 tests) 794ms
+     ✓ 初期表示: name と value (チェック状態) が正しく表示されること  655ms
+ ✓ app/components/CardList/CardList.test.tsx (1 test) 553ms
+     ✓ should render only a subset of cards (90 limit)  547ms
+ ✓ app/components/card/CardFAB.test.tsx (6 tests) 897ms
+     ✓ renders the FAB button  618ms
+ ✓ app/components/card/Card.test.tsx (8 tests) 759ms
+     ✓ renders the card container  312ms
 Not implemented: Window's alert() method
 Not implemented: navigation to another Document
 stderr | app/components/db-viewer/DbViewer.test.tsx > DbViewer > 閉じるボタンをクリックすると onClose が呼ばれること
@@ -78,17 +78,17 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1352ms
-     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  940ms
- ✓ app/components/card/CardDisplay.test.tsx (2 tests) 770ms
-     ✓ renders Time and Text cells for a newly created card  738ms
- ✓ app/lib/models/cell.test.ts (9 tests) 14ms
- ✓ app/hooks/useAutoVisibility.test.ts (4 tests) 64ms
- ✓ app/components/card/useCardSort.test.ts (5 tests) 57ms
+ ✓ app/components/db-viewer/DbViewer.test.tsx (6 tests) 1448ms
+     ✓ isOpen=true の時に表示され、ロゴ、操作ボタン、リスト情報、リストヘッダーが存在すること  1001ms
+ ✓ app/components/card/CardDisplay.test.tsx (2 tests) 777ms
+     ✓ renders Time and Text cells for a newly created card  745ms
+ ✓ app/lib/db/fileIO.test.ts (7 tests) 66ms
+ ✓ app/lib/models/cell.test.ts (6 tests) 12ms
+ ✓ app/hooks/useAutoVisibility.test.ts (4 tests) 62ms
  ✓ app/lib/rarity/RarityCalculator.test.ts (5 tests) 8ms
 
  Test Files  23 passed (23)
-      Tests  121 passed (121)
-   Start at  09:52:27
-   Duration  12.56s (transform 6.95s, setup 15.78s, import 35.47s, tests 8.50s, environment 104.75s)
+      Tests  118 passed (118)
+   Start at  10:28:17
+   Duration  12.14s (transform 6.25s, setup 15.19s, import 35.09s, tests 8.67s, environment 102.95s)
 

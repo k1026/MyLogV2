@@ -4,14 +4,14 @@ import { TextCell } from './TextCell';
 import { CellAttribute, Cell } from '@/app/lib/models/cell';
 
 describe('TextCell', () => {
-    const baseCell: Cell = {
+    const baseCell = new Cell({
         id: '1234567890123-ABCDE',
         attribute: CellAttribute.Text,
         name: 'Initial Name',
         value: 'Initial Value',
         geo: null,
         remove: null,
-    };
+    });
 
     const mockSave = vi.fn();
 
@@ -66,7 +66,7 @@ describe('TextCell', () => {
         });
 
         it('初期フォーカス: 両方空の場合は name にフォーカス', () => {
-            const cell = { ...baseCell, name: '', value: '' };
+            const cell = new Cell({ ...baseCell, name: '', value: '' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             // TextCellのコンテナをクリックしてフォーカス制御を発動させる
@@ -80,7 +80,7 @@ describe('TextCell', () => {
         });
 
         it('初期フォーカス: nameのみある場合は value にフォーカス', () => {
-            const cell = { ...baseCell, name: 'Title Only', value: '' };
+            const cell = new Cell({ ...baseCell, name: 'Title Only', value: '' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             fireEvent.click(screen.getByTestId('text-cell'));
@@ -91,7 +91,7 @@ describe('TextCell', () => {
         });
 
         it('初期フォーカス: valueのみある場合は name にフォーカス', () => {
-            const cell = { ...baseCell, name: '', value: 'Content Only' };
+            const cell = new Cell({ ...baseCell, name: '', value: 'Content Only' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             fireEvent.click(screen.getByTestId('text-cell'));
@@ -102,7 +102,7 @@ describe('TextCell', () => {
         });
 
         it('初期フォーカス: 両方ある場合は value にフォーカス', () => {
-            const cell = { ...baseCell, name: 'Title', value: 'Content' };
+            const cell = new Cell({ ...baseCell, name: 'Title', value: 'Content' });
             render(<TextCell cell={cell} onSave={mockSave} />);
 
             fireEvent.click(screen.getByTestId('text-cell'));
@@ -114,7 +114,7 @@ describe('TextCell', () => {
     });
 
     it('表示制御: フォーカスが外れた状態で空のフィールドが非表示になること', () => {
-        const cell = { ...baseCell, name: '', value: 'Something' };
+        const cell = new Cell({ ...baseCell, name: '', value: 'Something' });
         const { rerender } = render(<TextCell cell={cell} onSave={mockSave} />);
 
         // name は空なので非表示（または存在しない）

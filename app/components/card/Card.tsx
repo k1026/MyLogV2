@@ -153,14 +153,14 @@ export const Card: React.FC<CardProps> = ({
     };
 
     const renderCell = (c: CellDB) => {
-        const cellModel: Cell = {
+        const cellModel = new Cell({
             id: c.I,
             attribute: c.A as CellAttribute,
             name: c.N,
             value: c.V,
             geo: c.G,
             remove: c.R
-        };
+        });
         return (
             <div key={c.I} className="mb-2">
                 <CellContainer

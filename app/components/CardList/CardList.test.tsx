@@ -15,7 +15,7 @@ vi.mock('@/app/contexts/LocationContext', () => ({
 }));
 
 const createDummyCards = (count: number): Cell[] =>
-    Array.from({ length: count }, (_, i) => ({
+    Array.from({ length: count }, (_, i) => new Cell({
         id: `card-${i}`,
         attribute: 'Card' as CellAttribute,
         name: `Card ${i}`,
