@@ -6,6 +6,8 @@ import { cn } from '@/app/lib/utils';
 import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
 import { EstimationCandidate } from '@/app/lib/services/estimation/types';
 import { TitleCandidates } from './TitleCandidates';
+import { useFilter } from '@/app/contexts/FilterContext';
+import { highlightText } from '@/app/lib/utils/highlight';
 
 interface TaskCellProps {
     cell: Cell;
@@ -15,8 +17,12 @@ interface TaskCellProps {
 
 export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
     const [name, setName] = useState(cell.name);
+    const [isFocused, setIsFocused] = useState(false);
+    const { filterSettings } = useFilter();
+    const highlightKeywords = filterSettings.keywords.include;
     const isChecked = cell.value === 'true';
     const nameRef = useRef<HTMLInputElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Estimation Hook
     const { estimate } = useCellTitleEstimation();
@@ -66,10 +72,13 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
         onSave?.(new Cell({ ...cell, value: checked ? 'true' : 'false' }));
     };
 
-    const handleBlur = () => {
-        setShowCandidates(false);
-        if (name !== cell.name) {
-            onSave?.(new Cell({ ...cell, name }));
+    const handleBlur = (e: React.FocusEvent) => {
+        if (!containerRef.current?.contains(e.relatedTarget as Node)) {
+            setIsFocused(false);
+            setShowCandidates(false);
+            if (name !== cell.name) {
+                onSave?.(new Cell({ ...cell, name }));
+            }
         }
     };
 
@@ -82,6 +91,7 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
 
     return (
         <div
+            ref={containerRef}
             data-testid="task-cell"
             onClick={handleContainerClick}
             className="flex items-center justify-start gap-3 w-full flex-1 cursor-text p-3"
@@ -104,22 +114,39 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                         />
                     </div>
                 )}
-                <input
-                    ref={nameRef}
-                    type="text"
-                    value={name}
-                    onChange={(e) => {
-                        setName(e.target.value);
-                        setShowCandidates(false);
-                    }}
-                    onBlur={handleBlur}
-                    placeholder="To-do Task"
-                    className={cn(
-                        "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-left font-bold text-[20px] p-3 rounded-none placeholder:text-slate-400 flex-1 w-full",
-                        "focus:border-purple-500",
-                        isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"
-                    )}
-                />
+                <div className="relative flex-1">
+                    {!isFocused && name ? (
+                        <div className={cn(
+                            "absolute inset-0 p-3 text-left font-bold text-[20px] break-words pointer-events-none",
+                            isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"
+                        )}>
+                            {highlightText(name, highlightKeywords)}
+                        </div>
+                    ) : null}
+                    <input
+                        ref={nameRef}
+                        type="text"
+                        value={name}
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setShowCandidates(false);
+                        }}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={handleBlur}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                nameRef.current?.blur();
+                            }
+                        }}
+                        placeholder="To-do Task"
+                        className={cn(
+                            "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-left font-bold text-[20px] p-3 rounded-none placeholder:text-slate-400 flex-1 w-full",
+                            "focus:border-purple-500",
+                            isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800",
+                            !isFocused && name ? "text-transparent" : ""
+                        )}
+                    />
+                </div>
             </div>
         </div>
     );

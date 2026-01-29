@@ -12,12 +12,15 @@ import { CardList } from './components/CardList/CardList';
 import { CardAddButton } from './components/CardList/CardAddButton';
 import { Footer } from './components/Footer/Footer';
 import { useUIState } from './contexts/UIStateContext';
+import { useFilter } from './contexts/FilterContext';
+import { filterCards } from './lib/filter/cardFilter';
 import { useCellTitleEstimation } from './lib/hooks/useCellTitleEstimation';
 
 export default function Home() {
-    const { sortOrder } = useUIState();
+    const { sortOrder, filterState } = useUIState();
+    const { filterSettings } = useFilter();
     const useCardListResult = useCardList(sortOrder);
-    const { cards, isLoading, isSorting, totalCount } = useCardListResult;
+    const { cards, subCellMap, isLoading, isSorting, totalCount } = useCardListResult;
     const { isCalculating } = useRarity();
     const [mounted, setMounted] = useState(false);
     const [isDbViewerOpen, setIsDbViewerOpen] = useState(false);
@@ -30,15 +33,20 @@ export default function Home() {
         initEstimation();
     }, [initEstimation]);
 
+    // フィルタリングの適用
+    const filteredCards = filterState === 'on'
+        ? filterCards(cards, subCellMap, filterSettings)
+        : cards.filter(c => c.remove === null);
+
     const handleReset = () => {
         setFocusedCardId(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleRandomPick = () => {
-        if (cards.length === 0) return;
-        const randomIndex = Math.floor(Math.random() * cards.length);
-        const randomCard = cards[randomIndex];
+        if (filteredCards.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * filteredCards.length);
+        const randomCard = filteredCards[randomIndex];
         setFocusedCardId(randomCard.id);
     };
 
@@ -61,7 +69,7 @@ export default function Home() {
     return (
         <main className="h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-purple-100 relative overflow-hidden">
             <Header
-                cardCount={cards.length}
+                cardCount={filteredCards.length}
                 totalCardCount={totalCount}
                 onReset={handleReset}
                 onRandomPick={handleRandomPick}
@@ -77,13 +85,13 @@ export default function Home() {
                         <div className="w-12 h-12 border-4 border-purple-500/10 border-t-purple-600 rounded-full animate-spin" />
                         <p className="text-slate-400 font-medium animate-pulse">Loading Logs...</p>
                     </div>
-                ) : cards.length === 0 ? (
+                ) : filteredCards.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <p className="text-slate-400 font-medium">表示するカードがありません</p>
                     </div>
                 ) : (
                     <CardList
-                        cards={cards}
+                        cards={filteredCards}
                         focusedId={focusedCardId}
                         onFocusClear={() => setFocusedCardId(null)}
                         onFocus={setFocusedCardId}

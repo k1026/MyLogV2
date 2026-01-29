@@ -10,6 +10,8 @@ import { getRarityStyle } from '@/app/lib/rarity/RarityColor';
 import { CellContainer } from '../cell/CellContainer';
 import { cleanupCardCells, addCellToCard } from './cardUtils';
 import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
+import { useFilter } from '@/app/contexts/FilterContext';
+import { highlightText } from '@/app/lib/utils/highlight';
 
 interface CardProps {
     cell: Cell;
@@ -29,6 +31,8 @@ export const Card: React.FC<CardProps> = ({
     externalExpanded // New prop
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
+    const { filterSettings } = useFilter();
+    const highlightKeywords = filterSettings.keywords.include;
 
     // Sync with external control if provided
     React.useEffect(() => {
@@ -156,7 +160,7 @@ export const Card: React.FC<CardProps> = ({
             onClick={!isExpanded ? handleToggle : undefined}
         >
             <div className={`flex items-center w-full mb-2 ${isExpanded ? 'justify-end' : 'justify-between'}`}>
-                {!isExpanded && <div className="font-bold text-lg text-white">{displayTitle}</div>}
+                {!isExpanded && <div className="font-bold text-lg text-white">{highlightText(displayTitle, highlightKeywords)}</div>}
                 <div className="flex items-center gap-2">
                     {isExpanded && <CardToolbar sortState={sortState} />}
                     {!isExpanded && <div className="text-xs text-gray-400">{formattedDate}</div>}

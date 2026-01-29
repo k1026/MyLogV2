@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Cell } from '@/app/lib/models/cell';
+import { Cell, CellAttribute } from '@/app/lib/models/cell';
 import { CellRepository } from '@/app/lib/db/operations';
 import { SortOrder } from '../contexts/UIStateContext';
 
 export interface UseCardListResult {
     cards: Cell[];
+    subCellMap: Map<string, Cell>;
     isLoading: boolean;
     isSorting: boolean;
     totalCount: number;
@@ -15,6 +16,7 @@ const BATCH_SIZE = 1000;
 
 export function useCardList(sortOrder: SortOrder = 'desc'): UseCardListResult {
     const [cards, setCards] = useState<Cell[]>([]);
+    const [subCellMap, setSubCellMap] = useState<Map<string, Cell>>(new Map());
     const [isLoading, setIsLoading] = useState(true);
     const [isSorting, setIsSorting] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
@@ -29,44 +31,29 @@ export function useCardList(sortOrder: SortOrder = 'desc'): UseCardListResult {
     useEffect(() => {
         isMounted.current = true;
 
-        const loadCards = async () => {
+        const loadData = async () => {
             setIsLoading(true);
             try {
-                // Initial load
-                const initialBatch = await CellRepository.getCards(0, BATCH_SIZE);
+                // Initial load: fetch everything to build subCellMap and extract cards
+                // Note: If performance becomes an issue, we can optimize later, 
+                // but for filtering we need all data in memory.
+                const allCells = await CellRepository.getAll();
                 if (!isMounted.current) return;
 
-                setCards(initialBatch);
-                setIsLoading(false); // UI visible after first batch
+                const newSubCellMap = new Map<string, Cell>();
+                const newCards: Cell[] = [];
 
-                const count = await CellRepository.getCardCount();
-                if (!isMounted.current) return;
-                setTotalCount(count);
+                allCells.forEach(cell => {
+                    newSubCellMap.set(cell.id, cell);
+                    if (cell.attribute === CellAttribute.Card) {
+                        newCards.push(cell);
+                    }
+                });
 
-                // Background load
-                let currentOffset = BATCH_SIZE;
-                // Continue loading if we have more cards
-                while (currentOffset < count) {
-                    const nextBatch = await CellRepository.getCards(currentOffset, BATCH_SIZE);
-                    if (!isMounted.current) return;
-
-                    if (nextBatch.length === 0) break;
-
-                    setCards(prev => {
-                        const next = [...prev, ...nextBatch];
-                        return next.sort((a, b) => {
-                            if (sortOrderRef.current === 'desc') {
-                                return b.id.localeCompare(a.id);
-                            } else {
-                                return a.id.localeCompare(b.id);
-                            }
-                        });
-                    });
-                    currentOffset += BATCH_SIZE;
-
-                    // Small delay to yield to main thread
-                    await new Promise(resolve => setTimeout(resolve, 10));
-                }
+                setSubCellMap(newSubCellMap);
+                setCards(newCards); // Already sorted by ID descending from getAll()
+                setTotalCount(newCards.length);
+                setIsLoading(false);
 
             } catch (error) {
                 console.error("Failed to load cards", error);
@@ -74,7 +61,7 @@ export function useCardList(sortOrder: SortOrder = 'desc'): UseCardListResult {
             }
         };
 
-        loadCards();
+        loadData();
 
         return () => {
             isMounted.current = false;
@@ -111,11 +98,17 @@ export function useCardList(sortOrder: SortOrder = 'desc'): UseCardListResult {
                 }
             });
         });
+        setSubCellMap(prev => {
+            const next = new Map(prev);
+            next.set(card.id, card);
+            return next;
+        });
         setTotalCount(prev => prev + 1);
     };
 
     return {
         cards,
+        subCellMap,
         isLoading,
         isSorting,
         totalCount,

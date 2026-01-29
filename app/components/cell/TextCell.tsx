@@ -5,6 +5,8 @@ import { cn } from '@/app/lib/utils';
 import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
 import { EstimationCandidate } from '@/app/lib/services/estimation/types';
 import { TitleCandidates } from './TitleCandidates';
+import { useFilter } from '@/app/contexts/FilterContext';
+import { highlightText } from '@/app/lib/utils/highlight';
 
 interface TextCellProps {
     cell: Cell;
@@ -16,6 +18,8 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
     const [name, setName] = useState(cell.name);
     const [value, setValue] = useState(cell.value);
     const [isFocused, setIsFocused] = useState(false);
+    const { filterSettings } = useFilter();
+    const highlightKeywords = filterSettings.keywords.include;
 
     // Estimation Hook
     const { estimate } = useCellTitleEstimation();
@@ -151,35 +155,51 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
                             />
                         </div>
                     )}
-                    <input
-                        ref={nameRef}
-                        type="text"
-                        value={name}
-                        onChange={(e) => {
-                            setName(e.target.value);
-                            setShowCandidates(false); // 手動入力時は閉じる
-                        }}
-                        onKeyDown={handleKeyDown}
-                        placeholder={isFocused || !name ? "Title" : ""}
-                        className={cn(
-                            "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-left p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
-                            "focus:border-purple-500"
+                    <div className="relative w-full">
+                        {!isFocused && name && (
+                            <div className="absolute inset-0 p-2 text-slate-800 font-bold text-[20px] leading-tight break-words pointer-events-none">
+                                {highlightText(name, highlightKeywords)}
+                            </div>
                         )}
-                    />
+                        <input
+                            ref={nameRef}
+                            type="text"
+                            value={name}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                setShowCandidates(false); // 手動入力時は閉じる
+                            }}
+                            onKeyDown={handleKeyDown}
+                            placeholder={isFocused || !name ? "Title" : ""}
+                            className={cn(
+                                "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-left p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
+                                "focus:border-purple-500",
+                                !isFocused && name ? "text-transparent" : "text-slate-800"
+                            )}
+                        />
+                    </div>
                 </div>
             )}
             {showValue && (
-                <textarea
-                    ref={valueRef}
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    placeholder={isFocused || !value ? "Description..." : ""}
-                    rows={1}
-                    className={cn(
-                        "bg-transparent border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-left p-2 rounded-none text-slate-700 placeholder:text-slate-400 leading-relaxed text-[18px]",
-                        "focus:border-purple-500"
+                <div className="relative w-full">
+                    {!isFocused && value && (
+                        <div className="absolute inset-0 p-2 text-slate-700 text-left leading-relaxed text-[18px] break-words whitespace-pre-wrap pointer-events-none">
+                            {highlightText(value, highlightKeywords)}
+                        </div>
                     )}
-                />
+                    <textarea
+                        ref={valueRef}
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        placeholder={isFocused || !value ? "Description..." : ""}
+                        rows={1}
+                        className={cn(
+                            "bg-transparent border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-left p-2 rounded-none text-slate-700 placeholder:text-slate-400 leading-relaxed text-[18px]",
+                            "focus:border-purple-500",
+                            !isFocused && value ? "text-transparent" : "text-slate-700"
+                        )}
+                    />
+                </div>
             )}
         </div>
     );
