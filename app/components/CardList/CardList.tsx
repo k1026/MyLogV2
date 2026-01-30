@@ -1,8 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Cell } from '@/app/lib/models/cell';
 import { Card } from '../card/Card';
 import { cn } from '@/app/lib/utils';
 import { useUIState } from '@/app/contexts/UIStateContext';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
 interface CardListProps {
     cards: Cell[];
@@ -15,22 +16,23 @@ interface CardListProps {
 export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate }: CardListProps) {
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
     const { viewMode, handleScroll: syncScroll } = useUIState();
-    const containerRef = useRef<HTMLDivElement>(null);
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
 
+    // Virtuoso handles scroll events
     const handleScroll = (e: React.UIEvent<HTMLElement>) => {
-        // Pass scroll position to UI context for header/footer visibility
         const scrollTop = (e.currentTarget as HTMLElement).scrollTop;
         syncScroll(scrollTop);
     };
 
-    // Scroll helper
+    // Scroll helper using Virtuoso
     const scrollToCard = (id: string) => {
-        const element = document.getElementById(`card-wrapper-${id}`);
-        if (element && containerRef.current) {
-            // スムーズスクロールで対象要素までスクロール
-            // ヘッダー分のオフセットを考慮する必要がある場合はここで行うが、
-            // とりあえずblock: 'start'で呼び出す
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const index = cards.findIndex(c => c.id === id);
+        if (index !== -1 && virtuosoRef.current) {
+            virtuosoRef.current.scrollToIndex({
+                index,
+                align: 'start',
+                behavior: 'smooth'
+            });
         }
     };
 
@@ -45,7 +47,7 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
         } else if (focusedId === null && expandedCardId) {
             setExpandedCardId(null);
         }
-    }, [focusedId]);
+    }, [focusedId, cards]); // Added cards dependency to ensuring index lookup works if cards change
 
     const handleExpand = (id: string) => {
         setExpandedCardId(id);
@@ -59,47 +61,45 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
     const handleCollapse = (id: string) => {
         setExpandedCardId(null);
         if (onFocusClear) onFocusClear();
-        // Removed forced scroll on collapse to prevent screen jumping
+        // No forced scroll on collapse
     };
 
+    // Header and Footer components for Virtuoso
+    const Header = useMemo(() => () => <div className="h-[64px] w-full flex-shrink-0" />, []);
+    const Footer = useMemo(() => () => <div className="h-[80px] w-full flex-shrink-0" />, []);
+
     return (
-        <div
-            ref={containerRef}
-            data-testid="card-list-container"
-            className="h-full w-full relative overflow-y-auto scroll-smooth"
+        <Virtuoso
+            ref={virtuosoRef}
+            data={cards}
+            data-testid="virtuoso-container"
+            className="h-full w-full"
             onScroll={handleScroll}
-        >
-            {/* Header Spacer */}
-            <div className="h-[64px] w-full flex-shrink-0" />
-
-            <div className="w-full flex flex-col">
-                {cards.map((card) => {
-                    const isExpanded = card.id === expandedCardId;
-
-                    return (
-                        <div
-                            key={card.id}
-                            id={`card-wrapper-${card.id}`}
-                            data-testid="card-item-wrapper"
-                            className={cn(
-                                "w-full px-4 mb-4 transition-all duration-500",
-                                isExpanded ? "z-50" : "z-0"
-                            )}
-                        >
-                            <Card
-                                cell={card}
-                                externalExpanded={isExpanded}
-                                onUpdate={onCardUpdate}
-                                onExpand={() => handleExpand(card.id)}
-                                onCollapse={() => handleCollapse(card.id)}
-                            />
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Footer Spacer */}
-            <div className="h-[80px] w-full flex-shrink-0" />
-        </div>
+            components={{
+                Header: Header,
+                Footer: Footer
+            }}
+            itemContent={(index, card) => {
+                const isExpanded = card.id === expandedCardId;
+                return (
+                    <div
+                        id={`card-wrapper-${card.id}`}
+                        data-testid="card-item-wrapper"
+                        className={cn(
+                            "w-full px-4 mb-4 transition-all duration-500",
+                            isExpanded ? "z-50 relative" : "z-0"
+                        )}
+                    >
+                        <Card
+                            cell={card}
+                            externalExpanded={isExpanded}
+                            onUpdate={onCardUpdate}
+                            onExpand={() => handleExpand(card.id)}
+                            onCollapse={() => handleCollapse(card.id)}
+                        />
+                    </div>
+                );
+            }}
+        />
     );
 }
