@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 export type SortOrder = 'asc' | 'desc';
-export type ViewMode = 'list' | 'grid';
+export type ViewMode = 'list' | 'enum';
 export type FilterState = 'off' | 'on' | 'disabled';
 
 interface UIStateContextType {
@@ -81,7 +81,7 @@ export const UIStateProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     const toggleViewMode = () => {
-        setViewMode(prev => prev === 'list' ? 'grid' : 'list');
+        setViewMode(prev => prev === 'list' ? 'enum' : 'list');
     };
 
     const toggleFilterState = () => {

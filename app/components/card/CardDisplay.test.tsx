@@ -21,6 +21,12 @@ vi.mock('@/app/contexts/LocationContext', () => ({
     }),
 }));
 
+vi.mock('@/app/contexts/UIStateContext', () => ({
+    useUIState: () => ({
+        viewMode: 'list',
+    }),
+}));
+
 // We'll mock useLiveQuery to return data based on the card content
 // But since we can't easily switch mocks per test in parallel mode without factories,
 // We will simulate the "Fresh Card" scenario in this file exclusively.

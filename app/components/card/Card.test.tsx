@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import { Card } from './Card';
 import { Cell, CellAttribute } from '@/app/lib/models/cell';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { useUIState } from '@/app/contexts/UIStateContext';
 
 // --- Mocks ---
 
@@ -45,7 +46,8 @@ vi.mock('@/app/lib/db/db', () => ({
 
 const defaultChildCells = [
     { I: 'child1', A: 'Time', N: 'Time', V: 'Now', G: null, R: null },
-    { I: 'child2', A: 'Text', N: 'Child Title', V: 'Some text', G: null, R: null }
+    { I: 'child2', A: 'Text', N: 'Child Title 1', V: 'Some text', G: null, R: null },
+    { I: 'child3', A: 'Task', N: 'Child Title 2', V: 'done:false', G: null, R: null }
 ];
 
 vi.mock('dexie-react-hooks', () => ({
@@ -67,11 +69,20 @@ vi.mock('@/app/contexts/LocationContext', () => ({
     }),
 }));
 
+vi.mock('@/app/contexts/UIStateContext', () => ({
+    useUIState: vi.fn(() => ({
+        viewMode: 'list',
+    })),
+}));
+
+const mockUseUIState = vi.mocked(useUIState);
+
 vi.mock('./cardUtils', () => ({
     cleanupCardCells: vi.fn(),
     createCard: vi.fn(),
     addCellToCard: vi.fn().mockResolvedValue({ id: 'new-cell', attribute: 'Text' }),
 }));
+
 
 import { cleanupCardCells, addCellToCard } from './cardUtils';
 
@@ -97,7 +108,7 @@ describe('Card Component', () => {
     it('displays the title of the first text/task cell', async () => {
         render(<Card cell={mockCardCell} />);
         await waitFor(() => {
-            expect(screen.getByText('Child Title')).toBeInTheDocument();
+            expect(screen.getByText('Child Title 1')).toBeInTheDocument();
         });
     });
 
@@ -123,10 +134,10 @@ describe('Card Component', () => {
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
-        // Find the Text cell (Child Title) input
+        // Find the Text cell (Child Title 1) input
         // Note: TextCell renders 2 inputs (Title, Value).
-        // "Child Title" is in Title input.
-        const titleInput = screen.getByDisplayValue('Child Title');
+        // "Child Title 1" is in Title input.
+        const titleInput = screen.getByDisplayValue('Child Title 1');
 
         // Change text
         fireEvent.change(titleInput, { target: { value: 'Updated Title' } });
@@ -226,7 +237,7 @@ describe('Card Component', () => {
         render(<Card cell={mockCardCell} />);
         // Title is only visible when collapsed
         await waitFor(() => {
-            const title = screen.getByText('Child Title').closest('div');
+            const title = screen.getByText('Child Title 1');
             expect(title).toHaveClass('text-lg');
             expect(title).toHaveClass('font-bold');
         });
@@ -270,8 +281,10 @@ describe('Card Component', () => {
         // Let's look for 'line-through' on title.
 
         await waitFor(() => {
-            const title = screen.getByText('Child Title').closest('div');
-            expect(title).toHaveClass('line-through');
+            const titleElement = screen.getByText('Child Title 1');
+            // The line-through class is now on the parent container of the list
+            const container = titleElement.closest('.flex-col');
+            expect(container).toHaveClass('line-through');
         });
 
         // For background, we might check if style is NOT applied or if a specific class like 'bg-gray-800/50' is present.
@@ -279,5 +292,53 @@ describe('Card Component', () => {
         // Let's expect 'bg-gray-500/50' as a starting point for "thin gray" in a dark theme or similar.
         // Or "gray" usually implies `bg-gray-*`.
         expect(card).toHaveClass('bg-gray-500/20'); // Proposed implementation
+    });
+
+    it('通常表示（Listモード、Collapsed）：最初のText/Taskセルのタイトルのみが表示されること（Normalモード）', async () => {
+        mockUseUIState.mockReturnValue({
+            viewMode: 'list',
+            handleScroll: vi.fn(),
+            sortOrder: 'desc',
+            toggleSortOrder: vi.fn(),
+            toggleViewMode: vi.fn(),
+            filterState: 'off',
+            toggleFilterState: vi.fn(),
+            setFilterState: vi.fn(),
+            headerVisible: true,
+            setHeaderVisible: vi.fn(),
+            footerVisible: true,
+            setFooterVisible: vi.fn(),
+        });
+
+        render(<Card cell={mockCardCell} />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Child Title 1')).toBeInTheDocument();
+            expect(screen.queryByText('Child Title 2')).not.toBeInTheDocument();
+        });
+    });
+
+    it('通常表示（Enumモード、Collapsed）：TextとTaskセルのタイトルが縦に列挙されること', async () => {
+        mockUseUIState.mockReturnValue({
+            viewMode: 'enum',
+            handleScroll: vi.fn(),
+            sortOrder: 'desc',
+            toggleSortOrder: vi.fn(),
+            toggleViewMode: vi.fn(),
+            filterState: 'off',
+            toggleFilterState: vi.fn(),
+            setFilterState: vi.fn(),
+            headerVisible: true,
+            setHeaderVisible: vi.fn(),
+            footerVisible: true,
+            setFooterVisible: vi.fn(),
+        });
+
+        render(<Card cell={mockCardCell} />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Child Title 1')).toBeInTheDocument();
+            expect(screen.getByText('Child Title 2')).toBeInTheDocument();
+        });
     });
 });

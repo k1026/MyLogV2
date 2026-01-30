@@ -12,6 +12,7 @@ import { cleanupCardCells, addCellToCard } from './cardUtils';
 import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
 import { useFilter } from '@/app/contexts/FilterContext';
 import { highlightText } from '@/app/lib/utils/highlight';
+import { useUIState } from '@/app/contexts/UIStateContext';
 
 interface CardProps {
     cell: Cell;
@@ -32,6 +33,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
     const { filterSettings } = useFilter();
+    const { viewMode } = useUIState();
     const highlightKeywords = filterSettings.keywords.include;
 
     // Sync with external control if provided
@@ -170,15 +172,27 @@ export const Card: React.FC<CardProps> = ({
             `}
             onClick={!isExpanded && !isRemoved ? handleToggle : undefined}
         >
-            <div className={`flex items-center w-full mb-2 ${isExpanded ? 'justify-end' : 'justify-between'}`}>
+            <div className={`flex ${isExpanded ? 'items-center justify-end' : 'items-start justify-between'} w-full mb-2`}>
                 {!isExpanded && (
-                    <div className={`font-bold text-lg text-white ${isRemoved ? 'line-through opacity-70' : ''}`}>
-                        {highlightText(displayTitle, highlightKeywords)}
+                    <div className={`flex flex-col gap-0.5 ${isRemoved ? 'line-through opacity-70' : ''}`}>
+                        {viewMode === 'enum' && sortState.sortedCells.some(c => c.A === CellAttribute.Text || c.A === CellAttribute.Task) ? (
+                            sortState.sortedCells
+                                .filter(c => c.A === CellAttribute.Text || c.A === CellAttribute.Task)
+                                .map((c, i) => (
+                                    <div key={c.I} className={i === 0 ? "font-bold text-lg text-white" : "text-sm text-white/80"}>
+                                        {highlightText(c.N || '', highlightKeywords)}
+                                    </div>
+                                ))
+                        ) : (
+                            <div className="font-bold text-lg text-white">
+                                {highlightText(displayTitle, highlightKeywords)}
+                            </div>
+                        )}
                     </div>
                 )}
                 <div className="flex items-center gap-2">
                     {isExpanded && <CardToolbar sortState={sortState} />}
-                    {!isExpanded && <div className="text-xs text-gray-400">{formattedDate}</div>}
+                    {!isExpanded && <div className="text-xs text-gray-400 mt-1">{formattedDate}</div>}
                     {isExpanded && (
                         <button
                             data-testid="card-close-button"

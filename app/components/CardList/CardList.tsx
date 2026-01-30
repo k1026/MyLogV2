@@ -60,20 +60,8 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
     // List: 1 item per row. Grid: 2 items per row.
 
     const rows = useMemo(() => {
-        if (viewMode === 'list') {
-            return cards.map(c => [c]);
-        } else {
-            const result: Cell[][] = [];
-            for (let i = 0; i < cards.length; i += 2) {
-                const chunk = [cards[i]];
-                if (i + 1 < cards.length) {
-                    chunk.push(cards[i + 1]);
-                }
-                result.push(chunk);
-            }
-            return result;
-        }
-    }, [cards, viewMode]);
+        return cards.map(c => [c]);
+    }, [cards]);
 
     // Helper to find row index for a given card ID
     const getRowIndexForCard = (id: string) => {
@@ -96,16 +84,10 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
                     Footer: () => <div className="h-[80px]" />,
                 }}
                 itemContent={(rowIndex, rowItems) => {
-                    const isGrid = viewMode === 'grid';
-
                     return (
-                        <div className={cn(
-                            "w-full px-4 mb-4", // common padding/margin
-                            isGrid ? "grid grid-cols-2 gap-4" : "flex flex-col"
-                        )}>
-                            {rowItems.map((card, colIndex) => {
+                        <div className="w-full px-4 mb-4 flex flex-col">
+                            {rowItems.map((card) => {
                                 const isExpanded = card.id === expandedCardId;
-                                const originalIndex = isGrid ? rowIndex * 2 + colIndex : rowIndex;
 
                                 return (
                                     <div

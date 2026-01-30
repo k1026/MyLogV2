@@ -83,7 +83,7 @@ describe('UIStateContext', () => {
         act(() => {
             getByTestId('toggle-view').click();
         });
-        expect(getByTestId('view-mode').textContent).toBe('grid');
+        expect(getByTestId('view-mode').textContent).toBe('enum');
 
         act(() => {
             getByTestId('toggle-view').click();
