@@ -13,6 +13,7 @@ interface UIStateContextType {
     toggleViewMode: () => void;
     filterState: FilterState;
     toggleFilterState: () => void;
+    setFilterState: (state: FilterState) => void;
     headerVisible: boolean;
     setHeaderVisible: (visible: boolean) => void;
     footerVisible: boolean;
@@ -98,6 +99,7 @@ export const UIStateProvider: React.FC<{ children: React.ReactNode }> = ({ child
         toggleViewMode,
         filterState,
         toggleFilterState,
+        setFilterState,
         headerVisible: effectiveHeaderVisible,
         setHeaderVisible,
         footerVisible: effectiveFooterVisible,

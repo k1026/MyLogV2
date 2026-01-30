@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils';
 import { X, Calendar, RotateCcw, Check, Type, Tag, Search, Filter } from 'lucide-react';
 import { FilterAttribute, FilterTarget, FilterSettings, DEFAULT_FILTER_SETTINGS } from '../../lib/models/filter';
 import { useFilter } from '../../contexts/FilterContext';
+import { useUIState } from '../../contexts/UIStateContext';
 
 interface FilterDialogProps {
     isOpen: boolean;
@@ -16,6 +17,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
     onClose,
 }) => {
     const { filterSettings, setAttributes, setIncludeKeywords, setExcludeKeywords, setKeywordTarget, setDateRange, resetFilter } = useFilter();
+    const { setFilterState } = useUIState();
 
     // Dialog local state
     const [localAttributes, setLocalAttributes] = useState<FilterAttribute[]>(filterSettings.attributes);
@@ -67,6 +69,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
         setExcludeKeywords(localExclude.trim().split(/\s+/).filter(k => k.length > 0));
         setKeywordTarget(localTarget);
         setDateRange(localFrom, localTo);
+        setFilterState('on');
         onClose();
     };
 
@@ -79,6 +82,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
         setLocalTarget(DEFAULT_FILTER_SETTINGS.keywords.target);
         setLocalFrom(null);
         setLocalTo(null);
+        setFilterState('off');
     };
 
     return (

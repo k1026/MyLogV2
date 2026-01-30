@@ -9,24 +9,38 @@ interface FilterButtonProps {
 }
 
 export const FilterButton: React.FC<FilterButtonProps> = ({ onClick }) => {
-    const { filterState, toggleFilterState } = useUIState();
+    const { filterState } = useUIState();
 
-    const handleClick = () => {
-        if (onClick) onClick();
-        // toggleFilterState is handled in Footer now for specific logic,
-        // but if we want it here, we should be careful.
-        // The spec says 'on' toggles to 'disabled'.
+    const renderIcon = () => {
+        if (filterState === 'on') {
+            return <Filter size={20} fill="currentColor" />;
+        }
+        if (filterState === 'disabled') {
+            return (
+                <div className="relative flex items-center justify-center w-5 h-5">
+                    <Filter size={20} color="currentColor" />
+                    <svg
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                    >
+                        <line x1="4" y1="4" x2="20" y2="20" />
+                    </svg>
+                </div>
+            );
+        }
+        return <Filter size={20} />;
     };
 
     return (
         <FooterButton
-            icon={<Filter size={20} />}
+            icon={renderIcon()}
             label="Filter"
-            onClick={handleClick}
+            onClick={onClick}
             isActive={filterState === 'on'}
-            className={cn(
-                filterState === 'disabled' && "opacity-50 grayscale"
-            )}
         />
     );
 };

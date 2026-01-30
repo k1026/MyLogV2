@@ -1,0 +1,111 @@
+"filename", "language", "TypeScript", "JSON", "JavaScript", "JSON with Comments", "TypeScript JSX", "Markdown", "CSS", "comment", "blank", "total"
+"c:\tojiro\programming\AG\MyLogV2\.agent\SkillGuid.md", "Markdown", 0, 0, 0, 0, 0, 48, 0, 0, 11, 59
+"c:\tojiro\programming\AG\MyLogV2\.agent\manual-skills\cleanup-project\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 16, 0, 0, 3, 19
+"c:\tojiro\programming\AG\MyLogV2\.agent\manual-skills\lightSAT-DD\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 42, 0, 0, 22, 64
+"c:\tojiro\programming\AG\MyLogV2\.agent\manual-skills\planning\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 12, 0, 0, 6, 18
+"c:\tojiro\programming\AG\MyLogV2\.agent\manual-skills\spec-update\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 14, 0, 0, 3, 17
+"c:\tojiro\programming\AG\MyLogV2\.agent\manual-skills\test-optimization\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 23, 0, 0, 5, 28
+"c:\tojiro\programming\AG\MyLogV2\.agent\skills\guideline\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 31, 0, 0, 6, 37
+"c:\tojiro\programming\AG\MyLogV2\.agent\skills\investigate\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 21, 0, 0, 6, 27
+"c:\tojiro\programming\AG\MyLogV2\.agent\skills\ui-spec-template\SKILL.md", "Markdown", 0, 0, 0, 0, 0, 45, 0, 0, 11, 56
+"c:\tojiro\programming\AG\MyLogV2\app\components\CardList\CardAddButton.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 43, 0, 0, 3, 8, 54
+"c:\tojiro\programming\AG\MyLogV2\app\components\CardList\CardAddButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 50, 0, 0, 0, 5, 55
+"c:\tojiro\programming\AG\MyLogV2\app\components\CardList\CardList.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 121, 0, 0, 4, 22, 147
+"c:\tojiro\programming\AG\MyLogV2\app\components\CardList\CardList.tsx", "TypeScript JSX", 0, 0, 0, 0, 111, 0, 0, 16, 14, 141
+"c:\tojiro\programming\AG\MyLogV2\app\components\Filter\FilterDialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 196, 0, 0, 9, 19, 224
+"c:\tojiro\programming\AG\MyLogV2\app\components\Footer\FilterButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 42, 0, 0, 0, 5, 47
+"c:\tojiro\programming\AG\MyLogV2\app\components\Footer\Footer.tsx", "TypeScript JSX", 0, 0, 0, 0, 48, 0, 0, 5, 10, 63
+"c:\tojiro\programming\AG\MyLogV2\app\components\Footer\FooterButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 37, 0, 0, 0, 3, 40
+"c:\tojiro\programming\AG\MyLogV2\app\components\Footer\SortButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 16, 0, 0, 0, 3, 19
+"c:\tojiro\programming\AG\MyLogV2\app\components\Footer\ViewModeButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 15, 0, 0, 0, 3, 18
+"c:\tojiro\programming\AG\MyLogV2\app\components\Header\Header.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 84, 0, 0, 9, 13, 106
+"c:\tojiro\programming\AG\MyLogV2\app\components\Header\Header.tsx", "TypeScript JSX", 0, 0, 0, 0, 55, 0, 0, 0, 7, 62
+"c:\tojiro\programming\AG\MyLogV2\app\components\Header\HeaderActions.tsx", "TypeScript JSX", 0, 0, 0, 0, 50, 0, 0, 0, 4, 54
+"c:\tojiro\programming\AG\MyLogV2\app\components\Header\HeaderStatus.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 59, 0, 0, 0, 9, 68
+"c:\tojiro\programming\AG\MyLogV2\app\components\Header\HeaderStatus.tsx", "TypeScript JSX", 0, 0, 0, 0, 45, 0, 0, 0, 5, 50
+"c:\tojiro\programming\AG\MyLogV2\app\components\Header\HeaderTitle.tsx", "TypeScript JSX", 0, 0, 0, 0, 31, 0, 0, 2, 7, 40
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\Card.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 188, 0, 0, 44, 52, 284
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\Card.tsx", "TypeScript JSX", 0, 0, 0, 0, 180, 0, 0, 11, 30, 221
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\CardDisplay.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 55, 0, 0, 30, 16, 101
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\CardFAB.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 103, 0, 0, 7, 38, 148
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\CardFAB.tsx", "TypeScript JSX", 0, 0, 0, 0, 94, 0, 0, 9, 13, 116
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\CardToolbar.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 56, 0, 0, 12, 11, 79
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\CardToolbar.tsx", "TypeScript JSX", 0, 0, 0, 0, 34, 0, 0, 3, 5, 42
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\cardUtils.test.ts", "TypeScript", 114, 0, 0, 0, 0, 0, 0, 22, 35, 171
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\cardUtils.ts", "TypeScript", 105, 0, 0, 0, 0, 0, 0, 18, 27, 150
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\useCardSort.test.ts", "TypeScript", 69, 0, 0, 0, 0, 0, 0, 18, 17, 104
+"c:\tojiro\programming\AG\MyLogV2\app\components\card\useCardSort.ts", "TypeScript", 89, 0, 0, 0, 0, 0, 0, 10, 20, 119
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\CellContainer.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 50, 0, 0, 0, 6, 56
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\CellContainer.tsx", "TypeScript JSX", 0, 0, 0, 0, 51, 0, 0, 4, 8, 63
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TaskCell.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 143, 0, 0, 14, 43, 200
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TaskCell.tsx", "TypeScript JSX", 0, 0, 0, 0, 136, 0, 0, 5, 13, 154
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TextCell.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 177, 0, 0, 9, 46, 232
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TextCell.tsx", "TypeScript JSX", 0, 0, 0, 0, 167, 0, 0, 17, 23, 207
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TimeCell.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 83, 0, 0, 14, 22, 119
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TimeCell.tsx", "TypeScript JSX", 0, 0, 0, 0, 151, 0, 0, 28, 16, 195
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TitleCandidates.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 26, 0, 0, 0, 7, 33
+"c:\tojiro\programming\AG\MyLogV2\app\components\cell\TitleCandidates.tsx", "TypeScript JSX", 0, 0, 0, 0, 30, 0, 0, 0, 4, 34
+"c:\tojiro\programming\AG\MyLogV2\app\components\db-viewer\DbViewer.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 107, 0, 0, 12, 30, 149
+"c:\tojiro\programming\AG\MyLogV2\app\components\db-viewer\DbViewer.tsx", "TypeScript JSX", 0, 0, 0, 0, 314, 0, 0, 7, 27, 348
+"c:\tojiro\programming\AG\MyLogV2\app\contexts\FilterContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 77, 0, 0, 0, 14, 91
+"c:\tojiro\programming\AG\MyLogV2\app\contexts\LocationContext.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 47, 0, 0, 28, 16, 91
+"c:\tojiro\programming\AG\MyLogV2\app\contexts\LocationContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 81, 0, 0, 32, 27, 140
+"c:\tojiro\programming\AG\MyLogV2\app\contexts\RarityContext.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 64, 0, 0, 3, 15, 82
+"c:\tojiro\programming\AG\MyLogV2\app\contexts\RarityContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 52, 0, 0, 3, 13, 68
+"c:\tojiro\programming\AG\MyLogV2\app\contexts\UIStateContext.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 132, 0, 0, 10, 29, 171
+"c:\tojiro\programming\AG\MyLogV2\app\contexts\UIStateContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 103, 0, 0, 3, 18, 124
+"c:\tojiro\programming\AG\MyLogV2\app\globals.css", "CSS", 0, 0, 0, 0, 0, 0, 9, 0, 3, 12
+"c:\tojiro\programming\AG\MyLogV2\app\hooks\useAutoVisibility.test.ts", "TypeScript", 55, 0, 0, 0, 0, 0, 0, 9, 16, 80
+"c:\tojiro\programming\AG\MyLogV2\app\hooks\useAutoVisibility.ts", "TypeScript", 37, 0, 0, 0, 0, 0, 0, 5, 9, 51
+"c:\tojiro\programming\AG\MyLogV2\app\hooks\useCardList.test.ts", "TypeScript", 57, 0, 0, 0, 0, 0, 0, 5, 13, 75
+"c:\tojiro\programming\AG\MyLogV2\app\hooks\useCardList.test.tsx", "TypeScript JSX", 0, 0, 0, 0, 27, 0, 0, 4, 9, 40
+"c:\tojiro\programming\AG\MyLogV2\app\hooks\useCardList.ts", "TypeScript", 105, 0, 0, 0, 0, 0, 0, 6, 18, 129
+"c:\tojiro\programming\AG\MyLogV2\app\layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 30, 0, 0, 0, 3, 33
+"c:\tojiro\programming\AG\MyLogV2\app\lib\db\db.ts", "TypeScript", 23, 0, 0, 0, 0, 0, 0, 2, 7, 32
+"c:\tojiro\programming\AG\MyLogV2\app\lib\db\fileIO.test.ts", "TypeScript", 90, 0, 0, 0, 0, 0, 0, 4, 21, 115
+"c:\tojiro\programming\AG\MyLogV2\app\lib\db\operations.test.ts", "TypeScript", 173, 0, 0, 0, 0, 0, 0, 35, 35, 243
+"c:\tojiro\programming\AG\MyLogV2\app\lib\db\operations.ts", "TypeScript", 139, 0, 0, 0, 0, 0, 0, 7, 28, 174
+"c:\tojiro\programming\AG\MyLogV2\app\lib\filter\cardFilter.test.ts", "TypeScript", 167, 0, 0, 0, 0, 0, 0, 13, 15, 195
+"c:\tojiro\programming\AG\MyLogV2\app\lib\filter\cardFilter.ts", "TypeScript", 83, 0, 0, 0, 0, 0, 0, 11, 13, 107
+"c:\tojiro\programming\AG\MyLogV2\app\lib\hooks\useCellTitleEstimation.ts", "TypeScript", 29, 0, 0, 0, 0, 0, 0, 8, 9, 46
+"c:\tojiro\programming\AG\MyLogV2\app\lib\models\cell.test.ts", "TypeScript", 105, 0, 0, 0, 0, 0, 0, 6, 16, 127
+"c:\tojiro\programming\AG\MyLogV2\app\lib\models\cell.ts", "TypeScript", 53, 0, 0, 0, 0, 0, 0, 11, 9, 73
+"c:\tojiro\programming\AG\MyLogV2\app\lib\models\filter.ts", "TypeScript", 26, 0, 0, 0, 0, 0, 0, 0, 3, 29
+"c:\tojiro\programming\AG\MyLogV2\app\lib\rarity\RarityCalculator.test.ts", "TypeScript", 53, 0, 0, 0, 0, 0, 0, 2, 7, 62
+"c:\tojiro\programming\AG\MyLogV2\app\lib\rarity\RarityCalculator.ts", "TypeScript", 28, 0, 0, 0, 0, 0, 0, 5, 6, 39
+"c:\tojiro\programming\AG\MyLogV2\app\lib\rarity\RarityColor.ts", "TypeScript", 42, 0, 0, 0, 0, 0, 0, 8, 11, 61
+"c:\tojiro\programming\AG\MyLogV2\app\lib\services\LocationService.test.ts", "TypeScript", 22, 0, 0, 0, 0, 0, 0, 6, 7, 35
+"c:\tojiro\programming\AG\MyLogV2\app\lib\services\LocationService.ts", "TypeScript", 18, 0, 0, 0, 0, 0, 0, 3, 7, 28
+"c:\tojiro\programming\AG\MyLogV2\app\lib\services\estimation\CellTitleEstimationService.test.ts", "TypeScript", 103, 0, 0, 0, 0, 0, 0, 29, 29, 161
+"c:\tojiro\programming\AG\MyLogV2\app\lib\services\estimation\CellTitleEstimationService.ts", "TypeScript", 104, 0, 0, 0, 0, 0, 0, 19, 22, 145
+"c:\tojiro\programming\AG\MyLogV2\app\lib\services\estimation\types.ts", "TypeScript", 18, 0, 0, 0, 0, 0, 0, 6, 6, 30
+"c:\tojiro\programming\AG\MyLogV2\app\lib\services\estimation\utils.ts", "TypeScript", 18, 0, 0, 0, 0, 0, 0, 1, 3, 22
+"c:\tojiro\programming\AG\MyLogV2\app\lib\utils.ts", "TypeScript", 5, 0, 0, 0, 0, 0, 0, 0, 2, 7
+"c:\tojiro\programming\AG\MyLogV2\app\lib\utils\highlight.tsx", "TypeScript JSX", 0, 0, 0, 0, 29, 0, 0, 1, 6, 36
+"c:\tojiro\programming\AG\MyLogV2\app\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 103, 0, 0, 8, 16, 127
+"c:\tojiro\programming\AG\MyLogV2\components.json", "JSON", 0, 22, 0, 0, 0, 0, 0, 0, 0, 22
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\00_CordingRules.md", "Markdown", 0, 0, 0, 0, 0, 39, 0, 0, 5, 44
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\01_PageLayout.md", "Markdown", 0, 0, 0, 0, 0, 14, 0, 0, 3, 17
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\02_CellDataStructure.md", "Markdown", 0, 0, 0, 0, 0, 46, 0, 0, 11, 57
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\03_DatabaseSpecification.md", "Markdown", 0, 0, 0, 0, 0, 79, 0, 0, 25, 104
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\04_CellUI.md", "Markdown", 0, 0, 0, 0, 0, 89, 0, 0, 10, 99
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\05_CardUI.md", "Markdown", 0, 0, 0, 0, 0, 96, 0, 0, 15, 111
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\07_CardListUI.md", "Markdown", 0, 0, 0, 0, 0, 107, 0, 0, 14, 121
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\08_DbViewer.md", "Markdown", 0, 0, 0, 0, 0, 48, 0, 0, 15, 63
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\09_Rarity.md", "Markdown", 0, 0, 0, 0, 0, 45, 0, 0, 10, 55
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\10_CellTitleEstimation.md", "Markdown", 0, 0, 0, 0, 0, 103, 0, 0, 34, 137
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\11_Header.md", "Markdown", 0, 0, 0, 0, 0, 118, 0, 0, 11, 129
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\12_Footer.md", "Markdown", 0, 0, 0, 0, 0, 80, 0, 0, 5, 85
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\13_Typography.md", "Markdown", 0, 0, 0, 0, 0, 18, 0, 0, 6, 24
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\14_LocationService.md", "Markdown", 0, 0, 0, 0, 0, 13, 0, 0, 3, 16
+"c:\tojiro\programming\AG\MyLogV2\docs\specs\15_Filter.md", "Markdown", 0, 0, 0, 0, 0, 126, 0, 0, 13, 139
+"c:\tojiro\programming\AG\MyLogV2\eslint.config.mjs", "JavaScript", 0, 0, 46, 0, 0, 0, 0, 31, 15, 92
+"c:\tojiro\programming\AG\MyLogV2\next.config.ts", "TypeScript", 11, 0, 0, 0, 0, 0, 0, 0, 3, 14
+"c:\tojiro\programming\AG\MyLogV2\package-lock.json", "JSON", 0, 12126, 0, 0, 0, 0, 0, 0, 1, 12127
+"c:\tojiro\programming\AG\MyLogV2\package.json", "JSON", 0, 53, 0, 0, 0, 0, 0, 0, 1, 54
+"c:\tojiro\programming\AG\MyLogV2\postcss.config.mjs", "JavaScript", 0, 0, 6, 0, 0, 0, 0, 0, 2, 8
+"c:\tojiro\programming\AG\MyLogV2\public\manifest.json", "JSON", 0, 23, 0, 0, 0, 0, 0, 0, 0, 23
+"c:\tojiro\programming\AG\MyLogV2\test\setup.ts", "TypeScript", 47, 0, 0, 0, 0, 0, 0, 5, 6, 58
+"c:\tojiro\programming\AG\MyLogV2\tsconfig.json", "JSON with Comments", 0, 0, 0, 34, 0, 0, 0, 0, 1, 35
+"c:\tojiro\programming\AG\MyLogV2\vitest.config.ts", "TypeScript", 14, 0, 0, 0, 0, 0, 0, 1, 1, 16
+"Total", "-", 2002, 12224, 52, 34, 3893, 1273, 9, 672, 1410, 21569
