@@ -49,3 +49,10 @@ sw.js.map
 workbox-*.js.map
 worker-*.js.map
 fallback-*.js.map
+
+# Logs
+*.log
+test_*.log
+
+# Build files
+*.tsbuildinfo
