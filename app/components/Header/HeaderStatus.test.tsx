@@ -1,72 +1,67 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { HeaderStatus } from './HeaderStatus';
 import { useLocation } from '../../contexts/LocationContext';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import React from 'react';
 
-// Mock the context
 vi.mock('../../contexts/LocationContext', () => ({
     useLocation: vi.fn()
 }));
 
-// Mock lucide with simple components to pass tests
-// Using props in mock seems to cause issues in this environment, so we use simple placeholders
-vi.mock('lucide-react', () => ({
-    MapPin: () => <div data-testid="MapPin" />,
-    Loader2: () => <div data-testid="Loader2" />,
-    MapPinOff: () => <div data-testid="MapPinOff" />
-}));
-
 describe('HeaderStatus Visual Specs', () => {
     beforeEach(() => {
-        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
-    const setup = (status: string) => {
-        (useLocation as any).mockReturnValue({
-            status: status,
+    const setup = (status: 'active' | 'loading' | 'error' | 'idle') => {
+        vi.mocked(useLocation).mockReturnValue({
+            status,
             toggleLocation: vi.fn()
         });
-        render(<HeaderStatus cardCount={10} cellCount={20} />);
+        const { container } = render(<HeaderStatus cardCount={10} cellCount={20} />);
+        return { container };
     };
 
-    it('Active: displays correct button styles (purple icon implied)', () => {
-        setup('active');
+    it('Active: displays correct styles', () => {
+        const { container } = setup('active');
         const button = screen.getByTitle('Location: active');
-
-        // Check button does NOT have background
-        expect(button.className).not.toContain('bg-purple-100');
-        // Check button text color (icon lines)
-        expect(button.className).toContain('text-slate-500');
-
-        // Icon presence
-        expect(screen.getByTestId('MapPin')).toBeInTheDocument();
+        expect(button).toHaveClass('text-slate-500');
+        const svg = container.querySelector('svg');
+        expect(svg).toBeInTheDocument();
+        expect(svg).toHaveClass('fill-purple-300');
     });
 
-    it('Error: displays correct button styles', () => {
-        setup('error');
+    it('Error: displays correct styles', () => {
+        const { container } = setup('error');
         const button = screen.getByTitle('Location: error');
-
-        expect(button.className).not.toContain('bg-red-500');
-        expect(button.className).toContain('text-red-500');
-        expect(screen.getByTestId('MapPinOff')).toBeInTheDocument();
+        expect(button).toHaveClass('text-red-500');
+        const svg = container.querySelector('svg');
+        expect(svg).toBeInTheDocument();
+        expect(svg).toHaveClass('fill-red-500');
     });
 
-    it('Loading: displays correct button styles', () => {
-        setup('loading');
+    it('Loading: displays correct styles', () => {
+        const { container } = setup('loading');
         const button = screen.getByTitle('Location: loading');
-
-        expect(button.className).not.toContain('bg-white');
-        expect(button.className).toContain('text-slate-400');
-        expect(screen.getByTestId('Loader2')).toBeInTheDocument();
+        expect(button).toHaveClass('text-slate-400', 'cursor-wait');
+        const svg = container.querySelector('svg');
+        expect(svg).toBeInTheDocument();
+        expect(svg).toHaveClass('animate-spin');
     });
 
-    it('Idle: displays correct button styles', () => {
-        setup('idle');
+    it('Idle: displays correct styles', () => {
+        const { container } = setup('idle');
         const button = screen.getByTitle('Location: idle');
+        expect(button).toHaveClass('text-slate-400');
+        const svg = container.querySelector('svg');
+        expect(svg).toBeInTheDocument();
+        expect(svg).toHaveClass('fill-white');
+    });
 
-        expect(button.className).not.toContain('bg-white');
-        expect(button.className).toContain('text-slate-400');
-        expect(screen.getByTestId('MapPin')).toBeInTheDocument();
+    it('displays card and cell counts', () => {
+        setup('active');
+        expect(screen.getByText('CARDS: 10')).toBeInTheDocument();
+        expect(screen.getByText('CELLS: 20')).toBeInTheDocument();
     });
 });

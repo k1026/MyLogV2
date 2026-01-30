@@ -30,6 +30,31 @@ vi.mock('@/app/lib/db/db', () => ({
     }
 }));
 
+// Mock react-virtuoso
+vi.mock('react-virtuoso', () => {
+    const React = require('react');
+    const Virtuoso = React.forwardRef((props: any, ref: any) => {
+        const { data, itemContent } = props;
+
+        React.useImperativeHandle(ref, () => ({
+            scrollToIndex: vi.fn(),
+        }));
+
+        return (
+            <div data-testid="virtuoso-container">
+                {data.map((item: any, index: number) => {
+                    return (
+                        <div key={index} data-testid="virtuoso-item">
+                            {itemContent(index, item)}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    });
+    return { Virtuoso: Virtuoso };
+});
+
 const createDummyCards = (count: number): Cell[] =>
     Array.from({ length: count }, (_, i) => new Cell({
         id: `card-${i}`,
@@ -41,8 +66,8 @@ const createDummyCards = (count: number): Cell[] =>
     }));
 
 describe('CardList Virtual Scroll', () => {
-    it('should render only a subset of cards (90 limit)', () => {
-        const cards = createDummyCards(200);
+    it('should render items using Virtuoso', () => {
+        const cards = createDummyCards(10);
         render(
             <RarityProvider>
                 <UIStateProvider>
@@ -51,17 +76,14 @@ describe('CardList Virtual Scroll', () => {
             </RarityProvider>
         );
 
-        const items = screen.queryAllByTestId('card-item-wrapper');
-
-        // Assertions for Virtual Scroll
-        expect(items.length).toBeGreaterThan(0);
-        expect(items.length).toBeLessThanOrEqual(90);
+        // Since we mock Virtuoso to render all items, we expect 10 wrappers in list mode
+        const items = screen.getAllByTestId('card-item-wrapper');
+        expect(items.length).toBe(10);
     });
 
     it('should call onFocus when a card is expanded', () => {
         const cards = createDummyCards(5);
         const onFocus = vi.fn();
-
 
         render(
             <RarityProvider>
@@ -101,7 +123,7 @@ describe('CardList Virtual Scroll', () => {
         });
     });
 
-    it('should maintain other cards in DOM when a card is expanded', () => {
+    it('should maintain other cards in DOM when a card is expanded (due to mock rendering all)', () => {
         const cards = createDummyCards(10);
         render(
             <RarityProvider>
@@ -115,6 +137,6 @@ describe('CardList Virtual Scroll', () => {
         fireEvent.click(cardContainers[0]);
 
         const wrappers = screen.getAllByTestId('card-item-wrapper');
-        expect(wrappers.length).toBeGreaterThan(1);
+        expect(wrappers.length).toBe(10); // Mock renders all
     });
 });

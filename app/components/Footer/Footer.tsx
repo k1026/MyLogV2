@@ -29,8 +29,8 @@ export const Footer: React.FC = () => {
                     footerVisible ? "translate-y-0" : "translate-y-full"
                 )}
             >
-                {/* Glassmorphism Background */}
-                <div className="absolute inset-0 bg-white/70 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]" />
+                {/* Background & Shadow */}
+                <div className="absolute inset-0 bg-white border-t border-slate-200 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]" />
 
                 <div className="relative max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
                     {/* Left: Sort */}
@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
                 </div>
 
                 {/* Extra padding for safe area on mobile if needed */}
-                <div className="h-[env(safe-area-inset-bottom)] bg-white/70 backdrop-blur-md" />
+                <div className="h-[env(safe-area-inset-bottom)] bg-white" />
             </footer>
 
             <FilterDialog

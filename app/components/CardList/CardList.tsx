@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Cell } from '@/app/lib/models/cell';
 import { Card } from '../card/Card';
 import { cn } from '@/app/lib/utils';
 import { useUIState } from '@/app/contexts/UIStateContext';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
 interface CardListProps {
     cards: Cell[];
@@ -12,25 +13,13 @@ interface CardListProps {
     onCardUpdate?: (card: Cell) => void;
 }
 
-const ESTIMATED_ITEM_HEIGHT = 150; // px
-const GAP = 16;
-const BUFFER_SIZE = 30; // 30 items before and after
-const VISIBLE_COUNT = 30; // Target visible items (approx)
-const WINDOW_SIZE = BUFFER_SIZE * 2 + VISIBLE_COUNT; // 90 items
-
 export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate }: CardListProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const expandedRef = useRef<HTMLDivElement>(null);
-    const [scrollTop, setScrollTop] = useState(0);
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
-    const [clampRange, setClampRange] = useState<[number, number] | null>(null);
-    const lastStartIndexRef = useRef(0);
     const { viewMode, handleScroll: syncScroll } = useUIState();
-
-    const cols = viewMode === 'list' ? 1 : 2;
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
 
     // Sync focusedId prop with internal state
-    React.useEffect(() => {
+    useEffect(() => {
         if (focusedId) {
             setExpandedCardId(focusedId);
         } else if (focusedId === null && expandedCardId) {
@@ -38,149 +27,114 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
         }
     }, [focusedId]);
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const container = e.currentTarget;
-        const newTop = container.scrollTop;
-
-        // Sync with UI State (Header/Footer visibility)
-        syncScroll(newTop);
-
-        if (expandedCardId && clampRange) {
-            const [min, max] = clampRange;
-            if (newTop < min) {
-                container.scrollTop = min;
-                return;
-            } else if (newTop > max) {
-                container.scrollTop = max;
-                return;
-            }
-        }
-
-        if (expandedCardId) return;
-
-        const newTopIndex = Math.floor(newTop / (ESTIMATED_ITEM_HEIGHT + GAP));
-        const newStartItemIndex = Math.max(0, (newTopIndex - BUFFER_SIZE) * cols);
-
-        if (Math.abs(newStartItemIndex - lastStartIndexRef.current) >= cols) {
-            lastStartIndexRef.current = newStartItemIndex;
-            setScrollTop(newTop);
-        }
-    };
-
-    // Update clamp range when expanded card changes or resizes
-    React.useEffect(() => {
-        if (!expandedCardId || !expandedRef.current || !containerRef.current) {
-            setClampRange(null);
-            return;
-        }
-
-        const updateRange = () => {
-            if (!expandedRef.current || !containerRef.current) return;
-            const container = containerRef.current;
-            const el = expandedRef.current;
-
-            const rect = el.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
-
-            const currentScroll = container.scrollTop;
-            const absoluteTop = rect.top - containerRect.top + currentScroll;
-            const absoluteBottom = absoluteTop + rect.height;
-
-            // Clamping range: Align card's top with header bottom (64px) 
-            // and card's bottom with footer top (80px from screen bottom)
-            const minScroll = absoluteTop - 64;
-            const maxScroll = absoluteBottom - containerRect.height + 80;
-
-            // If card is smaller than available viewport, allow minimal movement or lock to top
-            if (maxScroll < minScroll) {
-                setClampRange([minScroll, minScroll]);
-            } else {
-                setClampRange([minScroll, maxScroll]);
-            }
-        };
-
-        const observer = new ResizeObserver(updateRange);
-        observer.observe(expandedRef.current);
-        updateRange();
-
-        return () => observer.disconnect();
-    }, [expandedCardId]);
-
     const handleExpand = (id: string, index: number) => {
         setExpandedCardId(id);
         if (onFocus) onFocus(id);
-        if (containerRef.current) {
-            // Adjust scroll position to align card top with screen top
-            const rowIndex = Math.floor(index / cols);
-            const targetScrollTop = rowIndex * (ESTIMATED_ITEM_HEIGHT + GAP);
-            if (containerRef.current.scrollTo) {
-                containerRef.current.scrollTo({
-                    top: targetScrollTop,
-                    behavior: 'smooth'
-                });
-            }
-        }
+        // Scroll to the item
+        requestAnimationFrame(() => {
+            virtuosoRef.current?.scrollToIndex({ index, align: 'start', behavior: 'smooth' });
+        });
     };
 
-    const handleCollapse = () => {
+    const handleCollapse = (id: string, index: number) => {
         setExpandedCardId(null);
         if (onFocusClear) onFocusClear();
+        // Scroll to the item to prevent getting lost
+        requestAnimationFrame(() => {
+            virtuosoRef.current?.scrollToIndex({ index, align: 'start', behavior: 'smooth' });
+        });
     };
 
-    const count = cards.length;
+    const handleScroll = (e: React.UIEvent<HTMLElement>) => {
+        // Pass scroll position to UI context for header/footer visibility
+        const scrollTop = (e.target as HTMLElement).scrollTop;
+        syncScroll(scrollTop);
+    };
 
-    const rowHeight = ESTIMATED_ITEM_HEIGHT + GAP;
-    const topRowIndex = Math.floor(scrollTop / rowHeight);
-    const startRowIndex = Math.max(0, topRowIndex - BUFFER_SIZE);
-    const startIndex = startRowIndex * cols;
-    const endItemIndex = Math.min(count, startIndex + WINDOW_SIZE);
-    const visibleCards = cards.slice(startIndex, endItemIndex);
+    // --- Data Preparation ---
 
-    const paddingTop = startRowIndex * rowHeight;
-    const remainingItems = count - endItemIndex;
-    const remainingRows = Math.ceil(remainingItems / cols);
-    const paddingBottom = remainingRows * rowHeight;
+    // For Grid View, we pair items: [ [card1, card2], [card3, card4], ... ]
+    // For List View, it's just [card1, card2, ...]
+    // But to unify the Virtuoso usage (and handle variable height rows in grid),
+    // we can treat everything as "rows".
+    // List: 1 item per row. Grid: 2 items per row.
+
+    const rows = useMemo(() => {
+        if (viewMode === 'list') {
+            return cards.map(c => [c]);
+        } else {
+            const result: Cell[][] = [];
+            for (let i = 0; i < cards.length; i += 2) {
+                const chunk = [cards[i]];
+                if (i + 1 < cards.length) {
+                    chunk.push(cards[i + 1]);
+                }
+                result.push(chunk);
+            }
+            return result;
+        }
+    }, [cards, viewMode]);
+
+    // Helper to find row index for a given card ID
+    const getRowIndexForCard = (id: string) => {
+        return rows.findIndex(row => row.some(c => c.id === id));
+    };
 
     return (
         <div
             data-testid="card-list-container"
-            ref={containerRef}
-            onScroll={handleScroll}
-            className={cn(
-                "h-full w-full overflow-y-auto relative scroll-smooth pt-[64px] pb-[80px]",
-                expandedCardId ? "overflow-y-auto" : "overflow-y-auto"
-            )}
+            className="h-full w-full relative"
         >
-            <div style={{ height: paddingTop }} />
-            <div className={cn(
-                "grid gap-4 p-4",
-                cols === 1 ? "grid-cols-1" : "grid-cols-2"
-            )}>
-                {visibleCards.map((card, i) => {
-                    const isExpanded = card.id === expandedCardId;
+            <Virtuoso
+                ref={virtuosoRef}
+                data={rows}
+                style={{ height: '100%' }}
+                className="scroll-smooth"
+                onScroll={handleScroll}
+                components={{
+                    Header: () => <div className="h-[64px]" />,
+                    Footer: () => <div className="h-[80px]" />,
+                }}
+                itemContent={(rowIndex, rowItems) => {
+                    const isGrid = viewMode === 'grid';
 
                     return (
-                        <div
-                            key={card.id}
-                            ref={isExpanded ? expandedRef : null}
-                            data-testid="card-item-wrapper"
-                            className={cn(
-                                "transition-all duration-500",
-                                isExpanded ? "z-50" : "z-0"
-                            )}
-                        >
-                            <Card
-                                cell={card}
-                                onExpand={() => handleExpand(card.id, startIndex + i)}
-                                onCollapse={handleCollapse}
-                                externalExpanded={isExpanded}
-                                onUpdate={onCardUpdate}
-                            />
+                        <div className={cn(
+                            "w-full px-4 mb-4", // common padding/margin
+                            isGrid ? "grid grid-cols-2 gap-4" : "flex flex-col"
+                        )}>
+                            {rowItems.map((card, colIndex) => {
+                                const isExpanded = card.id === expandedCardId;
+                                const originalIndex = isGrid ? rowIndex * 2 + colIndex : rowIndex;
+
+                                return (
+                                    <div
+                                        key={card.id}
+                                        data-testid="card-item-wrapper"
+                                        className={cn(
+                                            "transition-all duration-500",
+                                            isExpanded ? "z-50" : "z-0"
+                                        )}
+                                    // Ensure expanded card takes full width in grid if needed?
+                                    // Spec says "Grid mode... 2 columns". 
+                                    // If a card expands in grid mode, does it push others?
+                                    // Current CSS suggests it's just a card in a grid cell.
+                                    // If it becomes huge, it just makes the row tall.
+                                    >
+                                        <Card
+                                            cell={card}
+                                            externalExpanded={isExpanded}
+                                            onUpdate={onCardUpdate}
+                                            onExpand={() => handleExpand(card.id, rowIndex)}
+                                            onCollapse={() => handleCollapse(card.id, rowIndex)}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
                     );
-                })}
-            </div>
-            <div style={{ height: paddingBottom }} />
+                }}
+            />
         </div>
     );
 }

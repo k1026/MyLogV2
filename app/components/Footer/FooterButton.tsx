@@ -18,18 +18,22 @@ export const FooterButton: React.FC<FooterButtonProps> = ({
         <button
             className={cn(
                 "flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all active:scale-95",
-                isActive ? "text-purple-600" : "text-slate-400 hover:text-slate-600",
+                isActive ? "text-[#9333ea]" : "text-[#94a3b8] hover:text-[#475569]",
                 className
             )}
             {...props}
         >
             <div className={cn(
-                "w-10 h-10 flex items-center justify-center rounded-xl transition-all",
-                isActive ? "bg-purple-100" : "bg-transparent hover:bg-slate-100"
+                "w-10 h-10 flex items-center justify-center rounded-[12px] transition-all",
+                isActive ? "bg-[#f3e8ff]" : "bg-transparent hover:bg-[#f1f5f9]"
             )}>
                 {icon}
             </div>
-            {label && <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>}
+            {label && (
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] leading-none">
+                    {label}
+                </span>
+            )}
         </button>
     );
 };
