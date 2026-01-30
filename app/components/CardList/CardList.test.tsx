@@ -33,7 +33,11 @@ vi.mock('@/app/lib/db/db', () => ({
 // Mock react-virtuoso
 vi.mock('react-virtuoso', () => {
     const React = require('react');
-    const Virtuoso = React.forwardRef((props: any, ref: any) => {
+    interface VirtuosoProps {
+        data: any[];
+        itemContent: (index: number, data: any) => React.ReactNode;
+    }
+    const Virtuoso = React.forwardRef((props: VirtuosoProps, ref: React.Ref<any>) => {
         const { data, itemContent } = props;
 
         React.useImperativeHandle(ref, () => ({

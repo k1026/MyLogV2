@@ -31,16 +31,9 @@ describe('useCardList', () => {
         const updatedCard = new Cell({ id: '1', attribute: CellAttribute.Card, value: 'Updated' });
 
         act(() => {
-            // @ts-ignore
-            if (result.current.updateCard) {
-                // @ts-ignore
-                result.current.updateCard(updatedCard);
-            }
+            result.current.updateCard(updatedCard);
         });
 
-        expect(result.current).toHaveProperty('updateCard');
-        if ((result.current as any).updateCard) {
-            expect(result.current.cards[0].value).toBe('Updated');
-        }
+        expect(result.current.cards[0].value).toBe('Updated');
     });
 });
