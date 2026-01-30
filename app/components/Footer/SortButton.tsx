@@ -10,7 +10,7 @@ export const SortButton: React.FC = () => {
     return (
         <FooterButton
             icon={<MaterialIcon
-                icon="vertical_align_bottom"
+                icon="vertical_align_top"
                 size={20}
                 fill={sortOrder === 'asc'}
                 weight={sortOrder === 'asc' ? 400 : 300}

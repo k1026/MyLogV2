@@ -18,14 +18,38 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
     const { viewMode, handleScroll: syncScroll } = useUIState();
     const virtuosoRef = useRef<VirtuosoHandle>(null);
 
-    // Sync focusedId prop with internal state
+    const handleScroll = (e: React.UIEvent<HTMLElement>) => {
+        // Pass scroll position to UI context for header/footer visibility
+        const scrollTop = (e.target as HTMLElement).scrollTop;
+        syncScroll(scrollTop);
+    };
+
+    // --- Data Preparation ---
+    // List: 1 item per row.
+    const rows = useMemo(() => {
+        return cards.map(c => [c]);
+    }, [cards]);
+
+    // Helper to find row index for a given card ID
+    const getRowIndexForCard = (id: string) => {
+        return rows.findIndex(row => row.some(c => c.id === id));
+    };
+
+    // Sync focusedId prop with internal state and scroll to it
     useEffect(() => {
         if (focusedId) {
             setExpandedCardId(focusedId);
+            // Scroll to the item
+            const index = getRowIndexForCard(focusedId);
+            if (index !== -1) {
+                requestAnimationFrame(() => {
+                    virtuosoRef.current?.scrollToIndex({ index, align: 'start', behavior: 'smooth' });
+                });
+            }
         } else if (focusedId === null && expandedCardId) {
             setExpandedCardId(null);
         }
-    }, [focusedId]);
+    }, [focusedId, rows]); // Correct dependency order now
 
     const handleExpand = (id: string, index: number) => {
         setExpandedCardId(id);
@@ -39,33 +63,7 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
     const handleCollapse = (id: string, index: number) => {
         setExpandedCardId(null);
         if (onFocusClear) onFocusClear();
-        // Scroll to the item to prevent getting lost
-        requestAnimationFrame(() => {
-            virtuosoRef.current?.scrollToIndex({ index, align: 'start', behavior: 'smooth' });
-        });
-    };
-
-    const handleScroll = (e: React.UIEvent<HTMLElement>) => {
-        // Pass scroll position to UI context for header/footer visibility
-        const scrollTop = (e.target as HTMLElement).scrollTop;
-        syncScroll(scrollTop);
-    };
-
-    // --- Data Preparation ---
-
-    // For Grid View, we pair items: [ [card1, card2], [card3, card4], ... ]
-    // For List View, it's just [card1, card2, ...]
-    // But to unify the Virtuoso usage (and handle variable height rows in grid),
-    // we can treat everything as "rows".
-    // List: 1 item per row. Grid: 2 items per row.
-
-    const rows = useMemo(() => {
-        return cards.map(c => [c]);
-    }, [cards]);
-
-    // Helper to find row index for a given card ID
-    const getRowIndexForCard = (id: string) => {
-        return rows.findIndex(row => row.some(c => c.id === id));
+        // Removed forced scroll on collapse to prevent screen jumping
     };
 
     return (
@@ -77,7 +75,7 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
                 ref={virtuosoRef}
                 data={rows}
                 style={{ height: '100%' }}
-                className="scroll-smooth"
+                // removed scroll-smooth to prevent conflict with virtuoso scrolling
                 onScroll={handleScroll}
                 components={{
                     Header: () => <div className="h-[64px]" />,
@@ -97,11 +95,6 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
                                             "transition-all duration-500",
                                             isExpanded ? "z-50" : "z-0"
                                         )}
-                                    // Ensure expanded card takes full width in grid if needed?
-                                    // Spec says "Grid mode... 2 columns". 
-                                    // If a card expands in grid mode, does it push others?
-                                    // Current CSS suggests it's just a card in a grid cell.
-                                    // If it becomes huge, it just makes the row tall.
                                     >
                                         <Card
                                             cell={card}
