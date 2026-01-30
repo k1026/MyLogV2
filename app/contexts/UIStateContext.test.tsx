@@ -16,7 +16,8 @@ const TestComponent = () => {
         headerVisible,
         setHeaderVisible,
         footerVisible,
-        setFooterVisible
+        setFooterVisible,
+        handleScroll
     } = useUIState();
 
     return (
@@ -35,6 +36,9 @@ const TestComponent = () => {
 
             <div data-testid="footer-visible">{footerVisible ? 'visible' : 'hidden'}</div>
             <button data-testid="set-footer-hide" onClick={() => setFooterVisible(false)}>Hide Footer</button>
+
+            <button data-testid="scroll-down" onClick={() => handleScroll(100)}>Scroll Down</button>
+            <button data-testid="scroll-up" onClick={() => handleScroll(0)}>Scroll Up</button>
         </div>
     );
 };
@@ -138,5 +142,29 @@ describe('UIStateContext', () => {
             getByTestId('set-footer-hide').click();
         });
         expect(getByTestId('footer-visible').textContent).toBe('hidden');
+    });
+
+    it('handleScroll でスクロール量に応じてヘッダーとフッターが非表示になること', () => {
+        const { getByTestId } = render(
+            <UIStateProvider>
+                <TestComponent />
+            </UIStateProvider>
+        );
+
+        // 下方にスクロール (閾値 50 を超える 100)
+        act(() => {
+            getByTestId('scroll-down').click();
+        });
+
+        // 空実装なので、現時点では visible のままであるはず（テストは失敗させる）
+        expect(getByTestId('header-visible').textContent).toBe('hidden');
+        expect(getByTestId('footer-visible').textContent).toBe('hidden');
+
+        // 上方にスクロール
+        act(() => {
+            getByTestId('scroll-up').click();
+        });
+        expect(getByTestId('header-visible').textContent).toBe('visible');
+        expect(getByTestId('footer-visible').textContent).toBe('visible');
     });
 });

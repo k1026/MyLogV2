@@ -20,7 +20,7 @@ export default function Home() {
     const { sortOrder, filterState } = useUIState();
     const { filterSettings } = useFilter();
     const useCardListResult = useCardList(sortOrder);
-    const { cards, subCellMap, isLoading, isSorting, totalCount } = useCardListResult;
+    const { cards, subCellMap, isLoading, isSorting, totalCount, updateCard } = useCardListResult;
     const { isCalculating } = useRarity();
     const [mounted, setMounted] = useState(false);
     const [isDbViewerOpen, setIsDbViewerOpen] = useState(false);
@@ -37,6 +37,12 @@ export default function Home() {
     const filteredCards = filterState === 'on'
         ? filterCards(cards, subCellMap, filterSettings)
         : cards.filter(c => c.remove === null);
+
+    // セル数の計算
+    const cellCount = filteredCards.reduce((acc, card) => {
+        const ids = card.value.split(' ').filter(id => id.length > 0);
+        return acc + ids.length;
+    }, 0);
 
     const handleReset = () => {
         setFocusedCardId(null);
@@ -71,6 +77,7 @@ export default function Home() {
             <Header
                 cardCount={filteredCards.length}
                 totalCardCount={totalCount}
+                cellCount={cellCount}
                 onReset={handleReset}
                 onRandomPick={handleRandomPick}
                 onDbOpen={() => setIsDbViewerOpen(true)}
@@ -95,6 +102,7 @@ export default function Home() {
                         focusedId={focusedCardId}
                         onFocusClear={() => setFocusedCardId(null)}
                         onFocus={setFocusedCardId}
+                        onCardUpdate={updateCard}
                     />
                 )}
             </div>

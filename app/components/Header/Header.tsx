@@ -8,6 +8,7 @@ import { useUIState } from '../../contexts/UIStateContext';
 interface HeaderProps {
     cardCount: number;
     totalCardCount: number;
+    cellCount: number;
     onReset: () => void;
     onRandomPick: () => void;
     onDbOpen: () => void;
@@ -18,6 +19,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
     cardCount,
     totalCardCount,
+    cellCount,
     onReset,
     onRandomPick,
     onDbOpen,
@@ -34,17 +36,17 @@ export const Header: React.FC<HeaderProps> = ({
                 headerVisible ? "translate-y-0" : "-translate-y-full"
             )}
         >
-            <div className="absolute inset-0 bg-white/70 backdrop-blur-md border-b border-slate-200 shadow-sm" />
+            <div className="absolute inset-0 bg-white border-b border-slate-200 shadow-sm" />
 
             <div className="relative max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <HeaderStatus
+                    cardCount={cardCount}
+                    cellCount={cellCount}
+                />
+
                 <HeaderTitle
                     onReset={onReset}
                     isDbLoading={isDbLoading}
-                />
-
-                <HeaderStatus
-                    cardCount={cardCount}
-                    totalCardCount={totalCardCount}
                 />
 
                 <HeaderActions

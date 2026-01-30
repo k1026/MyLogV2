@@ -19,7 +19,7 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
         <div className="flex items-center gap-3">
             <button
                 onClick={onRandomPick}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50 transition-all shadow-sm active:scale-95"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-all active:scale-95"
                 aria-label="Random Pick"
                 title="Random Pick"
             >
@@ -29,12 +29,12 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
             <button
                 onClick={onDbOpen}
                 className={cn(
-                    "w-10 h-10 flex flex-col items-center justify-center rounded-xl transition-all border shadow-sm active:scale-95 relative overflow-hidden",
+                    "w-10 h-10 flex flex-col items-center justify-center rounded-xl transition-all active:scale-95 relative overflow-hidden bg-white",
                     (isDbLoading || isSorting)
-                        ? "text-purple-600 border-purple-500/30 bg-purple-500/10"
-                        : "text-slate-400 border-slate-200 hover:bg-slate-50 hover:text-slate-600"
+                        ? "text-purple-600 bg-purple-500/10"
+                        : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
                 )}
-                aria-label="Database Viewer"
+                aria-label="Database Status"
                 title="Database Status"
             >
                 {(isDbLoading || isSorting) ? (

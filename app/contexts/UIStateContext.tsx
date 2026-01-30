@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 export type SortOrder = 'asc' | 'desc';
 export type ViewMode = 'list' | 'grid';
@@ -17,6 +17,7 @@ interface UIStateContextType {
     setHeaderVisible: (visible: boolean) => void;
     footerVisible: boolean;
     setFooterVisible: (visible: boolean) => void;
+    handleScroll: (scrollTop: number) => void;
 }
 
 const UIStateContext = createContext<UIStateContextType | undefined>(undefined);
@@ -27,23 +28,21 @@ export const UIStateProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [filterState, setFilterState] = React.useState<FilterState>('off');
     const [headerVisible, setHeaderVisible] = React.useState(true);
     const [footerVisible, setFooterVisible] = React.useState(true);
-    const [lastScrollY, setLastScrollY] = useState(0);
     const [isInputFocused, setIsInputFocused] = useState(false);
-
+    const lastScrollRef = useRef(0);
     const threshold = 50;
 
     // Scroll handler
-    const handleScroll = useCallback(() => {
-        const currentScrollY = window.scrollY;
-        if (currentScrollY > lastScrollY && currentScrollY > threshold) {
+    const handleScroll = useCallback((scrollTop: number) => {
+        if (scrollTop > lastScrollRef.current && scrollTop > threshold) {
             setHeaderVisible(false);
             setFooterVisible(false);
         } else {
             setHeaderVisible(true);
             setFooterVisible(true);
         }
-        setLastScrollY(currentScrollY);
-    }, [lastScrollY]);
+        lastScrollRef.current = scrollTop;
+    }, []);
 
     // Focus handler
     const handleFocusIn = useCallback((e: FocusEvent) => {
@@ -58,8 +57,9 @@ export const UIStateProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, []);
 
     useEffect(() => {
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
+        const onScroll = () => handleScroll(window.scrollY);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
     }, [handleScroll]);
 
     useEffect(() => {
@@ -102,6 +102,7 @@ export const UIStateProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setHeaderVisible,
         footerVisible: effectiveFooterVisible,
         setFooterVisible,
+        handleScroll,
     };
 
     return (

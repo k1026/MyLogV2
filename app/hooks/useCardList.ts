@@ -10,6 +10,7 @@ export interface UseCardListResult {
     isSorting: boolean;
     totalCount: number;
     addCard: (card: Cell) => void;
+    updateCard: (card: Cell) => void;
 }
 
 const BATCH_SIZE = 1000;
@@ -106,12 +107,22 @@ export function useCardList(sortOrder: SortOrder = 'desc'): UseCardListResult {
         setTotalCount(prev => prev + 1);
     };
 
+    const updateCard = (updatedCard: Cell) => {
+        setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
+        setSubCellMap(prev => {
+            const next = new Map(prev);
+            next.set(updatedCard.id, updatedCard);
+            return next;
+        });
+    };
+
     return {
         cards,
         subCellMap,
         isLoading,
         isSorting,
         totalCount,
-        addCard
+        addCard,
+        updateCard
     };
 }

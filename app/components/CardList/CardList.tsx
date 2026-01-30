@@ -9,6 +9,7 @@ interface CardListProps {
     focusedId?: string | null;
     onFocusClear?: () => void;
     onFocus?: (id: string) => void;
+    onCardUpdate?: (card: Cell) => void;
 }
 
 const ESTIMATED_ITEM_HEIGHT = 150; // px
@@ -17,14 +18,14 @@ const BUFFER_SIZE = 30; // 30 items before and after
 const VISIBLE_COUNT = 30; // Target visible items (approx)
 const WINDOW_SIZE = BUFFER_SIZE * 2 + VISIBLE_COUNT; // 90 items
 
-export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListProps) {
+export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate }: CardListProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const expandedRef = useRef<HTMLDivElement>(null);
     const [scrollTop, setScrollTop] = useState(0);
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
     const [clampRange, setClampRange] = useState<[number, number] | null>(null);
     const lastStartIndexRef = useRef(0);
-    const { viewMode } = useUIState();
+    const { viewMode, handleScroll: syncScroll } = useUIState();
 
     const cols = viewMode === 'list' ? 1 : 2;
 
@@ -40,6 +41,9 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const container = e.currentTarget;
         const newTop = container.scrollTop;
+
+        // Sync with UI State (Header/Footer visibility)
+        syncScroll(newTop);
 
         if (expandedCardId && clampRange) {
             const [min, max] = clampRange;
@@ -170,6 +174,7 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus }: CardListPr
                                 onExpand={() => handleExpand(card.id, startIndex + i)}
                                 onCollapse={handleCollapse}
                                 externalExpanded={isExpanded}
+                                onUpdate={onCardUpdate}
                             />
                         </div>
                     );
