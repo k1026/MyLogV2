@@ -1,4 +1,4 @@
-import { ArrowDownUp, CheckSquare, Clock } from 'lucide-react';
+import { MaterialIcon } from '../ui/MaterialIcon';
 import { UseCardSortResult } from './useCardSort';
 
 interface CardToolbarProps {
@@ -14,7 +14,7 @@ export const CardToolbar: React.FC<CardToolbarProps> = ({ sortState }) => {
                 onClick={sortState.setManualSort}
                 className={`flex items-center justify-center w-6 h-6 rounded transition-colors ${sortState.isManualSort ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
             >
-                <ArrowDownUp size={20} />
+                <MaterialIcon icon="swap_vert" size={20} />
             </button>
 
             {/* Task Sort */}
@@ -23,7 +23,7 @@ export const CardToolbar: React.FC<CardToolbarProps> = ({ sortState }) => {
                 onClick={sortState.toggleTaskSort}
                 className={`flex items-center justify-center w-6 h-6 rounded transition-colors ${sortState.taskSortMode !== 'none' ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
             >
-                <CheckSquare size={20} />
+                <MaterialIcon icon="task" size={20} />
             </button>
 
             {/* Time Sort */}
@@ -32,10 +32,11 @@ export const CardToolbar: React.FC<CardToolbarProps> = ({ sortState }) => {
                 onClick={sortState.toggleSort}
                 className={`flex items-center justify-center h-6 px-1 rounded transition-colors ${sortState.sortMode !== 'none' ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
             >
-                <Clock size={20} />
+                <MaterialIcon icon="schedule" size={20} />
                 {sortState.sortMode === 'asc' && <span className="text-[10px] ml-1">OLD</span>}
                 {sortState.sortMode === 'desc' && <span className="text-[10px] ml-1">NEW</span>}
             </button>
         </div>
     );
 }
+

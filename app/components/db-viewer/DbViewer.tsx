@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Database, X, ChevronLeft, ChevronRight, Trash2, Loader2 } from 'lucide-react';
+import { MaterialIcon } from '../ui/MaterialIcon';
 import { CellRepository, ImportResult } from '@/app/lib/db/operations';
 import { Cell } from '@/app/lib/models/cell';
 import { cn } from '@/app/lib/utils';
@@ -159,14 +159,14 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                     className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center bg-white rounded-2xl text-purple-400 hover:text-purple-600 border border-purple-100 shadow-lg shadow-purple-500/10 transition-all hover:scale-110 active:scale-90 z-20"
                     aria-label="閉じる"
                 >
-                    <X size={28} />
+                    <MaterialIcon icon="close" size={28} />
                 </button>
 
                 {/* ヘッダーセクション */}
                 <div className="flex flex-col items-center pt-10 pb-6 bg-gradient-to-b from-slate-50 to-white">
                     <div className="flex items-center gap-4 group">
                         <div className="p-4 bg-purple-100/50 rounded-3xl text-purple-600 shadow-inner group-hover:scale-110 transition-transform duration-500">
-                            <Database size={40} />
+                            <MaterialIcon icon="database" size={40} />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-xs font-black text-purple-400 tracking-[0.3em] leading-none mb-1">LOCAL</span>
@@ -187,7 +187,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                                 (!!processingAction && processingAction !== 'delete') && "opacity-30 grayscale cursor-not-allowed"
                             )}
                         >
-                            {processingAction === 'delete' ? <Loader2 className="animate-spin inline mr-2" /> : null}
+                            {processingAction === 'delete' ? <MaterialIcon icon="progress_activity" size={20} className="animate-spin inline mr-2" /> : null}
                             DELETE DB
                         </button>
                         <button
@@ -201,7 +201,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                                 (!!processingAction && processingAction !== 'append') && "opacity-30 grayscale cursor-not-allowed"
                             )}
                         >
-                            {processingAction === 'append' ? <Loader2 className="animate-spin inline mr-2" /> : null}
+                            {processingAction === 'append' ? <MaterialIcon icon="progress_activity" size={20} className="animate-spin inline mr-2" /> : null}
                             APPEND
                         </button>
                         <button
@@ -215,7 +215,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                                 (!!processingAction && processingAction !== 'export') && "opacity-30 grayscale cursor-not-allowed"
                             )}
                         >
-                            {processingAction === 'export' ? <Loader2 className="animate-spin inline mr-2" /> : null}
+                            {processingAction === 'export' ? <MaterialIcon icon="progress_activity" size={20} className="animate-spin inline mr-2" /> : null}
                             EXPORT
                         </button>
                     </div>
@@ -244,7 +244,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                             className="p-2 text-purple-500 hover:bg-purple-50 rounded-2xl disabled:text-slate-200 transition-all hover:scale-110 active:scale-90"
                             aria-label="<"
                         >
-                            <ChevronLeft size={32} />
+                            <MaterialIcon icon="chevron_left" size={32} />
                         </button>
 
                         <div className="text-xl font-black text-slate-800 flex items-center gap-2">
@@ -276,7 +276,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                             className="p-2 text-purple-500 hover:bg-purple-50 rounded-2xl disabled:text-slate-200 transition-all hover:scale-110 active:scale-90"
                             aria-label=">"
                         >
-                            <ChevronRight size={32} />
+                            <MaterialIcon icon="chevron_right" size={32} />
                         </button>
                     </div>
 
@@ -319,7 +319,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                                                 className="p-3 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all hover:scale-110"
                                                 aria-label="Remove"
                                             >
-                                                <Trash2 size={20} />
+                                                <MaterialIcon icon="delete" size={20} />
                                             </button>
                                         </td>
                                     </tr>
@@ -329,7 +329,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                                     <td colSpan={6} className="px-6 py-32 text-center">
                                         {isLoading ? (
                                             <div className="flex flex-col items-center gap-4">
-                                                <Loader2 className="animate-spin text-purple-200" size={48} />
+                                                <MaterialIcon icon="progress_activity" size={48} className="animate-spin text-purple-200" />
                                                 <span className="text-slate-300 font-black tracking-widest text-xs">LOADING DATABASE...</span>
                                             </div>
                                         ) : (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { Database, Shuffle, Loader2 } from 'lucide-react';
+import { MaterialIcon } from '../ui/MaterialIcon';
 
 interface HeaderActionsProps {
     onRandomPick: () => void;
@@ -23,7 +23,7 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
                 aria-label="Random Pick"
                 title="Random Pick"
             >
-                <Shuffle size={20} />
+                <MaterialIcon icon="shuffle" size={20} />
             </button>
 
             <button
@@ -39,15 +39,16 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
             >
                 {(isDbLoading || isSorting) ? (
                     <>
-                        <Database size={16} className="animate-pulse mb-0.5" />
+                        <MaterialIcon icon="database" size={16} className="animate-pulse mb-0.5" />
                         <span className="text-[6px] font-bold uppercase tracking-tighter leading-none animate-pulse">
                             {isSorting ? "Sorting" : "Load"}
                         </span>
                     </>
                 ) : (
-                    <Database size={20} />
+                    <MaterialIcon icon="database" size={20} />
                 )}
             </button>
         </div>
     );
 };
+

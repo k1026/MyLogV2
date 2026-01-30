@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { RefreshCw } from 'lucide-react';
 
 interface HeaderTitleProps {
     onReset: () => void;

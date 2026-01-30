@@ -1,7 +1,7 @@
-import { Plus, FileText, CheckSquare } from 'lucide-react';
 import { CellAttribute } from '@/app/lib/models/cell';
 import { useState, useRef } from 'react';
 import { cn } from '@/app/lib/utils';
+import { MaterialIcon } from '../ui/MaterialIcon';
 
 interface CardFABProps {
     onAdd: (attribute: CellAttribute) => void;
@@ -68,7 +68,7 @@ export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
                             hoveredItem === CellAttribute.Task ? "scale-110 shadow-lg ring-2 ring-white/50" : "scale-100"
                         )}
                     >
-                        <CheckSquare size={24} />
+                        <MaterialIcon icon="task" size={24} />
                     </div>
 
                     {/* Text Item (Left) */}
@@ -83,7 +83,7 @@ export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
                             hoveredItem === CellAttribute.Text ? "scale-110 shadow-lg ring-2 ring-white/50" : "scale-100"
                         )}
                     >
-                        <FileText size={24} />
+                        <MaterialIcon icon="article" size={24} />
                     </div>
                 </>
             )}
@@ -108,8 +108,13 @@ export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
                     "bg-purple-200 text-white" // Spec: 薄い紫の背景に白い十字
                 )}
             >
-                <Plus size={28} className={cn("transition-transform", isMenuOpen && "rotate-45")} />
+                <MaterialIcon
+                    icon="add"
+                    size={28}
+                    className={cn("transition-transform", isMenuOpen && "rotate-45")}
+                />
             </button>
         </div>
     );
 }
+

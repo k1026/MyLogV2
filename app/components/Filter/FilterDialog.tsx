@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../lib/utils';
-import { X, Calendar, RotateCcw, Check, Type, Tag, Search, Filter } from 'lucide-react';
+import { MaterialIcon } from '../ui/MaterialIcon';
 import { FilterAttribute, FilterTarget, FilterSettings, DEFAULT_FILTER_SETTINGS } from '../../lib/models/filter';
 import { useFilter } from '../../contexts/FilterContext';
 import { useUIState } from '../../contexts/UIStateContext';
@@ -97,7 +97,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                 <div className="p-6 pb-2 flex items-center justify-between text-white">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
-                            <Filter size={20} />
+                            <MaterialIcon icon="filter_list" size={20} />
                         </div>
                         <h2 className="text-xl font-bold tracking-tight">Filter Settings</h2>
                     </div>
@@ -105,7 +105,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                         onClick={onClose}
                         className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 text-white/70 transition-colors"
                     >
-                        <X size={24} />
+                        <MaterialIcon icon="close" size={24} />
                     </button>
                 </div>
 
@@ -136,7 +136,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                         <label className="text-white/60 text-xs font-bold uppercase tracking-widest pl-1">キーワード抽出</label>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-300" size={18} />
+                                <MaterialIcon icon="search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-300" />
                                 <input
                                     type="text"
                                     value={localInclude}
@@ -158,7 +158,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                     <div className="space-y-3">
                         <label className="text-white/60 text-xs font-bold uppercase tracking-widest pl-1">キーワード除外</label>
                         <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-red-300" size={18} />
+                            <MaterialIcon icon="search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-red-300" />
                             <input
                                 type="text"
                                 value={localExclude}
@@ -194,7 +194,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                                 onClick={() => { setLocalFrom(null); setLocalTo(null); }}
                                 className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-xl text-white/50 hover:bg-white/20"
                             >
-                                <RotateCcw size={18} />
+                                <MaterialIcon icon="restart_alt" size={18} />
                             </button>
                         </div>
                     </div>
@@ -206,14 +206,14 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                         onClick={handleReset}
                         className="flex-1 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
                     >
-                        <RotateCcw size={18} />
+                        <MaterialIcon icon="restart_alt" size={18} />
                         リセット
                     </button>
                     <button
                         onClick={handleApply}
                         className="flex-[2] py-4 bg-white text-purple-700 hover:bg-purple-50 font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2"
                     >
-                        <Check size={20} />
+                        <MaterialIcon icon="check" size={20} />
                         適用する
                     </button>
                 </div>

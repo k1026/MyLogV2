@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from '../../contexts/LocationContext';
 import { cn } from '../../lib/utils';
-import { MapPin, Loader2, MapPinOff } from 'lucide-react';
+import { MaterialIcon } from '../ui/MaterialIcon';
 
 interface HeaderStatusProps {
     cardCount: number;
@@ -26,15 +26,17 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
                 aria-label="Location Status"
             >
                 {status === 'loading' ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <MaterialIcon icon="progress_activity" size={16} className="animate-spin" />
                 ) : status === 'error' ? (
-                    <MapPinOff size={16} className="fill-red-500" />
+                    <MaterialIcon icon="location_off" size={16} className="text-red-500" fill />
                 ) : (
-                    <MapPin
+                    <MaterialIcon
+                        icon="location_on"
                         size={16}
+                        fill={status === 'active' || status === 'idle'}
                         className={cn(
-                            status === 'active' && "fill-purple-300",
-                            status === 'idle' && "fill-white"
+                            status === 'active' && "text-purple-300",
+                            status === 'idle' && "text-white"
                         )}
                     />
                 )}
@@ -47,3 +49,4 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
         </div>
     );
 };
+

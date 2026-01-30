@@ -1,8 +1,8 @@
 import React from 'react';
-import { Filter } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useUIState } from '../../contexts/UIStateContext';
 import { FooterButton } from './FooterButton';
+import { MaterialIcon } from '../ui/MaterialIcon';
 
 interface FilterButtonProps {
     onClick?: () => void;
@@ -13,26 +13,12 @@ export const FilterButton: React.FC<FilterButtonProps> = ({ onClick }) => {
 
     const renderIcon = () => {
         if (filterState === 'on') {
-            return <Filter size={20} fill="currentColor" />;
+            return <MaterialIcon icon="filter_alt" size={20} fill />;
         }
         if (filterState === 'disabled') {
-            return (
-                <div className="relative flex items-center justify-center w-5 h-5">
-                    <Filter size={20} color="currentColor" />
-                    <svg
-                        className="absolute inset-0 w-full h-full pointer-events-none"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                    >
-                        <line x1="4" y1="4" x2="20" y2="20" />
-                    </svg>
-                </div>
-            );
+            return <MaterialIcon icon="filter_alt_off" size={20} weight={300} />;
         }
-        return <Filter size={20} />;
+        return <MaterialIcon icon="filter_alt" size={20} weight={300} />;
     };
 
     return (
@@ -44,3 +30,4 @@ export const FilterButton: React.FC<FilterButtonProps> = ({ onClick }) => {
         />
     );
 };
+
