@@ -12,7 +12,7 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
     const { status, toggleLocation } = useLocation();
 
     return (
-        <div className="flex flex-col items-start gap-0">
+        <div className="flex items-center gap-2">
             <button
                 onClick={toggleLocation}
                 className={cn(
@@ -42,9 +42,9 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
                 )}
             </button>
 
-            <div className="flex flex-col items-start text-slate-500 font-bold tracking-widest uppercase leading-none">
-                <div className="text-[9px] whitespace-nowrap">CARDS: {cardCount}</div>
-                <div className="text-[9px] whitespace-nowrap">CELLS: {cellCount}</div>
+            <div className="flex flex-col items-start text-slate-500/60 font-bold tracking-widest uppercase leading-none">
+                <div className="text-[9px] whitespace-nowrap">CARD: {cardCount}</div>
+                <div className="text-[9px] whitespace-nowrap">CELL: {cellCount}</div>
             </div>
         </div>
     );

@@ -105,7 +105,7 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                     type="checkbox"
                     checked={isChecked}
                     onChange={(e) => handleCheckboxChange(e.target.checked)}
-                    className="appearance-none w-7 h-7 rounded-[2px] border-2 border-purple-200 bg-transparent checked:bg-purple-500 checked:border-purple-500 transition-all cursor-pointer relative
+                    className="appearance-none w-7 h-7 rounded-[6px] border-2 border-purple-200 bg-transparent checked:bg-purple-600 checked:border-purple-600 transition-all cursor-pointer relative
                         checked:after:content-['✓'] checked:after:absolute checked:after:text-white checked:after:text-base checked:after:font-bold checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 hover:border-purple-400 ring-offset-2 focus:ring-4 focus:ring-purple-500/10"
                 />
             </div>

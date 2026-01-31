@@ -27,7 +27,7 @@ export function CardAddButton({ onClick, visible }: CardAddButtonProps) {
             data-testid="card-add-button-root"
             onClick={onClick}
             className={cn(
-                "fixed right-8 w-14 h-14 bg-white rounded-xl shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 z-[70]",
+                "fixed right-8 w-14 h-14 bg-white rounded-xl shadow-lg shadow-purple-500/30 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 z-[70]",
                 footerVisible ? "bottom-[104px]" : "bottom-8"
             )}
             aria-label="Add new card"

@@ -152,13 +152,13 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
             onClick={handleContainerClick}
             onBlur={handleBlur}
             onFocus={() => setIsFocused(true)}
-            className="flex flex-col gap-3 w-full flex-1 cursor-text min-h-[4rem] justify-start p-3"
+            className="flex flex-col gap-[1px] w-full flex-1 cursor-text min-h-[4rem] justify-start p-2"
         >
             {showName && (
                 <div className="flex flex-col gap-1">
                     <div className="relative w-full">
                         {!isFocused && name && (
-                            <div className="absolute inset-0 p-2 text-slate-800 font-bold text-[20px] leading-tight break-words pointer-events-none">
+                            <div className="absolute inset-0 p-1 text-slate-800 font-bold text-[20px] leading-tight break-words pointer-events-none">
                                 {highlightText(name, highlightKeywords)}
                             </div>
                         )}
@@ -175,8 +175,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
                             onKeyDown={handleKeyDown}
                             placeholder={isFocused || !name ? "Title" : ""}
                             className={cn(
-                                "bg-transparent border-b-2 border-transparent outline-none w-full transition-all duration-300 text-left p-2 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
-                                "focus:border-purple-500",
+                                "bg-transparent border-none outline-none w-full transition-all duration-300 text-left p-1 rounded-none text-slate-800 font-bold text-[20px] placeholder:text-slate-400",
                                 !isFocused && name ? "text-transparent" : "text-slate-800"
                             )}
                         />
@@ -186,7 +185,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
             {showValue && (
                 <div className="relative w-full">
                     {!isFocused && value && (
-                        <div className="absolute inset-0 p-2 text-slate-700 text-left leading-relaxed text-[18px] break-words whitespace-pre-wrap pointer-events-none">
+                        <div className="absolute inset-0 p-1 text-slate-700 text-left leading-relaxed text-[18px] break-words whitespace-pre-wrap pointer-events-none">
                             {highlightText(value, highlightKeywords)}
                         </div>
                     )}
@@ -197,8 +196,7 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
                         placeholder={isFocused || !value ? "Description..." : ""}
                         rows={1}
                         className={cn(
-                            "bg-transparent border-b-2 border-transparent outline-none w-full resize-none transition-all duration-300 overflow-hidden text-left p-2 rounded-none text-slate-700 placeholder:text-slate-400 leading-relaxed text-[18px]",
-                            "focus:border-purple-500",
+                            "bg-transparent border-none outline-none w-full resize-none transition-all duration-300 overflow-hidden text-left p-1 rounded-none text-slate-700 placeholder:text-slate-400 leading-relaxed text-[18px]",
                             !isFocused && value ? "text-transparent" : "text-slate-700"
                         )}
                     />

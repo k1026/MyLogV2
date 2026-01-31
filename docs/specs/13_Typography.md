@@ -11,7 +11,8 @@
 ### 2.1 ヘッダーUI
 - **アプリタイトル**: 20px (`text-xl`), `font-black`, `tracking-tight`
 - **バージョン番号**: 12px, `font-bold`, `tracking-widest`, `uppercase`
-- **統計情報 (CARDS/CELLS)**: 10px, `font-bold`, `tracking-widest`, `uppercase`
+- **統計情報 (CARD/CELL)**: 9px, `font-bold`, `tracking-widest`, `uppercase`, 透過 (Slate 500/60)
+- **統計情報の配置**: 位置情報アイコンの右側に縦並びで配置。
 
 ### 2.2 セルUI (Cell)
 - **タイトル (name)**: 20px (基本), `font-bold`

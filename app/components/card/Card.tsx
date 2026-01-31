@@ -13,6 +13,7 @@ import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
 import { useFilter } from '@/app/contexts/FilterContext';
 import { highlightText } from '@/app/lib/utils/highlight';
 import { useUIState } from '@/app/contexts/UIStateContext';
+import { cn } from '@/app/lib/utils';
 
 interface CardProps {
     cell: Cell;
@@ -149,9 +150,6 @@ export const Card: React.FC<CardProps> = ({
         }));
     }, [sortState.sortedCells]);
 
-    // renderCell 関数は不要になるため削除し、直接マップ内でレンダリングする
-
-
     // Check if cell is removed
     const isRemoved = !!cell.remove;
 
@@ -162,12 +160,12 @@ export const Card: React.FC<CardProps> = ({
         <div
             data-testid="card-container"
             style={containerStyle}
-            className={`flex flex-col p-[12px] rounded-3xl shadow-sm transition-all duration-300 relative
+            className={`flex flex-col p-2 rounded-[16px] shadow-sm transition-all duration-300 relative
                 ${isExpanded
                     ? 'bg-white/10 backdrop-blur-md ring-2 ring-white/20'
                     : isRemoved
-                        ? 'bg-gray-500/20 cursor-default' // Removed style
-                        : 'bg-white/5 hover:bg-white/10 cursor-pointer'
+                        ? 'bg-gray-500/20 cursor-default p-2' // Removed style
+                        : 'bg-white/5 hover:bg-white/10 cursor-pointer p-2'
                 }
             `}
             onClick={!isExpanded && !isRemoved ? handleToggle : undefined}
@@ -209,9 +207,9 @@ export const Card: React.FC<CardProps> = ({
 
             {isExpanded && (
                 <div data-testid="card-item-list" className="mt-2 text-sm w-full relative">
-                    <div className="flex flex-col gap-2 pb-12">
+                    <div className="flex flex-col gap-2 pb-[12px]">
                         {cellModels.map(cellModel => (
-                            <div key={cellModel.id} className="mb-2">
+                            <div key={cellModel.id}>
                                 <CellContainer
                                     cell={cellModel}
                                     onSave={handleCellSave}

@@ -96,7 +96,7 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
                         id={`card-wrapper-${card.id}`}
                         data-testid="card-item-wrapper"
                         className={cn(
-                            "w-full px-4 mb-4 transition-all duration-500",
+                            "w-full px-4 mb-3 transition-all duration-500",
                             isExpanded ? "z-50 relative" : "z-0"
                         )}
                     >

@@ -105,7 +105,7 @@ export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
                 }}
                 className={cn(
                     "w-[60px] h-[60px] flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 z-50",
-                    "bg-purple-200 text-white" // Spec: 薄い紫の背景に白い十字
+                    "bg-purple-600 text-white shadow-white/50" // 紫色に変更し、白のシャドウを追加
                 )}
             >
                 <MaterialIcon
