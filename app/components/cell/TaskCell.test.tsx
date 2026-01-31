@@ -130,70 +130,83 @@ describe('TaskCell', () => {
             });
         });
 
-        it('新規セル追加時に候補チップが表示されること', async () => {
+        it('新規セル追加時に候補チップが表示されないこと', async () => {
             const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-new' });
             render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
 
             await waitFor(() => {
-                expect(screen.getByText('Task Est 2')).toBeInTheDocument();
-            });
-        });
-
-        it('候補チップをクリックするとタイトルが更新され、チップが消えること', async () => {
-            const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-new' });
-            render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
-
-            await waitFor(() => expect(screen.getByText('Task Est 2')).toBeInTheDocument());
-
-            fireEvent.click(screen.getByText('Task Est 2'));
-
-            expect(screen.getByDisplayValue('Task Est 2')).toBeInTheDocument();
-            expect(screen.queryByText('Task Est 1')).not.toBeInTheDocument();
-        });
-
-        it('手動で入力すると候補チップが消えること', async () => {
-            const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-new' });
-            render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
-
-            await waitFor(() => expect(screen.getByText('Task Est 1')).toBeInTheDocument());
-
-            const nameInput = screen.getByDisplayValue('Task Est 1');
-            fireEvent.change(nameInput, { target: { value: 'User Input' } });
-
-            expect(screen.queryByText('Task Est 1')).not.toBeInTheDocument();
-        });
-    });
-
-    it('競合状態の防止: 推定処理中にユーザーが入力を開始した場合、推定結果で上書きされないこと', async () => {
-        vi.useFakeTimers();
-        try {
-            // estimateが少し遅れるように遅延させる
-            mockEstimate.mockImplementation(async () => {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                return [
-                    { title: 'Delayed Est', score: 10, details: {} }
-                ];
+                expect(screen.getByDisplayValue('Task Est 1')).toBeInTheDocument();
             });
 
-            const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-race' });
+            expect(screen.queryByTestId('title-candidates')).not.toBeInTheDocument();
+        });
+
+        it('推定値がセットされた後、タイトルが全選択されていること', async () => {
+            vi.useFakeTimers();
+            const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-selection' });
             render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
 
-            // まだ推定結果は来ていない（空文字であること）
-            const input = screen.getByPlaceholderText('To-do Task');
-            expect(input).toHaveValue('');
-
-            // ユーザーが入力を開始
-            fireEvent.change(input, { target: { value: 'User Typed' } });
-
-            // タイマーを進めて推定処理を完了させる
             await act(async () => {
-                vi.advanceTimersByTime(150);
+                vi.advanceTimersByTime(0);
             });
 
-            // ユーザー入力が維持されていること（Delayed Estで上書きされていないこと）
-            expect(input).toHaveValue('User Typed');
-        } finally {
+            const input = screen.getByDisplayValue('Task Est 1') as HTMLInputElement;
+
+            act(() => {
+                vi.advanceTimersByTime(100);
+            });
+
+            expect(input.selectionStart).toBe(0);
+            expect(input.selectionEnd).toBe(input.value.length);
             vi.useRealTimers();
-        }
+        });
+
+        it('一度推定された後、タイトルを空にしても再推定されないこと', async () => {
+            const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-no-retry' });
+            const { rerender } = render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            await waitFor(() => expect(screen.getByDisplayValue('Task Est 1')).toBeInTheDocument());
+
+            const input = screen.getByDisplayValue('Task Est 1');
+            fireEvent.change(input, { target: { value: '' } });
+
+            rerender(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            expect(input).toHaveValue('');
+            expect(mockEstimate).toHaveBeenCalledTimes(1);
+        });
+
+        it('競合状態の防止: 推定処理中にユーザーが入力を開始した場合、推定結果で上書きされないこと', async () => {
+            vi.useFakeTimers();
+            try {
+                // estimateが少し遅れるように遅延させる
+                mockEstimate.mockImplementation(async () => {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    return [
+                        { title: 'Delayed Est', score: 10, details: {} }
+                    ];
+                });
+
+                const cell = new Cell({ ...baseCell, name: '', value: 'false', id: '999-race' });
+                render(<TaskCell cell={cell} onSave={mockSave} isNew={true} />);
+
+                // まだ推定結果は来ていない（空文字であること）
+                const input = screen.getByPlaceholderText('To-do Task');
+                expect(input).toHaveValue('');
+
+                // ユーザーが入力を開始
+                fireEvent.change(input, { target: { value: 'User Typed' } });
+
+                // タイマーを進めて推定処理を完了させる
+                await act(async () => {
+                    vi.advanceTimersByTime(150);
+                });
+
+                // ユーザー入力が維持されていること（Delayed Estで上書きされていないこと）
+                expect(input).toHaveValue('User Typed');
+            } finally {
+                vi.useRealTimers();
+            }
+        });
     });
 });

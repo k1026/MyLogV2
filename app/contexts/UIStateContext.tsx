@@ -92,7 +92,7 @@ export const UIStateProvider: React.FC<{ children: React.ReactNode }> = ({ child
         });
     };
 
-    const value: UIStateContextType = {
+    const value: UIStateContextType = React.useMemo(() => ({
         sortOrder,
         toggleSortOrder,
         viewMode,
@@ -105,7 +105,14 @@ export const UIStateProvider: React.FC<{ children: React.ReactNode }> = ({ child
         footerVisible: effectiveFooterVisible,
         setFooterVisible,
         handleScroll,
-    };
+    }), [
+        sortOrder,
+        viewMode,
+        filterState,
+        effectiveHeaderVisible,
+        effectiveFooterVisible,
+        handleScroll
+    ]);
 
     return (
         <UIStateContext.Provider value={value}>

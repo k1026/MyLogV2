@@ -41,16 +41,17 @@ vi.mock('react-virtuoso', () => {
         data: any[];
         itemContent: (index: number, data: any) => React.ReactNode;
         className?: string; // Add className to props
+        style?: React.CSSProperties;
     }
     const Virtuoso = React.forwardRef((props: VirtuosoProps, ref: React.Ref<any>) => {
-        const { data, itemContent, className } = props;
+        const { data, itemContent, className, style } = props;
 
         React.useImperativeHandle(ref, () => ({
             scrollToIndex: mockScrollToIndex,
         }));
 
         return (
-            <div data-testid="virtuoso-container" className={className}>
+            <div data-testid="virtuoso-container" className={className} style={style}>
                 {data.map((item: any, index: number) => {
                     return (
                         <div key={index} data-testid="virtuoso-item">
@@ -159,6 +160,36 @@ describe('CardList Virtual Scroll', () => {
             }));
         });
     });
+    it('should NOT scroll when cards instance changes but focusedId remains the same', async () => {
+        const cards = createDummyCards(5);
+        const { rerender } = render(
+            <RarityProvider>
+                <UIStateProvider>
+                    <CardList cards={cards} focusedId={cards[2].id} />
+                </UIStateProvider>
+            </RarityProvider>
+        );
+
+        // Initial scroll
+        await waitFor(() => {
+            expect(mockScrollToIndex).toHaveBeenCalled();
+        });
+        mockScrollToIndex.mockClear();
+
+        // Rerender with new cards instance (but same data) and same focusedId
+        const newCardsInstance = [...cards];
+        rerender(
+            <RarityProvider>
+                <UIStateProvider>
+                    <CardList cards={newCardsInstance} focusedId={cards[2].id} />
+                </UIStateProvider>
+            </RarityProvider>
+        );
+
+        // Wait a bit to ensure no scroll happens
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(mockScrollToIndex).not.toHaveBeenCalled();
+    });
 
     it('should call onFocusClear when a card is collapsed', async () => {
         const cards = createDummyCards(5);
@@ -211,5 +242,21 @@ describe('CardList Virtual Scroll', () => {
             // Should verify that scrollToIndex was NOT called
             expect(mockScrollToIndex).not.toHaveBeenCalled();
         });
+    });
+
+    it('should have scroll-padding based on header and footer visibility', () => {
+        const cards = createDummyCards(5);
+        render(
+            <RarityProvider>
+                <UIStateProvider>
+                    <CardList cards={cards} />
+                </UIStateProvider>
+            </RarityProvider>
+        );
+
+        const container = screen.getByTestId('virtuoso-container');
+        // Default visibility is true for both
+        expect(container.style.scrollPaddingTop).toBe('64px');
+        expect(container.style.scrollPaddingBottom).toBe('80px');
     });
 });

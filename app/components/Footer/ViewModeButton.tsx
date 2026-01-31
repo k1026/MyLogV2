@@ -8,6 +8,7 @@ export const ViewModeButton: React.FC = () => {
 
     return (
         <FooterButton
+            aria-label="View Mode Options"
             icon={viewMode === 'list'
                 ? <MaterialIcon icon="list" size={20} weight={300} />
                 : <MaterialIcon icon="dashboard" size={20} fill={true} />}

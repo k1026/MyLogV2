@@ -2,7 +2,7 @@
 import { CellRepository } from './operations';
 import { db } from './db';
 import { Cell, CellAttribute } from '../models/cell';
-import { afterEach, describe, expect, it, beforeEach } from 'vitest';
+import { afterEach, describe, expect, it, beforeEach, vi } from 'vitest';
 
 describe('CellRepository File I/O', () => {
 
@@ -15,9 +15,9 @@ describe('CellRepository File I/O', () => {
     });
 
     const createSampleCells = (): Cell[] => [
-        { id: '1700000000001-TEST1', attribute: CellAttribute.Time, name: 'Task 1', value: '10:00', geo: null, remove: null },
-        { id: '1700000000002-TEST2', attribute: CellAttribute.Text, name: 'Note 1', value: 'Some text', geo: null, remove: null },
-        { id: '1700000000003-TEST3', attribute: CellAttribute.Task, name: 'Todo 1', value: '0', geo: 'loc', remove: 'deleted' },
+        new Cell({ id: '1700000000001-TEST1', attribute: CellAttribute.Time, name: 'Task 1', value: '10:00', geo: null, remove: null }),
+        new Cell({ id: '1700000000002-TEST2', attribute: CellAttribute.Text, name: 'Note 1', value: 'Some text', geo: null, remove: null }),
+        new Cell({ id: '1700000000003-TEST3', attribute: CellAttribute.Task, name: 'Todo 1', value: '0', geo: 'loc', remove: 'deleted' }),
     ];
 
     describe('exportAsJSONL', () => {
@@ -69,7 +69,7 @@ describe('CellRepository File I/O', () => {
         });
 
         it('should handle upsert (overwrite existing)', async () => {
-            await CellRepository.save({ id: '1700000000010-IMPTA', attribute: CellAttribute.Time, name: 'Old Name', value: '10:00', geo: null, remove: null });
+            await CellRepository.save(new Cell({ id: '1700000000010-IMPTA', attribute: CellAttribute.Time, name: 'Old Name', value: '10:00', geo: null, remove: null }));
 
             const jsonl = `{"I":"1700000000010-IMPTA","A":"Time","N":"New Name","V":"10:00","G":null,"R":null}`;
             const result = await CellRepository.importFromJSONL(jsonl);
@@ -85,30 +85,36 @@ describe('CellRepository File I/O', () => {
 Invalid JSON Line
 {"I":"1700000000002-GOOD2","A":"Text","N":"Also Good","V":"2","G":null,"R":null}
 `.trim();
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
             const result = await CellRepository.importFromJSONL(jsonl);
+            logSpy.mockRestore();
+
             expect(result.successCount).toBe(2);
             expect(result.failureCount).toBe(1);
             expect(result.errors[0]).toEqual(expect.stringContaining('Unexpected token'));
         });
 
         it('should skip lines that fail validation', async () => {
-            // Missing required 'A' (attribute) which maps to 'attribute' in Cell
-            // Or let's say 'A' has invalid value 'InvalidType'
             const jsonl = `
 {"I":"1700000000001-INVAL","A":"InvalidType","N":"Bad Attribute","V":"Val","G":null,"R":null}
 `.trim();
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
             const result = await CellRepository.importFromJSONL(jsonl);
+            logSpy.mockRestore();
+
             expect(result.successCount).toBe(0);
             expect(result.failureCount).toBe(1);
             expect(result.errors[0]).toContain('Validation error');
         });
 
         it('should skip data with missing keys mandatory for mapping', async () => {
-            // Missing 'I'
             const jsonl = `{"A":"Time","N":"No ID","V":"Val"}`;
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
             const result = await CellRepository.importFromJSONL(jsonl);
+            logSpy.mockRestore();
+
             expect(result.successCount).toBe(0);
-            expect(result.failureCount).toBe(1); // Should fail at Zod validation or mapping
+            expect(result.failureCount).toBe(1);
         });
     });
 });

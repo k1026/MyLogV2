@@ -3,8 +3,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Cell } from '@/app/lib/models/cell';
 import { cn } from '@/app/lib/utils';
 import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
-import { EstimationCandidate } from '@/app/lib/services/estimation/types';
-import { TitleCandidates } from './TitleCandidates';
 import { useFilter } from '@/app/contexts/FilterContext';
 import { highlightText } from '@/app/lib/utils/highlight';
 
@@ -23,30 +21,39 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
 
     // Estimation Hook
     const { estimate } = useCellTitleEstimation();
-    const [candidates, setCandidates] = useState<EstimationCandidate[]>([]);
-    const [showCandidates, setShowCandidates] = useState(false);
+    const hasEstimatedRef = useRef(false);
+    const isEstimatingRef = useRef(false);
+    const preventAutoMoveRef = useRef(false);
 
     useEffect(() => {
-        if ((isFocused || isNew) && !name) {
+        if (isNew && !name && !hasEstimatedRef.current && !isEstimatingRef.current) {
+            isEstimatingRef.current = true;
             estimate().then(results => {
-                setCandidates(results);
                 if (results.length > 0) {
-                    setShowCandidates(true);
                     // 新規追加時は自動的に1位をセット
                     if (isNew && !name) {
                         setName(results[0].title);
+                        hasEstimatedRef.current = true;
+                        preventAutoMoveRef.current = true;
+
+                        // DOM更新後に全選択
+                        setTimeout(() => {
+                            nameRef.current?.focus();
+                            nameRef.current?.select();
+                            // 少し遅れて自動移動抑制を解除（ユーザーが操作できるように）
+                            setTimeout(() => {
+                                preventAutoMoveRef.current = false;
+                            }, 500);
+                        }, 50);
                     }
                 }
+                isEstimatingRef.current = false;
+            }).catch(() => {
+                isEstimatingRef.current = false;
             });
         }
-    }, [isFocused, isNew, name, estimate]);
+    }, [isNew, name, estimate]);
 
-    const handleSelectCandidate = (title: string) => {
-        setName(title);
-        setShowCandidates(false);
-        // フォーカスを維持しつつ値を更新
-        nameRef.current?.focus();
-    };
 
     // ... focus management code ...
     // Note: Inserting hook calls must be at top level, before returns.
@@ -96,6 +103,9 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
             // 既存の focus check を行って、すでにフォーカスがある場合は何もしない（誤作動防止）
             if (document.activeElement === nameRef.current || document.activeElement === valueRef.current) return;
 
+            // 推定直後は移動を抑制
+            if (preventAutoMoveRef.current) return;
+
             if (!name && !value) {
                 nameRef.current?.focus();
             } else if (name && !value) {
@@ -112,7 +122,6 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
         // コンテナ外にフォーカスが移ったかチェック (relatedTarget is the new focused element)
         if (!containerRef.current?.contains(e.relatedTarget as Node)) {
             setIsFocused(false);
-            setShowCandidates(false);
             if (name !== cell.name || value !== cell.value) {
                 // Fix lint: Create new Cell instance because onSave expects Cell, not POJO
                 onSave?.(new Cell({ ...cell, name, value }));
@@ -147,14 +156,6 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
         >
             {showName && (
                 <div className="flex flex-col gap-1">
-                    {showCandidates && candidates.length > 0 && (
-                        <div className="px-2">
-                            <TitleCandidates
-                                candidates={candidates}
-                                onSelect={handleSelectCandidate}
-                            />
-                        </div>
-                    )}
                     <div className="relative w-full">
                         {!isFocused && name && (
                             <div className="absolute inset-0 p-2 text-slate-800 font-bold text-[20px] leading-tight break-words pointer-events-none">
@@ -167,7 +168,9 @@ export const TextCell: React.FC<TextCellProps> = ({ cell, onSave, isNew }) => {
                             value={name}
                             onChange={(e) => {
                                 setName(e.target.value);
-                                setShowCandidates(false); // 手動入力時は閉じる
+                                if (!hasEstimatedRef.current) {
+                                    hasEstimatedRef.current = true;
+                                }
                             }}
                             onKeyDown={handleKeyDown}
                             placeholder={isFocused || !name ? "Title" : ""}

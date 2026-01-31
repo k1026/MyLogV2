@@ -11,6 +11,7 @@ export interface UseCardListResult {
     totalCount: number;
     addCard: (card: Cell) => void;
     updateCard: (card: Cell) => void;
+    refresh: () => Promise<void>;
 }
 
 const BATCH_SIZE = 1000;
@@ -29,39 +30,42 @@ export function useCardList(sortOrder: SortOrder = 'desc'): UseCardListResult {
         sortOrderRef.current = sortOrder;
     }, [sortOrder]);
 
+    const loadData = async () => {
+        setIsLoading(true);
+        try {
+            // Initial load: fetch everything to build subCellMap and extract cards
+            // Note: If performance becomes an issue, we can optimize later, 
+            // but for filtering we need all data in memory.
+            const allCells = await CellRepository.getAll();
+            if (!isMounted.current) return;
+
+            const newSubCellMap = new Map<string, Cell>();
+            const newCards: Cell[] = [];
+
+            allCells.forEach(cell => {
+                newSubCellMap.set(cell.id, cell);
+                if (cell.attribute === CellAttribute.Card) {
+                    newCards.push(cell);
+                }
+            });
+
+            setSubCellMap(newSubCellMap);
+            setCards(newCards); // Already sorted by ID descending from getAll()
+            setTotalCount(newCards.length);
+            setIsLoading(false);
+
+        } catch (error) {
+            console.error("Failed to load cards", error);
+            if (isMounted.current) setIsLoading(false);
+        }
+    };
+
+    const refresh = async () => {
+        await loadData();
+    };
+
     useEffect(() => {
         isMounted.current = true;
-
-        const loadData = async () => {
-            setIsLoading(true);
-            try {
-                // Initial load: fetch everything to build subCellMap and extract cards
-                // Note: If performance becomes an issue, we can optimize later, 
-                // but for filtering we need all data in memory.
-                const allCells = await CellRepository.getAll();
-                if (!isMounted.current) return;
-
-                const newSubCellMap = new Map<string, Cell>();
-                const newCards: Cell[] = [];
-
-                allCells.forEach(cell => {
-                    newSubCellMap.set(cell.id, cell);
-                    if (cell.attribute === CellAttribute.Card) {
-                        newCards.push(cell);
-                    }
-                });
-
-                setSubCellMap(newSubCellMap);
-                setCards(newCards); // Already sorted by ID descending from getAll()
-                setTotalCount(newCards.length);
-                setIsLoading(false);
-
-            } catch (error) {
-                console.error("Failed to load cards", error);
-                if (isMounted.current) setIsLoading(false);
-            }
-        };
-
         loadData();
 
         return () => {
@@ -123,6 +127,7 @@ export function useCardList(sortOrder: SortOrder = 'desc'): UseCardListResult {
         isSorting,
         totalCount,
         addCard,
-        updateCard
+        updateCard,
+        refresh
     };
 }

@@ -147,7 +147,9 @@ describe('TextCell', () => {
         });
 
         it('過剰なフォーカス奪取の防止: isNew=trueでも、一度フォーカスが外れたら再取得しないこと', async () => {
-            const cell = new Cell({ ...baseCell, name: '', value: '', id: 'new-cell-1' });
+            // 推定が走らないように、id以外（例えばname）で区別するか、あるいは推定結果が空になるようにする
+            // ここでは Cell に初期値を詰めて推定条件 (!name) を外す
+            const cell = new Cell({ ...baseCell, name: 'Sample', value: '', id: 'new-cell-1' });
             // 初回レンダリング (isNew=true)
             const { rerender } = render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
 
@@ -155,7 +157,7 @@ describe('TextCell', () => {
                 vi.runAllTimers();
             });
             await act(async () => { await Promise.resolve(); });
-            const nameInput = screen.getByPlaceholderText('Title');
+            const nameInput = screen.getByDisplayValue('Sample');
             expect(nameInput).toHaveFocus();
 
             // ユーザーが別の要素 (bodyなど) にフォーカスを移動
@@ -195,37 +197,76 @@ describe('TextCell', () => {
             });
         });
 
-        it('新規セル追加時に候補チップが表示されること', async () => {
+        it('新規セル追加時に候補チップが表示されないこと', async () => {
             const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-new' });
             render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
 
             await waitFor(() => {
-                expect(screen.getByText('Est 2')).toBeInTheDocument();
+                expect(screen.getByDisplayValue('Est 1')).toBeInTheDocument();
             });
+
+            expect(screen.queryByTestId('title-candidates')).not.toBeInTheDocument();
         });
 
-        it('候補チップをクリックするとタイトルが更新され、チップが消えること', async () => {
-            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-new' });
+        it('推定値がセットされた後、タイトルが全選択されていること', async () => {
+            vi.useFakeTimers();
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-selection' });
             render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
 
-            await waitFor(() => expect(screen.getByText('Est 2')).toBeInTheDocument());
+            // estimate() の Promise を解決
+            await act(async () => {
+                vi.advanceTimersByTime(0);
+            });
 
-            fireEvent.click(screen.getByText('Est 2'));
+            // setName 等の更新を待つ
+            const input = screen.getByDisplayValue('Est 1') as HTMLInputElement;
 
-            expect(screen.getByDisplayValue('Est 2')).toBeInTheDocument();
-            expect(screen.queryByText('Est 1')).not.toBeInTheDocument();
+            // setTimeout(select) を実行
+            act(() => {
+                vi.advanceTimersByTime(100);
+            });
+
+            expect(input.selectionStart).toBe(0);
+            expect(input.selectionEnd).toBe(input.value.length);
+            vi.useRealTimers();
         });
 
-        it('手動で入力すると候補チップが消えること', async () => {
-            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-new' });
+        it('一度推定された後、タイトルを空にしても再推定されないこと', async () => {
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-no-retry' });
+            const { rerender } = render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            await waitFor(() => expect(screen.getByDisplayValue('Est 1')).toBeInTheDocument());
+
+            // ユーザーが空文字にする
+            const input = screen.getByDisplayValue('Est 1');
+            fireEvent.change(input, { target: { value: '' } });
+
+            // 再レンダリング（依存配列の変化を想定）
+            rerender(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
+
+            // 推定が再度走っていないこと（空文字のままであること）
+            expect(input).toHaveValue('');
+            expect(mockEstimate).toHaveBeenCalledTimes(1);
+        });
+
+        it('推定値がセットされた直後はフォーカスがタイトルに留まり、本文へ移動しないこと', async () => {
+            vi.useFakeTimers();
+            const cell = new Cell({ ...baseCell, name: '', value: '', id: '999-focus-stay' });
             render(<TextCell cell={cell} onSave={mockSave} isNew={true} />);
 
-            await waitFor(() => expect(screen.getByText('Est 1')).toBeInTheDocument());
+            await act(async () => {
+                vi.advanceTimersByTime(0);
+            });
 
             const nameInput = screen.getByDisplayValue('Est 1');
-            fireEvent.change(nameInput, { target: { value: 'User Input' } });
+            act(() => {
+                vi.advanceTimersByTime(100);
+            });
 
-            expect(screen.queryByText('Est 1')).not.toBeInTheDocument();
+            const valueInput = screen.getByPlaceholderText('Description...');
+            expect(nameInput).toHaveFocus();
+            expect(valueInput).not.toHaveFocus();
+            vi.useRealTimers();
         });
     });
 });

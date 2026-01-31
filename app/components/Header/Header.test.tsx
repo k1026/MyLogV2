@@ -102,4 +102,32 @@ describe('Header Component', () => {
         fireEvent.click(button);
         expect(defaultProps.onDbOpen).toHaveBeenCalled();
     });
+
+    describe('z-index and pointer-events (Scroll Bug Fix)', () => {
+        it('has z-[60] class for z-index order', () => {
+            renderHeader();
+            const header = screen.getByTestId('app-header');
+            expect(header).toHaveClass('z-[60]');
+        });
+
+        it('has pointer-events-none on root to allow background scrolling', () => {
+            renderHeader();
+            const header = screen.getByTestId('app-header');
+            expect(header).toHaveClass('pointer-events-none');
+        });
+
+        it('has pointer-events-auto on content wrapper to allow interactions', () => {
+            renderHeader();
+            const header = screen.getByTestId('app-header');
+            // Check the containers inside that should be interactive
+            // Based on Header.tsx, there's a background div and a content div
+            const bg = header.querySelector('.absolute.inset-0');
+            const content = header.querySelector('.relative.max-w-7xl');
+
+            // Background shadow/bg should not block events
+            expect(bg).toHaveClass('pointer-events-none');
+            // Content (buttons/title) should block events
+            expect(content).toHaveClass('pointer-events-auto');
+        });
+    });
 });

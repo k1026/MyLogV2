@@ -93,49 +93,115 @@ export const CellRepository = {
         }
     },
 
-    async exportAsJSONL(): Promise<string> {
-        const docs = await db.cells.orderBy('I').reverse().toArray();
+    async exportAsJSONL(onProgress?: (percent: number) => void, signal?: AbortSignal): Promise<string> {
+        const totalCount = await this.getCount();
+
+        if (totalCount === 0) {
+            onProgress?.(100);
+            return '';
+        }
+
+        // Use toArray() then manual iteration to ensure abort check works reliably
+        // (Dexie's each() might behave synchronously in some environments preventing abort)
+        const allDocs = await db.cells.orderBy('I').reverse().toArray();
+        const docs: CellDB[] = [];
+        let processed = 0;
+
+        let lastPercent = -1;
+        for (const doc of allDocs) {
+            if (signal?.aborted) {
+                throw new Error('Aborted');
+            }
+            docs.push(doc);
+            processed++;
+
+            if (totalCount > 0) {
+                const percent = Math.floor((processed / totalCount) * 100);
+                if (percent !== lastPercent) {
+                    onProgress?.(percent);
+                    lastPercent = percent;
+                }
+            }
+
+            // Yield control back to the event loop every 100 docs
+            if (processed % 100 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+                // Extra check for abort after yielding
+                if (signal?.aborted) throw new Error('Aborted');
+            }
+        }
+
         return docs.map(doc => JSON.stringify(doc)).join('\n');
     },
 
-    async importFromJSONL(jsonl: string): Promise<ImportResult> {
+    async importFromJSONL(jsonl: string, onProgress?: (percent: number) => void, signal?: AbortSignal): Promise<ImportResult> {
         const lines = jsonl.split('\n');
         let successCount = 0;
         let failureCount = 0;
         const errors: string[] = [];
+        const totalLines = lines.length;
 
-        for (const line of lines) {
+        if (totalLines === 0) {
+            onProgress?.(100);
+            return { successCount: 0, failureCount: 0, errors: [] };
+        }
+
+        let lastPercent = -1;
+        for (let i = 0; i < totalLines; i++) {
+            if (signal?.aborted) {
+                // Throw to stop processing
+                throw new Error('Aborted');
+            }
+
+            const line = lines[i];
             const trimmedLine = line.trim();
-            if (!trimmedLine) continue;
 
-            try {
-                const rawDoc = JSON.parse(trimmedLine) as Record<string, unknown>;
+            // Progress update (throttled to integer percentage changes)
+            const percent = Math.floor(((i + 1) / totalLines) * 100);
+            if (percent !== lastPercent) {
+                onProgress?.(percent);
+                lastPercent = percent;
+            }
 
-                // Basic check for minimal required fields roughly
-                if (!rawDoc['I'] || !rawDoc['A']) {
-                    throw new Error('Missing required DB keys (I, A)');
+            if (trimmedLine) {
+                try {
+                    const rawDoc = JSON.parse(trimmedLine) as Record<string, unknown>;
+
+                    // Basic check for minimal required fields roughly
+                    if (!rawDoc['I'] || !rawDoc['A']) {
+                        throw new Error('Missing required DB keys (I, A)');
+                    }
+
+                    // mapFromDB handles the casting from raw object
+                    const cell = this.mapFromDB(rawDoc as unknown as CellDB);
+
+                    const validation = CellSchema.safeParse(cell);
+                    if (!validation.success) {
+                        const errorMsg = validation.error.issues
+                            .map(i => `${i.path.join('.')}: ${i.message}`)
+                            .join(', ');
+                        throw new Error(`Validation error: ${errorMsg}`);
+                    }
+
+                    await this.save(cell);
+                    successCount++;
+                } catch (e: unknown) {
+                    failureCount++;
+                    const message = e instanceof Error ? e.message : String(e);
+                    errors.push(`Line error: ${message}`);
                 }
+            }
 
-                // mapFromDB handles the casting from raw object
-                const cell = this.mapFromDB(rawDoc as unknown as CellDB);
-
-                const validation = CellSchema.safeParse(cell);
-                if (!validation.success) {
-                    const errorMsg = validation.error.issues
-                        .map(i => `${i.path.join('.')}: ${i.message}`)
-                        .join(', ');
-                    throw new Error(`Validation error: ${errorMsg}`);
-                }
-
-                await this.save(cell);
-                successCount++;
-            } catch (e: unknown) {
-                failureCount++;
-                const message = e instanceof Error ? e.message : String(e);
-                errors.push(`Line error: ${message}`);
+            // Yield control back to the event loop every 50 lines
+            if ((i + 1) % 50 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+                // Extra check for abort after yielding
+                if (signal?.aborted) throw new Error('Aborted');
             }
         }
 
+        // Ensure 100% on completion
+        onProgress?.(100);
         return { successCount, failureCount, errors };
     },
 

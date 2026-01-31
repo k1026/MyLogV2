@@ -15,8 +15,9 @@ interface CardListProps {
 
 export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate }: CardListProps) {
     const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
-    const { viewMode, handleScroll: syncScroll } = useUIState();
+    const { viewMode, handleScroll: syncScroll, headerVisible, footerVisible } = useUIState();
     const virtuosoRef = useRef<VirtuosoHandle>(null);
+    const lastScrolledId = useRef<string | null>(null);
 
     // Virtuoso handles scroll events
     const handleScroll = (e: React.UIEvent<HTMLElement>) => {
@@ -40,18 +41,23 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
     useEffect(() => {
         if (focusedId) {
             setExpandedCardId(focusedId);
-            // Scroll to the item
-            requestAnimationFrame(() => {
-                scrollToCard(focusedId);
-            });
+            // Scroll to the item only if focusedId has changed
+            if (focusedId !== lastScrolledId.current) {
+                lastScrolledId.current = focusedId;
+                requestAnimationFrame(() => {
+                    scrollToCard(focusedId);
+                });
+            }
         } else if (focusedId === null && expandedCardId) {
             setExpandedCardId(null);
+            lastScrolledId.current = null;
         }
-    }, [focusedId, cards]); // Added cards dependency to ensuring index lookup works if cards change
+    }, [focusedId, cards]); // cards dependency is still needed for scrollToCard index lookup
 
     const handleExpand = (id: string) => {
         setExpandedCardId(id);
         if (onFocus) onFocus(id);
+        lastScrolledId.current = id;
         // Scroll to the item
         requestAnimationFrame(() => {
             scrollToCard(id);
@@ -74,6 +80,10 @@ export function CardList({ cards, focusedId, onFocusClear, onFocus, onCardUpdate
             data={cards}
             data-testid="virtuoso-container"
             className="h-full w-full"
+            style={{
+                scrollPaddingTop: headerVisible ? '64px' : '0px',
+                scrollPaddingBottom: footerVisible ? '80px' : '0px',
+            }}
             onScroll={handleScroll}
             components={{
                 Header: Header,

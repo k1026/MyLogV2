@@ -9,12 +9,13 @@ import { cn } from '@/app/lib/utils';
 interface DbViewerProps {
     isOpen: boolean;
     onClose: () => void;
+    onDataChange?: () => void;
 }
 
 /**
  * データベース閲覧・管理ダイアログ
  */
-export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
+export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose, onDataChange }) => {
     const [cells, setCells] = useState<Cell[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -56,6 +57,9 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
         }
     }, [isEditingPage]);
 
+    const [columns, setColumns] = useState<string[]>([]);
+    const abortControllerRef = useRef<AbortController | null>(null);
+
     if (!isOpen) return null;
 
     const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
@@ -67,6 +71,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                 await CellRepository.clearAll();
                 await fetchData(1);
                 setCurrentPage(1);
+                onDataChange?.();
             } finally {
                 setProcessingAction(null);
             }
@@ -77,17 +82,37 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
         try {
             await CellRepository.delete(id);
             await fetchData(currentPage);
+            onDataChange?.();
         } catch (error) {
             console.error('Failed to delete cell:', error);
         }
     };
 
+
+    // ... (existing fetchData)
+
+    const handleCancel = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+            // processingAction will be cleared in finally block of the operation
+        }
+    };
+
     const handleExport = async () => {
         setProcessingAction('export');
-        setProgress(10); // Start
+        setProgress(0);
+
+        abortControllerRef.current = new AbortController();
+        const signal = abortControllerRef.current.signal;
+
         try {
-            const jsonl = await CellRepository.exportAsJSONL();
-            setProgress(80);
+            const jsonl = await CellRepository.exportAsJSONL((p) => setProgress(p), signal);
+
+            // 100%表示を確実にするための微小な待機
+            setProgress(100);
+            await new Promise(resolve => setTimeout(resolve, 200));
+
             const blob = new Blob([jsonl], { type: 'application/x-jsonlines' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -95,15 +120,19 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
             a.download = `mylog_export_${new Date().toISOString().split('T')[0]}.jsonl`;
             a.click();
             URL.revokeObjectURL(url);
-            setProgress(100);
-            alert(`エクスポート完了: ${totalCount}件を出力しました`);
-        } catch (error) {
-            console.error('Export failed:', error);
+            alert(`エクスポート完了: ${totalCount}件を出力しました\n(成功: ${totalCount}件, 失敗: 0件, 中止: 0件)`);
+        } catch (error: any) {
+            if (error.message === 'Aborted' || error.name === 'AbortError') {
+                const exportedCount = Math.floor((progress / 100) * totalCount);
+                alert(`エクスポートを中止しました\n(出力済: ${exportedCount}件, 未出力: ${totalCount - exportedCount}件)`);
+            } else {
+                console.error('Export failed:', error);
+                alert(`エクスポート失敗: ${(error as Error).message}`);
+            }
         } finally {
-            setTimeout(() => {
-                setProcessingAction(null);
-                setProgress(0);
-            }, 500);
+            setProcessingAction(null);
+            setProgress(0);
+            abortControllerRef.current = null;
         }
     };
 
@@ -116,21 +145,42 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
             if (!file) return;
 
             setProcessingAction('append');
-            setProgress(20);
+            setProgress(0);
+
+            abortControllerRef.current = new AbortController();
+            const signal = abortControllerRef.current.signal;
+
             const reader = new FileReader();
             reader.onload = async (event) => {
                 try {
                     const content = event.target?.result as string;
-                    setProgress(50);
-                    const result: ImportResult = await CellRepository.importFromJSONL(content);
+                    const result: ImportResult = await CellRepository.importFromJSONL(content, (p) => setProgress(p), signal);
+                    const totalLines = content.split('\n').filter(l => l.trim()).length;
+                    const cancelled = totalLines - (result.successCount + result.failureCount);
+
+                    // 100%表示を確実にするための微小な待機
                     setProgress(100);
-                    alert(`追加完了: 成功:${result.successCount}件, 失敗:${result.failureCount}件`);
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    alert(`追加完了: 成功:${result.successCount}件, 失敗:${result.failureCount}件, 中止:${cancelled}件`);
                     fetchData(currentPage);
-                } catch (error) {
-                    console.error('Import failed:', error);
+                    onDataChange?.();
+                } catch (error: any) {
+                    if (error.message === 'Aborted' || error.name === 'AbortError') {
+                        // importFromJSONLの中でProgressが上がっているので、そこから概算またはRepository側の結果を使う
+                        // 現状importFromJSONLは例外を投げるので、正確な途中経過はRepositoryの戻り値を工夫する必要があるが
+                        // ここでは「中止されました」という通知を優先する
+                        alert('インポートを中止しました（そこまでに読み込まれたデータは保存されています）');
+                        fetchData(currentPage);
+                        onDataChange?.();
+                    } else {
+                        console.error('Import failed:', error);
+                        alert(`インポート失敗: ${(error as Error).message}`);
+                    }
                 } finally {
                     setProcessingAction(null);
                     setProgress(0);
+                    abortControllerRef.current = null;
                 }
             };
             reader.readAsText(file);
@@ -150,20 +200,31 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
     return (
         <div
             data-testid="db-viewer-overlay"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 animate-in fade-in duration-300"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 animate-in fade-in duration-300"
         >
             <div className="relative w-full max-w-6xl h-[92vh] bg-white rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 border border-slate-200">
-                {/* 閉じるボタン */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center bg-white rounded-2xl text-purple-400 hover:text-purple-600 border border-purple-100 shadow-lg shadow-purple-500/10 transition-all hover:scale-110 active:scale-90 z-20"
-                    aria-label="閉じる"
-                >
-                    <MaterialIcon icon="close" size={28} />
-                </button>
+
+                {/* Processing Overlay */}
+                {processingAction && (
+                    <div
+                        data-testid="processing-overlay"
+                        className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center animate-in fade-in duration-300"
+                    />
+                )}
+
+                {/* 閉じるボタン (Overlayの上に来るべきか、無効化されるべきか。仕様は「中止操作以外を無効化」なので閉じるも無効) */}
+                {!processingAction && (
+                    <button
+                        onClick={onClose}
+                        className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center bg-white rounded-2xl text-purple-400 hover:text-purple-600 border border-purple-100 shadow-lg shadow-purple-500/10 transition-all hover:scale-110 active:scale-90 z-[60]"
+                        aria-label="閉じる"
+                    >
+                        <MaterialIcon icon="close" size={28} />
+                    </button>
+                )}
 
                 {/* ヘッダーセクション */}
-                <div className="flex flex-col items-center pt-10 pb-6 bg-gradient-to-b from-slate-50 to-white">
+                <div className="flex flex-col items-center pt-10 pb-6 bg-gradient-to-b from-slate-50 to-white relative z-50">
                     <div className="flex items-center gap-4 group">
                         <div className="p-4 bg-purple-100/50 rounded-3xl text-purple-600 shadow-inner group-hover:scale-110 transition-transform duration-500">
                             <MaterialIcon icon="database" size={40} />
@@ -176,6 +237,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
 
                     {/* 操作ボタン */}
                     <div className="flex gap-6 mt-10">
+                        {/* Buttons logic ... */}
                         <button
                             onClick={handleDeleteDB}
                             disabled={!!processingAction || isLoading}
@@ -192,7 +254,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                         </button>
                         <button
                             onClick={handleAppend}
-                            disabled={!!processingAction || isLoading}
+                            disabled={!!processingAction}
                             className={cn(
                                 "px-8 py-3 border-2 border-purple-200 text-purple-500 rounded-2xl font-black tracking-wider transition-all shadow-lg shadow-purple-500/5",
                                 processingAction === 'append'
@@ -206,7 +268,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                         </button>
                         <button
                             onClick={handleExport}
-                            disabled={!!processingAction || isLoading}
+                            disabled={!!processingAction}
                             className={cn(
                                 "px-8 py-3 border-2 border-purple-200 text-purple-500 rounded-2xl font-black tracking-wider transition-all shadow-lg shadow-purple-500/5",
                                 processingAction === 'export'
@@ -220,13 +282,27 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                         </button>
                     </div>
 
-                    {/* プログレスバー */}
+                    {/* プログレスバー & 中止ボタン */}
                     {processingAction && (
-                        <div className="w-96 h-1.5 bg-slate-100 rounded-full mt-6 overflow-hidden">
-                            <div
-                                className="h-full bg-purple-500 transition-all duration-300 ease-out"
-                                style={{ width: `${progress}%` }}
-                            />
+                        <div className="flex items-center gap-4 mt-6 animate-in fade-in slide-in-from-bottom-2">
+                            <div className="w-80 h-3 bg-slate-100 rounded-full overflow-hidden relative border border-slate-200">
+                                <div
+                                    className="h-full bg-purple-500 transition-all duration-500 ease-out relative"
+                                    style={{ width: `${progress}%` }}
+                                >
+                                    <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite] w-full transform -skew-x-12"></div>
+                                </div>
+                            </div>
+                            <span className="font-mono font-bold text-purple-600 w-12 text-right">{progress}%</span>
+
+                            <button
+                                onClick={handleCancel}
+                                className="w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 hover:text-slate-800 transition-colors"
+                                aria-label="処理を中止"
+                                title="中止"
+                            >
+                                <MaterialIcon icon="close" size={18} />
+                            </button>
                         </div>
                     )}
                 </div>
@@ -238,6 +314,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     <div className="flex items-center gap-6">
+                        {/* Pagination < */}
                         <button
                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                             disabled={currentPage === 1 || !!processingAction || isLoading}
@@ -254,14 +331,18 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                                         ref={pageInputRef}
                                         type="number"
                                         defaultValue={currentPage}
-                                        className="w-16 h-10 text-center border-2 border-purple-200 rounded-xl outline-none focus:border-purple-500"
+                                        className="w-16 h-10 text-center border-2 border-purple-200 rounded-xl outline-none focus:border-purple-500 text-purple-600"
                                         onBlur={() => setIsEditingPage(false)}
                                     />
                                 </form>
                             ) : (
                                 <span
-                                    onClick={() => setIsEditingPage(true)}
-                                    className="cursor-pointer hover:text-purple-600 transition-colors border-b-4 border-purple-100 h-8 flex items-center px-2"
+                                    data-testid="current-page-display"
+                                    onClick={() => !processingAction && setIsEditingPage(true)}
+                                    className={cn(
+                                        "cursor-pointer hover:text-purple-600 transition-colors border-b-4 border-purple-100 h-8 flex items-center px-2",
+                                        "text-purple-600" // Specification Update: Purple color
+                                    )}
                                 >
                                     {currentPage}
                                 </span>
@@ -270,6 +351,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
                             <span className="text-slate-400">{totalPages}</span>
                         </div>
 
+                        {/* Pagination > */}
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages || !!processingAction || isLoading}
@@ -282,6 +364,7 @@ export const DbViewer: React.FC<DbViewerProps> = ({ isOpen, onClose }) => {
 
                     <div className="w-32"></div> {/* バランス用 */}
                 </div>
+
 
                 {/* データテーブル */}
                 <div className="flex-1 overflow-auto bg-slate-50/50 scrollbar-thin scrollbar-thumb-slate-200">

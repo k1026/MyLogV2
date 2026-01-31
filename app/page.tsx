@@ -20,7 +20,7 @@ export default function Home() {
     const { sortOrder, filterState } = useUIState();
     const { filterSettings } = useFilter();
     const useCardListResult = useCardList(sortOrder);
-    const { cards, subCellMap, isLoading, isSorting, totalCount, updateCard } = useCardListResult;
+    const { cards, subCellMap, isLoading, isSorting, totalCount, updateCard, refresh } = useCardListResult;
     const { isCalculating } = useRarity();
     const [mounted, setMounted] = useState(false);
     const [isDbViewerOpen, setIsDbViewerOpen] = useState(false);
@@ -34,9 +34,11 @@ export default function Home() {
     }, [initEstimation]);
 
     // フィルタリングの適用
-    const filteredCards = filterState === 'on'
-        ? filterCards(cards, subCellMap, filterSettings)
-        : cards.filter(c => c.remove === null);
+    const filteredCards = React.useMemo(() => {
+        return filterState === 'on'
+            ? filterCards(cards, subCellMap, filterSettings)
+            : cards.filter(c => c.remove === null);
+    }, [cards, subCellMap, filterState, filterSettings]);
 
     // セル数の計算
     const cellCount = filteredCards.reduce((acc, card) => {
@@ -111,6 +113,7 @@ export default function Home() {
             <DbViewer
                 isOpen={isDbViewerOpen}
                 onClose={() => setIsDbViewerOpen(false)}
+                onDataChange={refresh}
             />
 
             {/* Footer */}

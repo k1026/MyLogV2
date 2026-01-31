@@ -23,6 +23,7 @@ export const FilterButton: React.FC<FilterButtonProps> = ({ onClick }) => {
 
     return (
         <FooterButton
+            aria-label="Filter Options"
             icon={renderIcon()}
             label="Filter"
             onClick={onClick}

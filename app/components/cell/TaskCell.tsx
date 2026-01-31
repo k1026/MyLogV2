@@ -4,8 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Cell } from '@/app/lib/models/cell';
 import { cn } from '@/app/lib/utils';
 import { useCellTitleEstimation } from '@/app/lib/hooks/useCellTitleEstimation';
-import { EstimationCandidate } from '@/app/lib/services/estimation/types';
-import { TitleCandidates } from './TitleCandidates';
 import { useFilter } from '@/app/contexts/FilterContext';
 import { highlightText } from '@/app/lib/utils/highlight';
 
@@ -26,31 +24,38 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
 
     // Estimation Hook
     const { estimate } = useCellTitleEstimation();
-    const [candidates, setCandidates] = useState<EstimationCandidate[]>([]);
-    const [showCandidates, setShowCandidates] = useState(false);
+    const hasEstimatedRef = useRef(false);
+    const isEstimatingRef = useRef(false);
 
     useEffect(() => {
-        if (isNew && !name) {
+        if (isNew && !name && !hasEstimatedRef.current && !isEstimatingRef.current) {
+            isEstimatingRef.current = true;
             estimate().then(results => {
-                setCandidates(results);
                 if (results.length > 0) {
-                    setShowCandidates(true);
                     // 新規追加時は自動的に1位をセット
                     setName(currentName => {
                         // ユーザーが既に入力済みの場合は上書きしない
                         if (currentName) return currentName;
-                        return results[0].title;
+
+                        const estimatedTitle = results[0].title;
+                        hasEstimatedRef.current = true;
+
+                        // DOM更新後に全選択
+                        setTimeout(() => {
+                            nameRef.current?.focus();
+                            nameRef.current?.select();
+                        }, 50);
+
+                        return estimatedTitle;
                     });
                 }
+                isEstimatingRef.current = false;
+            }).catch(() => {
+                isEstimatingRef.current = false;
             });
         }
     }, [isNew, name, estimate]);
 
-    const handleSelectCandidate = (title: string) => {
-        setName(title);
-        setShowCandidates(false);
-        nameRef.current?.focus();
-    };
 
     const hasAutoFocusedRef = useRef(false);
 
@@ -75,7 +80,6 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
     const handleBlur = (e: React.FocusEvent) => {
         if (!containerRef.current?.contains(e.relatedTarget as Node)) {
             setIsFocused(false);
-            setShowCandidates(false);
             if (name !== cell.name) {
                 onSave?.(new Cell({ ...cell, name }));
             }
@@ -106,14 +110,6 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                 />
             </div>
             <div className="flex-1 flex flex-col gap-1">
-                {showCandidates && candidates.length > 0 && (
-                    <div className="px-2">
-                        <TitleCandidates
-                            candidates={candidates}
-                            onSelect={handleSelectCandidate}
-                        />
-                    </div>
-                )}
                 <div className="relative flex-1">
                     {!isFocused && name ? (
                         <div className={cn(
@@ -129,7 +125,9 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                         value={name}
                         onChange={(e) => {
                             setName(e.target.value);
-                            setShowCandidates(false);
+                            if (!hasEstimatedRef.current) {
+                                hasEstimatedRef.current = true;
+                            }
                         }}
                         onFocus={() => setIsFocused(true)}
                         onBlur={handleBlur}

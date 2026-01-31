@@ -9,6 +9,7 @@ export const SortButton: React.FC = () => {
 
     return (
         <FooterButton
+            aria-label="Sort Options"
             icon={<MaterialIcon
                 icon="vertical_align_top"
                 size={20}

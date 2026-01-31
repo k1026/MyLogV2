@@ -32,13 +32,13 @@ export const Header: React.FC<HeaderProps> = ({
         <header
             data-testid="app-header"
             className={cn(
-                "fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out",
+                "fixed top-0 left-0 right-0 z-[60] transition-transform duration-300 ease-in-out pointer-events-none",
                 headerVisible ? "translate-y-0" : "-translate-y-full"
             )}
         >
-            <div className="absolute inset-0 bg-white border-b border-slate-200 shadow-sm" />
+            <div className="absolute inset-0 bg-white border-b border-slate-200 shadow-sm pointer-events-none" />
 
-            <div className="relative max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="relative max-w-7xl mx-auto px-4 h-16 flex items-center justify-between pointer-events-auto">
                 <HeaderStatus
                     cardCount={cardCount}
                     cellCount={cellCount}

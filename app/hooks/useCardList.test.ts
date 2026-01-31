@@ -71,4 +71,26 @@ describe('useCardList', () => {
         expect(result.current.cards[0]).toEqual(newCard); // Spec 7.6: Insert at proper position (newest first by default)
         expect(result.current.totalCount).toBe(initialTotal + 1);
     });
+
+    it('should refresh data when refresh is called', async () => {
+        const mockCards1 = [createMockCard('card-1', 'time-1')];
+        const mockCards2 = [createMockCard('card-1', 'time-1'), createMockCard('card-2', 'time-2')];
+
+        (CellRepository.getAll as Mock).mockResolvedValueOnce(mockCards1).mockResolvedValueOnce(mockCards2);
+
+        const { result } = renderHook(() => useCardList());
+
+        // Initial load
+        await waitFor(() => expect(result.current.cards.length).toBe(1));
+
+        const { act } = await import('@testing-library/react');
+        await act(async () => {
+            await result.current.refresh();
+        });
+
+        await waitFor(() => {
+            expect(result.current.cards.length).toBe(2);
+            expect(CellRepository.getAll).toHaveBeenCalledTimes(2);
+        });
+    });
 });
