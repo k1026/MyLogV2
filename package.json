@@ -7,9 +7,9 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest",
-    "test:full-log": "set NO_COLOR=1 && vitest run > test_full.log 2>&1",
-    "test:error-log": "set NO_COLOR=1 && vitest run --reporter=dot --silent > test_error.log 2>&1"
+    "test": "set DEBUG_PRINT_LIMIT=100 && vitest",
+    "test:full-log": "set NO_COLOR=1 && set DEBUG_PRINT_LIMIT=300 && vitest run > test_full.log 2>&1",
+    "test:error-log": "set NO_COLOR=1 && set DEBUG_PRINT_LIMIT=300 && vitest run --reporter=dot --silent > test_error.log 2>&1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

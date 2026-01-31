@@ -17,7 +17,6 @@ describe('TimeCell', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        // HTMLInputElement.prototype.showPicker is not implemented in JSDOM
         if (!HTMLInputElement.prototype.showPicker) {
             HTMLInputElement.prototype.showPicker = vi.fn();
         }
@@ -26,93 +25,97 @@ describe('TimeCell', () => {
     it('初期表示: name と value (日付・時刻) が正しく表示されること', () => {
         render(<TimeCell cell={baseCell} onSave={mockSave} />);
 
-        expect(screen.getByDisplayValue('Time Entry')).toBeInTheDocument();
+        // タイトルの確認
+        const nameInput = screen.getByDisplayValue('Time Entry');
+        expect(nameInput).toBeInTheDocument();
 
-        const dateInput = screen.getByLabelText(/date/i) as HTMLInputElement;
-        const timeInput = screen.getByLabelText(/time/i) as HTMLInputElement;
+        // 日付・時刻ボタンの確認 (仕様: 日付 200px, 時刻 100px)
+        const dateButton = screen.getByRole('button', { name: /date/i });
+        const timeButton = screen.getByRole('button', { name: /time/i });
 
-        // Expect YYYY-MM-DD
-        expect(dateInput.value).toBe('2026-01-28');
-        // Expect HH:mm
-        expect(timeInput.value).toBe('12:00');
+        expect(dateButton).toHaveTextContent('2026-01-28');
+        expect(timeButton).toHaveTextContent('12:00');
     });
 
-    it('UI要件: 配置、ギャップ、デザインが仕様通りであること', () => {
+    it('UI要件: 配置、デザインが仕様通りであること', () => {
         render(<TimeCell cell={baseCell} onSave={mockSave} />);
 
         const container = screen.getByTestId('time-cell');
         const nameInput = screen.getByDisplayValue('Time Entry');
-        const dateInput = screen.getByLabelText(/date/i);
-        const timeInput = screen.getByLabelText(/time/i);
+        const dateButton = screen.getByRole('button', { name: /date/i });
+        const timeButton = screen.getByRole('button', { name: /time/i });
 
-        // コンテナの配置確認 (左詰め、gap 2px)
-        expect(container).toHaveClass('items-start');
+        // コンテナ: flex-col, gap-[2px], items-start
+        expect(container).toHaveClass('flex-col');
         expect(container).toHaveClass('gap-[2px]');
+        expect(container).toHaveClass('items-start');
 
-        // デザイン確認: 背景透明、文字色白、枠線なし
-        [nameInput, dateInput, timeInput].forEach(input => {
-            expect(input).toHaveClass('bg-transparent');
-            expect(input).toHaveClass('text-white');
-            expect(input).toHaveClass('border-none');
-            expect(input).toHaveClass('outline-none');
-        });
+        // 値行: flex-row, gap-2 (8px)
+        const valueRow = dateButton.parentElement;
+        expect(valueRow).toHaveClass('flex-row');
+        expect(valueRow).toHaveClass('gap-2');
 
-        // テキスト配置
-        // タイトル: 14px, medium
+        // 全体: 角丸なし、枠線なし、背景透明
+        expect(container).not.toHaveClass('rounded-lg');
+        expect(container).not.toHaveClass('border');
+
+        // タイトル: 14px, text-white, font-medium
         expect(nameInput).toHaveClass('text-[14px]');
+        expect(nameInput).toHaveClass('text-white');
         expect(nameInput).toHaveClass('font-medium');
 
-        // 値: 18px, normal
-        expect(dateInput).toHaveClass('text-[18px]');
-        expect(dateInput).toHaveClass('font-normal');
-        expect(timeInput).toHaveClass('text-[18px]');
-        expect(timeInput).toHaveClass('font-normal');
+        // 日付ボタン: 18px, w-fit, text-white
+        expect(dateButton).toHaveClass('text-[18px]');
+        expect(dateButton).toHaveClass('w-fit');
+        expect(dateButton).toHaveClass('text-white');
 
-        // 自動保存ピッカー用クラス (w-full, min-w-0 for grid overlap)
-        expect(dateInput).toHaveClass('w-full');
-        expect(dateInput).toHaveClass('min-w-0');
-        expect(timeInput).toHaveClass('w-full');
-        expect(timeInput).toHaveClass('min-w-0');
-
-        // inputs should NOT have w-auto (cause of the bug)
-        expect(dateInput).not.toHaveClass('w-auto');
-        expect(timeInput).not.toHaveClass('w-auto');
+        // 時刻ボタン: 18px, w-fit, text-white
+        expect(timeButton).toHaveClass('text-[18px]');
+        expect(timeButton).toHaveClass('w-fit');
+        expect(timeButton).toHaveClass('text-white');
     });
 
-    it('日付、時刻、タイトルを変更すると onSave が呼ばれること', () => {
+    it('タイトルを変更すると onSave が呼ばれること', () => {
         render(<TimeCell cell={baseCell} onSave={mockSave} />);
-        const dateInput = screen.getByLabelText(/date/i);
-        const timeInput = screen.getByLabelText(/time/i);
         const nameInput = screen.getByDisplayValue('Time Entry');
 
-        // Date Change
-        fireEvent.change(dateInput, { target: { value: '2026-01-29' } });
-        fireEvent.blur(dateInput);
-        expect(mockSave).toHaveBeenCalledWith(expect.any(Cell));
-        expect(mockSave.mock.calls[0][0].value).toContain('2026-01-29T12:00:00');
-        mockSave.mockClear();
-
-        // Time Change
-        fireEvent.change(timeInput, { target: { value: '13:00' } });
-        fireEvent.blur(timeInput);
-        expect(mockSave).toHaveBeenCalledWith(expect.any(Cell));
-        // Previous step set date to 29, so we expect 29 here too
-        expect(mockSave.mock.calls[0][0].value).toContain('2026-01-29T13:00:00');
-        mockSave.mockClear();
-
-        // Name Change
         fireEvent.change(nameInput, { target: { value: 'New Name' } });
         fireEvent.blur(nameInput);
-        expect(mockSave).toHaveBeenCalledWith(expect.any(Cell));
+
+        expect(mockSave).toHaveBeenCalledTimes(1);
         expect(mockSave.mock.calls[0][0].name).toBe('New Name');
     });
 
-    it('テキストボックスをクリックするとピッカーが開くこと', () => {
+    it('ボタンをクリックするとピッカーが開くこと', () => {
         const showPickerMock = vi.spyOn(HTMLInputElement.prototype, 'showPicker');
         render(<TimeCell cell={baseCell} onSave={mockSave} />);
 
-        const dateInput = screen.getByLabelText(/date/i);
-        fireEvent.click(dateInput);
+        const dateButton = screen.getByRole('button', { name: /date/i });
+        fireEvent.click(dateButton);
         expect(showPickerMock).toHaveBeenCalled();
+
+        const timeButton = screen.getByRole('button', { name: /time/i });
+        fireEvent.click(timeButton);
+        expect(showPickerMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('ピッカーで値を変更すると onSave が呼ばれること', () => {
+        render(<TimeCell cell={baseCell} onSave={mockSave} />);
+
+        // 日付の変更 (aria-label="Date Input" の input を探す)
+        const dateInput = screen.getByLabelText('Date Input');
+        fireEvent.change(dateInput, { target: { value: '2026-01-29' } });
+
+        expect(mockSave).toHaveBeenCalled();
+        expect(mockSave.mock.calls[0][0].value).toContain('2026-01-29T12:00:00');
+        mockSave.mockClear();
+
+        // 時刻の変更 (aria-label="Time Input" の input を探す)
+        const timeInput = screen.getByLabelText('Time Input');
+        fireEvent.change(timeInput, { target: { value: '13:00' } });
+
+        expect(mockSave).toHaveBeenCalled();
+        // 直前のテストで日付が 29 になっているので、29 を期待する
+        expect(mockSave.mock.calls[0][0].value).toContain('2026-01-29T13:00:00');
     });
 });

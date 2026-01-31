@@ -9,7 +9,11 @@ interface TimeCellProps {
     isNew?: boolean;
 }
 
-export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
+/**
+ * タイムセル (Time) コンポーネント
+ * 発生・記録日時の表示・編集を仕様(04_CellUI.md)に基づいて行う。
+ */
+export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave }) => {
     // -------------------------------------------------------------------------
     // Helper Functions
     // -------------------------------------------------------------------------
@@ -40,154 +44,106 @@ export const TimeCell: React.FC<TimeCellProps> = ({ cell, onSave, isNew }) => {
     };
 
     // -------------------------------------------------------------------------
-    // State Initialization
+    // State
     // -------------------------------------------------------------------------
     const dateObj = parseDate(cell.value);
-    const initialDate = formatDate(dateObj);
-    const initialTime = formatTime(dateObj);
-
     const [name, setName] = useState(cell.name);
-    const [date, setDate] = useState(initialDate);
-    const [time, setTime] = useState(initialTime);
+    const [date, setDate] = useState(formatDate(dateObj));
+    const [time, setTime] = useState(formatTime(dateObj));
 
     const dateInputRef = useRef<HTMLInputElement>(null);
     const timeInputRef = useRef<HTMLInputElement>(null);
 
-    // -------------------------------------------------------------------------
-    // Effects & Handlers
-    // -------------------------------------------------------------------------
+    // 同期
     useEffect(() => {
         setName(cell.name);
         const d = parseDate(cell.value);
         if (!isNaN(d.getTime())) {
             setDate(formatDate(d));
             setTime(formatTime(d));
-        } else {
-            setDate('');
-            setTime('');
         }
     }, [cell.name, cell.value]);
 
-    const handleBlur = () => {
+    const handleSave = (newName?: string, newDate?: string, newTime?: string) => {
+        const finalName = newName ?? name;
+        const finalDate = newDate ?? date;
+        const finalTime = newTime ?? time;
+
         let newValue = cell.value;
-        if (date && time) {
-            newValue = `${date}T${time}:00`;
-        } else if (!date && !time) {
+        if (finalDate && finalTime) {
+            newValue = `${finalDate}T${finalTime}:00`;
+        } else if (!finalDate && !finalTime) {
             newValue = '';
-        } else if (date && !time) {
-            newValue = `${date}T00:00:00`;
-        } else if (!date && time) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            newValue = `${year}-${month}-${day}T${time}:00`;
+        } else if (finalDate && !finalTime) {
+            newValue = `${finalDate}T00:00:00`;
         }
 
-        if (name !== cell.name || newValue !== cell.value) {
-            // Must return a distinct Cell instance for onSave
-            onSave?.(new Cell({ ...cell, name, value: newValue }));
+        if (finalName !== cell.name || newValue !== cell.value) {
+            onSave?.(new Cell({ ...cell, name: finalName, value: newValue }));
         }
     };
 
-    // -------------------------------------------------------------------------
-    // Render Helper: Auto-Width Input via Grid Stack
-    // -------------------------------------------------------------------------
-    const renderAutoWidthInput = (
-        value: string,
-        onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-        placeholder: string = "",
-        ariaLabel: string = "",
-        className: string = "",
-        onClick?: () => void
-    ) => {
-        // Base styling for seamless look
-        const inputBaseClass = "bg-transparent border-none outline-none text-white transition-all duration-300 text-left focus:ring-0 p-0 m-0 font-inherit leading-none";
-
-        return (
-            <div className="inline-grid items-center p-0 m-0">
-                {/* 
-                  Grid Stack Trick:
-                  1. Input and Span occupy col-1 / row-1
-                  2. Span is invisible but sets the grid width based on content
-                  3. Input fills the grid width (w-full) but is allowed to shrink (min-w-0)
-                  
-                  IMPORTANT: 'min-w-0' is critical to prevent the input from defaulting to ~150px
-                */}
-                <input
-                    type="text"
-                    value={value}
-                    onChange={onChange}
-                    onBlur={handleBlur}
-                    placeholder={placeholder}
-                    aria-label={ariaLabel}
-                    className={cn(inputBaseClass, "col-start-1 row-start-1 w-full min-w-0", className)}
-                    onClick={onClick}
-                />
-                <span className={cn(inputBaseClass, "col-start-1 row-start-1 invisible whitespace-pre px-0 pointer-events-none", className)}>
-                    {value || placeholder}
-                </span>
-            </div>
-        );
-    };
-
-    // -------------------------------------------------------------------------
-    // Component Render
-    // -------------------------------------------------------------------------
     return (
         <div
             data-testid="time-cell"
-            className="flex flex-col gap-[2px] items-start justify-start w-full"
+            className="flex flex-col gap-[2px] items-start w-full bg-transparent"
         >
-            {/* Title Row */}
-            {renderAutoWidthInput(
-                name,
-                (e) => setName(e.target.value),
-                "Entry Title",
-                "Name",
-                "font-medium text-[14px] text-white placeholder:text-white/40"
-            )}
+            {/* タイトル行 - 仕様: 14px, medium, text-white */}
+            <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => handleSave()}
+                placeholder="Entry Title"
+                className="w-full bg-transparent border-none outline-none text-[14px] font-medium text-white placeholder:text-white/40 p-0 focus:ring-0"
+                aria-label="Name"
+            />
 
-            {/* DateTime Row (Side-by-side) */}
-            <div className="flex gap-[2px] items-center flex-wrap">
-                {renderAutoWidthInput(
-                    date,
-                    (e) => setDate(e.target.value),
-                    "",
-                    "Date",
-                    "font-normal text-[18px] text-white",
-                    () => dateInputRef.current?.showPicker()
-                )}
-                {renderAutoWidthInput(
-                    time,
-                    (e) => setTime(e.target.value),
-                    "",
-                    "Time",
-                    "font-normal text-[18px] text-white",
-                    () => timeInputRef.current?.showPicker()
-                )}
+            {/* 値行 - 仕様: 横並び gap-2px */}
+            <div className="flex flex-row gap-2">
+                {/* 日付ボタン - 仕様: 18px, w-fit, text-white */}
+                <button
+                    type="button"
+                    onClick={() => dateInputRef.current?.showPicker()}
+                    className="w-fit text-left text-[18px] font-normal text-white bg-transparent border-none p-0 cursor-pointer"
+                    aria-label="Date"
+                >
+                    {date || 'YYYY-MM-DD'}
+                </button>
+
+                {/* 時刻ボタン - 仕様: 18px, w-fit, text-white */}
+                <button
+                    type="button"
+                    onClick={() => timeInputRef.current?.showPicker()}
+                    className="w-fit text-left text-[18px] font-normal text-white bg-transparent border-none p-0 cursor-pointer"
+                    aria-label="Time"
+                >
+                    {time || 'HH:mm'}
+                </button>
             </div>
 
-            {/* Hidden Built-in Pickers for Browser Feature Support */}
+            {/* 隠しインプット */}
             <input
                 type="date"
                 ref={dateInputRef}
                 className="sr-only"
+                value={date}
                 onChange={(e) => {
                     setDate(e.target.value);
-                    handleBlur();
+                    handleSave(name, e.target.value, time);
                 }}
-                tabIndex={-1}
+                aria-label="Date Input"
             />
             <input
                 type="time"
                 ref={timeInputRef}
                 className="sr-only"
+                value={time}
                 onChange={(e) => {
                     setTime(e.target.value);
-                    handleBlur();
+                    handleSave(name, date, e.target.value);
                 }}
-                tabIndex={-1}
+                aria-label="Time Input"
             />
         </div>
     );
