@@ -34,7 +34,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
     const { filterSettings } = useFilter();
-    const { viewMode } = useUIState();
+    const { viewMode, footerVisible } = useUIState();
     const highlightKeywords = filterSettings.keywords.include;
 
     // Sync with external control if provided
@@ -116,11 +116,11 @@ export const Card: React.FC<CardProps> = ({
         };
     }, [isExpanded, handleToggle]);
 
-    const handleAddCell = async (attribute: CellAttribute) => {
+    const handleAddCell = React.useCallback(async (attribute: CellAttribute) => {
         const currentIds = sortState.sortedCells.map(c => c.I);
         const newCell = await addCellToCard(cell.id, attribute, currentIds);
         setLastAddedId(newCell.id);
-    };
+    }, [cell.id, sortState.sortedCells]);
 
     const { learn } = useCellTitleEstimation();
 
@@ -207,6 +207,21 @@ export const Card: React.FC<CardProps> = ({
 
             {isExpanded && (
                 <div data-testid="card-item-list" className="mt-2 text-sm w-full relative">
+                    {/* Floating Add Button Wrapper - Keeps FAB visible while scrolling through the card */}
+                    <div
+                        data-testid="card-fab-container"
+                        className="sticky z-[100] h-0 flex justify-end pr-[16px] pointer-events-none"
+                        style={{
+                            top: footerVisible
+                                ? 'calc(100vh - 80px - 16px - 60px)'
+                                : 'calc(100vh - 16px - 60px)'
+                        }}
+                    >
+                        <div className="pointer-events-auto">
+                            <CardFAB onAdd={handleAddCell} />
+                        </div>
+                    </div>
+
                     <div className="flex flex-col gap-2 pb-[12px]">
                         {cellModels.map(cellModel => (
                             <div key={cellModel.id}>
@@ -217,13 +232,6 @@ export const Card: React.FC<CardProps> = ({
                                 />
                             </div>
                         ))}
-                    </div>
-
-                    <div
-                        data-testid="card-fab-container"
-                        className="absolute bottom-[16px] right-[16px] z-[100]"
-                    >
-                        <CardFAB onAdd={handleAddCell} />
                     </div>
                 </div>
             )}

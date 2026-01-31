@@ -1,5 +1,5 @@
 import { CellAttribute } from '@/app/lib/models/cell';
-import { useState, useRef } from 'react';
+import { useState, useRef, memo } from 'react';
 import { cn } from '@/app/lib/utils';
 import { MaterialIcon } from '../ui/MaterialIcon';
 
@@ -7,13 +7,17 @@ interface CardFABProps {
     onAdd: (attribute: CellAttribute) => void;
 }
 
-export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
+export const CardFAB: React.FC<CardFABProps> = memo(({ onAdd }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [hoveredItem, setHoveredItem] = useState<CellAttribute | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const isLongPressActive = useRef(false);
 
-    const handleMouseDown = () => {
+    const handleMouseDown = (e: React.MouseEvent) => {
+        // Prevent stealing focus from cells to avoid immediate layout shift
+        // This keeps the UI stable during the click/long-press interaction.
+        e.preventDefault();
+
         isLongPressActive.current = false;
         timeoutRef.current = setTimeout(() => {
             setIsMenuOpen(true);
@@ -116,5 +120,5 @@ export const CardFAB: React.FC<CardFABProps> = ({ onAdd }) => {
             </button>
         </div>
     );
-}
+});
 
