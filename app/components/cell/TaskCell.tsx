@@ -98,14 +98,14 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
             ref={containerRef}
             data-testid="task-cell"
             onClick={handleContainerClick}
-            className="flex items-center justify-start gap-3 w-full flex-1 cursor-text p-3"
+            className="flex items-center justify-start gap-3 w-full flex-1 cursor-text p-0"
         >
             <div className="flex items-center">
                 <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={(e) => handleCheckboxChange(e.target.checked)}
-                    className="appearance-none w-7 h-7 rounded-[6px] border-2 border-purple-200 bg-transparent checked:bg-purple-600 checked:border-purple-600 transition-all cursor-pointer relative
+                    className="appearance-none w-7 h-7 rounded-[6px] border-2 border-purple-600 bg-transparent checked:bg-purple-600 checked:border-purple-600 transition-all cursor-pointer relative
                         checked:after:content-['✓'] checked:after:absolute checked:after:text-white checked:after:text-base checked:after:font-bold checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 hover:border-purple-400 ring-offset-2 focus:ring-4 focus:ring-purple-500/10"
                 />
             </div>
@@ -113,7 +113,7 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                 <div className="relative flex-1">
                     {!isFocused && name ? (
                         <div className={cn(
-                            "absolute inset-0 p-3 text-left font-bold text-[20px] break-words pointer-events-none",
+                            "absolute inset-0 p-[3px] text-left font-bold text-[20px] break-words pointer-events-none",
                             isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"
                         )}>
                             {highlightText(name, highlightKeywords)}
@@ -138,7 +138,7 @@ export const TaskCell: React.FC<TaskCellProps> = ({ cell, onSave, isNew }) => {
                         }}
                         placeholder="To-do Task"
                         className={cn(
-                            "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-left font-bold text-[20px] p-3 rounded-none placeholder:text-slate-400 flex-1 w-full",
+                            "bg-transparent border-b-2 border-transparent outline-none transition-all duration-300 text-left font-bold text-[20px] p-[3px] rounded-none placeholder:text-slate-400 flex-1 w-full",
                             "focus:border-purple-500",
                             isChecked ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800",
                             !isFocused && name ? "text-transparent" : ""
