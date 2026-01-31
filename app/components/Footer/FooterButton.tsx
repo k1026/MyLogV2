@@ -24,7 +24,7 @@ export const FooterButton: React.FC<FooterButtonProps> = ({
             {...props}
         >
             <div className={cn(
-                "w-10 h-10 flex items-center justify-center rounded-[12px] transition-all",
+                "w-8 h-8 flex items-center justify-center rounded-[10px] transition-all",
                 isActive ? "bg-[#f3e8ff]" : "bg-transparent hover:bg-[#f1f5f9]"
             )}>
                 {icon}

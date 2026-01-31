@@ -12,11 +12,11 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
     const { status, toggleLocation } = useLocation();
 
     return (
-        <div className="flex flex-col items-start gap-1">
+        <div className="flex flex-col items-start gap-0">
             <button
                 onClick={toggleLocation}
                 className={cn(
-                    "p-1.5 rounded-full transition-all duration-300",
+                    "p-1 rounded-full transition-all duration-300",
                     status === 'active' && "text-slate-500",
                     status === 'loading' && "text-slate-400 cursor-wait",
                     status === 'error' && "text-red-500",
@@ -26,13 +26,13 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
                 aria-label="Location Status"
             >
                 {status === 'loading' ? (
-                    <MaterialIcon icon="progress_activity" size={16} className="animate-spin" />
+                    <MaterialIcon icon="progress_activity" size={14} className="animate-spin" />
                 ) : status === 'error' ? (
-                    <MaterialIcon icon="location_off" size={16} className="text-red-500" fill />
+                    <MaterialIcon icon="location_off" size={14} className="text-red-500" fill />
                 ) : (
                     <MaterialIcon
                         icon="location_on"
-                        size={16}
+                        size={14}
                         fill={status === 'active' || status === 'idle'}
                         className={cn(
                             status === 'active' && "text-purple-300",
@@ -42,9 +42,9 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
                 )}
             </button>
 
-            <div className="flex flex-col items-start text-slate-500 font-bold tracking-widest uppercase leading-tight">
-                <div className="text-[10px] whitespace-nowrap">CARDS: {cardCount}</div>
-                <div className="text-[10px] whitespace-nowrap">CELLS: {cellCount}</div>
+            <div className="flex flex-col items-start text-slate-500 font-bold tracking-widest uppercase leading-none">
+                <div className="text-[9px] whitespace-nowrap">CARDS: {cardCount}</div>
+                <div className="text-[9px] whitespace-nowrap">CELLS: {cellCount}</div>
             </div>
         </div>
     );

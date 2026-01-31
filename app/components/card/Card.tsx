@@ -162,7 +162,7 @@ export const Card: React.FC<CardProps> = ({
         <div
             data-testid="card-container"
             style={containerStyle}
-            className={`flex flex-col p-[12px] border rounded-3xl shadow-sm transition-all duration-300 relative
+            className={`flex flex-col p-[12px] rounded-3xl shadow-sm transition-all duration-300 relative
                 ${isExpanded
                     ? 'bg-white/10 backdrop-blur-md ring-2 ring-white/20'
                     : isRemoved

@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
             <div className="absolute inset-0 bg-white border-b border-slate-200 shadow-sm pointer-events-none" />
 
-            <div className="relative max-w-7xl mx-auto px-4 h-16 flex items-center justify-between pointer-events-auto">
+            <div className="relative max-w-7xl mx-auto px-4 h-12 flex items-center justify-between pointer-events-auto">
                 <HeaderStatus
                     cardCount={cardCount}
                     cellCount={cellCount}

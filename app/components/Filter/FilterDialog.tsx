@@ -96,10 +96,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                 {/* Header */}
                 <div className="p-6 pb-2 flex items-center justify-between text-white">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
-                            <MaterialIcon icon="filter_list" size={20} />
-                        </div>
-                        <h2 className="text-xl font-bold tracking-tight">Filter Settings</h2>
+                        <MaterialIcon icon="filter_alt" size={24} className="text-white" />
                     </div>
                     <button
                         onClick={onClose}
@@ -109,20 +106,19 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                     </button>
                 </div>
 
-                <div className="p-6 pt-4 space-y-6">
+                <div className="p-6 pt-4 space-y-[12px]">
                     {/* Attributes */}
-                    <div className="space-y-3">
-                        <label className="text-white/60 text-xs font-bold uppercase tracking-widest pl-1">属性選択</label>
-                        <div className="flex gap-2">
+                    <div>
+                        <div className="flex gap-[12px]">
                             {(['Text', 'Task', 'Remove'] as FilterAttribute[]).map(attr => (
                                 <button
                                     key={attr}
                                     onClick={() => toggleAttribute(attr)}
                                     className={cn(
-                                        "flex-1 py-3 px-4 rounded-2xl text-sm font-bold transition-all border border-white/40",
+                                        "flex-1 py-3 px-4 rounded-2xl text-sm font-bold transition-all",
                                         localAttributes.includes(attr)
-                                            ? "bg-white text-purple-700 shadow-lg"
-                                            : "bg-white/10 text-white/50 hover:bg-white/20"
+                                            ? "bg-purple-600 text-white shadow-md"
+                                            : "bg-white/40 text-purple-300 hover:bg-white/60"
                                     )}
                                 >
                                     {attr}
@@ -132,22 +128,21 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                     </div>
 
                     {/* Keywords Include */}
-                    <div className="space-y-3">
-                        <label className="text-white/60 text-xs font-bold uppercase tracking-widest pl-1">キーワード抽出</label>
-                        <div className="flex gap-2">
+                    <div>
+                        <div className="flex gap-[12px]">
                             <div className="relative flex-1">
-                                <MaterialIcon icon="search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-300" />
+                                <MaterialIcon icon="search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-200" />
                                 <input
                                     type="text"
                                     value={localInclude}
                                     onChange={(e) => setLocalInclude(e.target.value)}
                                     placeholder="キーワード (スペース区切り)"
-                                    className="w-full bg-white/10 border border-white/20 rounded-2xl py-3 pl-11 pr-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                    className="w-full bg-white border-none rounded-2xl py-3 pl-11 pr-4 text-purple-600 placeholder:text-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-100"
                                 />
                             </div>
                             <button
                                 onClick={nextTarget}
-                                className="px-4 bg-white/10 border border-white/20 rounded-2xl text-white text-xs font-bold hover:bg-white/20 transition-all min-w-[4rem]"
+                                className="px-4 bg-white rounded-2xl text-purple-400 text-xs font-bold hover:bg-purple-50 transition-all min-w-[4rem]"
                             >
                                 {getTargetLabel(localTarget)}
                             </button>
@@ -155,44 +150,42 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                     </div>
 
                     {/* Keywords Exclude */}
-                    <div className="space-y-3">
-                        <label className="text-white/60 text-xs font-bold uppercase tracking-widest pl-1">キーワード除外</label>
+                    <div>
                         <div className="relative">
-                            <MaterialIcon icon="search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-red-300" />
+                            <MaterialIcon icon="search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-200" />
                             <input
                                 type="text"
                                 value={localExclude}
                                 onChange={(e) => setLocalExclude(e.target.value)}
                                 placeholder="除外キーワード"
-                                className="w-full bg-white/10 border border-white/20 rounded-2xl py-3 pl-11 pr-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                className="w-full bg-white border-none rounded-2xl py-3 pl-11 pr-4 text-purple-600 placeholder:text-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-100"
                             />
                         </div>
                     </div>
 
                     {/* Date Range */}
-                    <div className="space-y-3">
-                        <label className="text-white/60 text-xs font-bold uppercase tracking-widest pl-1">期間フィルタ</label>
-                        <div className="flex items-center gap-2">
+                    <div>
+                        <div className="flex items-center gap-[12px]">
                             <div className="relative flex-1">
                                 <input
                                     type="date"
                                     value={localFrom || ''}
                                     onChange={(e) => setLocalFrom(e.target.value || null)}
-                                    className="w-full bg-white/10 border border-white/20 rounded-2xl py-3 px-4 text-white text-sm focus:outline-none [color-scheme:dark]"
+                                    className="w-full bg-white border-none rounded-2xl py-3 px-4 text-purple-600 text-sm focus:outline-none [color-scheme:light]"
                                 />
                             </div>
-                            <span className="text-white/40">~</span>
+                            <span className="text-white/40 text-lg">~</span>
                             <div className="relative flex-1">
                                 <input
                                     type="date"
                                     value={localTo || ''}
                                     onChange={(e) => setLocalTo(e.target.value || null)}
-                                    className="w-full bg-white/10 border border-white/20 rounded-2xl py-3 px-4 text-white text-sm focus:outline-none [color-scheme:dark]"
+                                    className="w-full bg-white border-none rounded-2xl py-3 px-4 text-purple-600 text-sm focus:outline-none [color-scheme:light]"
                                 />
                             </div>
                             <button
                                 onClick={() => { setLocalFrom(null); setLocalTo(null); }}
-                                className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-xl text-white/50 hover:bg-white/20"
+                                className="w-10 h-10 flex items-center justify-center bg-white rounded-xl text-purple-600 hover:bg-purple-50"
                             >
                                 <MaterialIcon icon="restart_alt" size={18} />
                             </button>
@@ -201,20 +194,20 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 bg-black/10 backdrop-blur-md flex gap-3">
+                <div className="p-6 bg-black/10 backdrop-blur-md flex gap-[12px]">
                     <button
                         onClick={handleReset}
-                        className="flex-1 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
+                        className="flex-1 py-4 bg-white hover:bg-purple-50 text-purple-400 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
                     >
                         <MaterialIcon icon="restart_alt" size={18} />
                         リセット
                     </button>
                     <button
                         onClick={handleApply}
-                        className="flex-[2] py-4 bg-white text-purple-700 hover:bg-purple-50 font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2"
+                        className="flex-1 py-4 bg-white text-purple-700 hover:bg-purple-50 font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2"
                     >
                         <MaterialIcon icon="check" size={20} />
-                        適用する
+                        ✓適用
                     </button>
                 </div>
             </div>

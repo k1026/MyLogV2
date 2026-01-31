@@ -19,17 +19,17 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
         <div className="flex items-center gap-3">
             <button
                 onClick={onRandomPick}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-all active:scale-95"
+                className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-all active:scale-95"
                 aria-label="Random Pick"
                 title="Random Pick"
             >
-                <MaterialIcon icon="shuffle" size={20} />
+                <MaterialIcon icon="shuffle" size={18} />
             </button>
 
             <button
                 onClick={onDbOpen}
                 className={cn(
-                    "w-10 h-10 flex flex-col items-center justify-center rounded-xl transition-all active:scale-95 relative overflow-hidden bg-white",
+                    "w-8 h-8 flex flex-col items-center justify-center rounded-xl transition-all active:scale-95 relative overflow-hidden bg-white",
                     (isDbLoading || isSorting)
                         ? "text-purple-600 bg-purple-500/10"
                         : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
@@ -39,13 +39,13 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
             >
                 {(isDbLoading || isSorting) ? (
                     <>
-                        <MaterialIcon icon="database" size={16} className="animate-pulse mb-0.5" />
-                        <span className="text-[6px] font-bold uppercase tracking-tighter leading-none animate-pulse">
+                        <MaterialIcon icon="database" size={14} className="animate-pulse mb-0.5" />
+                        <span className="text-[5px] font-bold uppercase tracking-tighter leading-none animate-pulse">
                             {isSorting ? "Sorting" : "Load"}
                         </span>
                     </>
                 ) : (
-                    <MaterialIcon icon="database" size={20} />
+                    <MaterialIcon icon="database" size={18} />
                 )}
             </button>
         </div>
