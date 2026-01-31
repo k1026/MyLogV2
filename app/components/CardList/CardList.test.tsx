@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CardList } from './CardList';
 import { RarityProvider } from '@/app/contexts/RarityContext';
 import { UIStateProvider } from '@/app/contexts/UIStateContext';
+import { CardSortProvider } from '@/app/contexts/CardSortContext';
 import { Cell, CellAttribute } from '@/app/lib/models/cell';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
@@ -85,7 +86,9 @@ describe('CardList Virtual Scroll', () => {
         render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} />
+                    <CardSortProvider>
+                        <CardList cards={cards} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -100,7 +103,9 @@ describe('CardList Virtual Scroll', () => {
         render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} />
+                    <CardSortProvider>
+                        <CardList cards={cards} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -116,7 +121,9 @@ describe('CardList Virtual Scroll', () => {
         render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} onFocus={onFocus} />
+                    <CardSortProvider>
+                        <CardList cards={cards} onFocus={onFocus} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -131,7 +138,9 @@ describe('CardList Virtual Scroll', () => {
         const { rerender } = render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} focusedId={null} />
+                    <CardSortProvider>
+                        <CardList cards={cards} focusedId={null} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -140,19 +149,15 @@ describe('CardList Virtual Scroll', () => {
         rerender(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} focusedId={cards[3].id} />
+                    <CardSortProvider>
+                        <CardList cards={cards} focusedId={cards[3].id} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
 
         // check if scrollToIndex was called
         await waitFor(() => {
-            // Need to wait for requestAnimationFrame in component? 
-            // Currently component uses requestAnimationFrame for expand, but let's see implementation.
-            // If the implementation for focusedId change is not yet there, this test will fail as expected (RED).
-            // But we actually WANT it to fail first. 
-            // However, the test assumes immediate scroll or inside RAF.
-            // Let's assume the implementation puts it in an effect, possibly with RAF.
             expect(mockScrollToIndex).toHaveBeenCalledWith(expect.objectContaining({
                 index: 3,
                 align: 'start',
@@ -160,12 +165,15 @@ describe('CardList Virtual Scroll', () => {
             }));
         });
     });
+
     it('should NOT scroll when cards instance changes but focusedId remains the same', async () => {
         const cards = createDummyCards(5);
         const { rerender } = render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} focusedId={cards[2].id} />
+                    <CardSortProvider>
+                        <CardList cards={cards} focusedId={cards[2].id} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -181,7 +189,9 @@ describe('CardList Virtual Scroll', () => {
         rerender(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={newCardsInstance} focusedId={cards[2].id} />
+                    <CardSortProvider>
+                        <CardList cards={newCardsInstance} focusedId={cards[2].id} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -198,7 +208,9 @@ describe('CardList Virtual Scroll', () => {
         render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} onFocusClear={onFocusClear} />
+                    <CardSortProvider>
+                        <CardList cards={cards} onFocusClear={onFocusClear} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -222,7 +234,9 @@ describe('CardList Virtual Scroll', () => {
         render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} />
+                    <CardSortProvider>
+                        <CardList cards={cards} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );
@@ -249,7 +263,9 @@ describe('CardList Virtual Scroll', () => {
         render(
             <RarityProvider>
                 <UIStateProvider>
-                    <CardList cards={cards} />
+                    <CardSortProvider>
+                        <CardList cards={cards} />
+                    </CardSortProvider>
                 </UIStateProvider>
             </RarityProvider>
         );

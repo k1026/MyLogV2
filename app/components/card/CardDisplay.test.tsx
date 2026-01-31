@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Card } from './Card';
 import { Cell, CellAttribute } from '@/app/lib/models/cell';
+import { CardSortProvider } from '@/app/contexts/CardSortContext';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Mock Rarity
@@ -59,7 +60,11 @@ const mockNewCard = new Cell({
 describe('Card Display - Default Content', () => {
     it('renders Time and Text cells for a newly created card', async () => {
         // Render expanded by default as per page.tsx logic
-        render(<Card cell={mockNewCard} defaultExpanded={true} />);
+        render(
+            <CardSortProvider>
+                <Card cell={mockNewCard} defaultExpanded={true} />
+            </CardSortProvider>
+        );
 
         // Check for Time Cell
         const timeCells = screen.getAllByRole('textbox');
@@ -93,7 +98,11 @@ describe('Card Display - Default Content', () => {
     });
 
     it('renders empty Text cell visible in the list', async () => {
-        render(<Card cell={mockNewCard} defaultExpanded={true} />);
+        render(
+            <CardSortProvider>
+                <Card cell={mockNewCard} defaultExpanded={true} />
+            </CardSortProvider>
+        );
 
         await waitFor(() => {
             // Look for the empty textarea/input of the TextCell

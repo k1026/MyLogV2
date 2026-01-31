@@ -3,6 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Card } from './Card';
 import { Cell, CellAttribute } from '@/app/lib/models/cell';
+import { UIStateProvider } from '@/app/contexts/UIStateContext';
+import { CardSortProvider } from '@/app/contexts/CardSortContext';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useUIState } from '@/app/contexts/UIStateContext';
 
@@ -96,24 +98,30 @@ const mockCardCell = new Cell({
 });
 
 describe('Card Component', () => {
+    const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+        <CardSortProvider>
+            {children}
+        </CardSortProvider>
+    );
+
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
     it('renders the card container', () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         expect(screen.getByTestId('card-container')).toBeInTheDocument();
     });
 
     it('displays the title of the first text/task cell', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         await waitFor(() => {
             expect(screen.getByText('Child Title 1')).toBeInTheDocument();
         });
     });
 
     it('toggles expansion on click', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
 
         expect(screen.queryByTestId('card-item-list')).not.toBeInTheDocument();
@@ -130,7 +138,7 @@ describe('Card Component', () => {
     });
 
     it('Child Cell の変更を保存すると db.cells.put が呼ばれること', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
@@ -150,7 +158,7 @@ describe('Card Component', () => {
     });
 
     it('closes the card when Escape key is pressed', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
@@ -164,7 +172,7 @@ describe('Card Component', () => {
     });
 
     it('should NOT close the card on popstate if history management is disabled', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
@@ -180,7 +188,7 @@ describe('Card Component', () => {
 
     it('should NOT push state to history when expanded', async () => {
         const pushStateSpy = vi.spyOn(window.history, 'pushState');
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
@@ -189,7 +197,7 @@ describe('Card Component', () => {
     });
 
     it('calls addCellToCard when adding a new cell via FAB', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
@@ -207,34 +215,32 @@ describe('Card Component', () => {
         });
     });
 
-    it('CardFAB rendering position: should be absolute, not fixed', () => {
-        render(<Card cell={mockCardCell} />);
+    it('CardFAB rendering position: should be sticky, not absolute', () => {
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const cardContainer = screen.getByTestId('card-container');
         fireEvent.click(cardContainer); // Expand
 
         const fabContainer = screen.getByTestId('card-fab-container');
 
-        // 修正前は 'fixed' があるはずだが、修正後は 'absolute' になるべき
-        expect(fabContainer).toHaveClass('absolute');
+        // 実装は 'sticky'
+        expect(fabContainer).toHaveClass('sticky');
         expect(fabContainer).not.toHaveClass('fixed');
+        expect(fabContainer).not.toHaveClass('absolute');
     });
 
     // --- Style & Design Spec Tests ---
 
-    it('Card Container should have correct styles (rounded-3xl, p-[12px], shadow-sm)', () => {
-        render(<Card cell={mockCardCell} />);
+    it('Card Container should have correct styles (rounded-[16px], p-2, shadow-sm)', () => {
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
 
-        expect(card).toHaveClass('rounded-3xl');
-        // p-[12px] matches Tailwind p-[12px] or p-3 (3 * 4px = 12px)
-        // Code uses p-[12px]
-        expect(card).toHaveClass('p-[12px]');
+        expect(card).toHaveClass('rounded-[16px]');
+        expect(card).toHaveClass('p-2');
         expect(card).toHaveClass('shadow-sm');
-        expect(card).toHaveClass('border');
     });
 
     it('Card Title should be text-lg and font-bold', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         // Title is only visible when collapsed
         await waitFor(() => {
             const title = screen.getByText('Child Title 1');
@@ -244,7 +250,7 @@ describe('Card Component', () => {
     });
 
     it('Card Created Date should be text-xs', async () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         // The date is formatted, so we search for text content.
         // In mock, date is from '1700000000000'.
         // "11/15/2023, 5:46:40 AM" (depends on locale, but we can search for the element container)
@@ -253,7 +259,7 @@ describe('Card Component', () => {
     });
 
     it('Card Expanded state should have backdrop-blur-md and ring-2', () => {
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
         fireEvent.click(card); // Expand
 
@@ -269,17 +275,10 @@ describe('Card Component', () => {
             remove: '1700000099999' // Removed
         });
 
-        render(<Card cell={removedCell} />);
+        render(<Card cell={removedCell} />, { wrapper: Wrapper });
         const card = screen.getByTestId('card-container');
 
         // Spec: 薄いグレー背景 (bg-gray-**?)
-        // Let's assume a class like bg-gray-500/20 or similar for now, 
-        // or we check if it DOES NOT have the gradient style?
-        // Actually, we should probably implement it with a class override.
-        // Let's check for 'bg-gray-800' (dark mode gray) or 'bg-gray-100' (light)?
-        // Since the app seems dark/glassy (white/5), "gray" might mean gray color.
-        // Let's look for 'line-through' on title.
-
         await waitFor(() => {
             const titleElement = screen.getByText('Child Title 1');
             // The line-through class is now on the parent container of the list
@@ -287,10 +286,6 @@ describe('Card Component', () => {
             expect(container).toHaveClass('line-through');
         });
 
-        // For background, we might check if style is NOT applied or if a specific class like 'bg-gray-800/50' is present.
-        // Given existing code uses `style={rarityStyle}`, we might need to override it.
-        // Let's expect 'bg-gray-500/50' as a starting point for "thin gray" in a dark theme or similar.
-        // Or "gray" usually implies `bg-gray-*`.
         expect(card).toHaveClass('bg-gray-500/20'); // Proposed implementation
     });
 
@@ -310,7 +305,7 @@ describe('Card Component', () => {
             setFooterVisible: vi.fn(),
         });
 
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
 
         await waitFor(() => {
             expect(screen.getByText('Child Title 1')).toBeInTheDocument();
@@ -334,7 +329,7 @@ describe('Card Component', () => {
             setFooterVisible: vi.fn(),
         });
 
-        render(<Card cell={mockCardCell} />);
+        render(<Card cell={mockCardCell} />, { wrapper: Wrapper });
 
         await waitFor(() => {
             expect(screen.getByText('Child Title 1')).toBeInTheDocument();

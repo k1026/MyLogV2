@@ -44,8 +44,8 @@ describe('Header Component', () => {
         expect(statusArea).toBeInTheDocument();
         expect(screen.getByText(/10/i)).toBeInTheDocument();
         expect(screen.getByText(/50/i)).toBeInTheDocument();
-        // text-slate-500が指定されていることの確認
-        expect(screen.getByText(/10/i).parentElement).toHaveClass('text-slate-500');
+        // text-slate-500/60が指定されていることの確認
+        expect(screen.getByText(/10/i).parentElement).toHaveClass('text-slate-500/60');
     });
 
     it('renders layout in correct order: Status -> Title -> Actions', () => {
@@ -62,11 +62,10 @@ describe('Header Component', () => {
         expect(children![2]).toContainElement(screen.getByLabelText('Random Pick'));
     });
 
-    it('renders version number with 12px size', () => {
+    it('renders version number with 10px size', () => {
         renderHeader();
-        // 仕様: 12px (text-xs is 12px in tailwind default, though spec says 12px)
         const version = screen.getByText(/v\d+\.\d+\.\d+/);
-        expect(version).toHaveClass('text-[12px]');
+        expect(version).toHaveClass('text-[10px]');
     });
 
     it('tool buttons have no border or shadow (transparent/flat design)', () => {

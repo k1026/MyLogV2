@@ -3,6 +3,7 @@ import { RarityProvider } from './contexts/RarityContext';
 import { LocationProvider } from './contexts/LocationContext';
 import { UIStateProvider } from './contexts/UIStateContext';
 import { FilterProvider } from './contexts/FilterContext';
+import { CardSortProvider } from './contexts/CardSortContext';
 
 export const metadata = {
   title: 'MyLog V2',
@@ -23,9 +24,11 @@ export default function RootLayout({
         <RarityProvider>
           <LocationProvider>
             <UIStateProvider>
-              <FilterProvider>
-                {children}
-              </FilterProvider>
+              <CardSortProvider>
+                <FilterProvider>
+                  {children}
+                </FilterProvider>
+              </CardSortProvider>
             </UIStateProvider>
           </LocationProvider>
         </RarityProvider>

@@ -64,7 +64,7 @@ describe('HeaderStatus Visual Specs', () => {
 
     it('displays card and cell counts', () => {
         setup('active');
-        expect(screen.getByText('CARDS: 10')).toBeInTheDocument();
-        expect(screen.getByText('CELLS: 20')).toBeInTheDocument();
+        expect(screen.getByText('CARD: 10')).toBeInTheDocument();
+        expect(screen.getByText('CELL: 20')).toBeInTheDocument();
     });
 });

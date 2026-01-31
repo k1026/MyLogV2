@@ -1,9 +1,7 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { CellDB } from '@/app/lib/db/db';
 import { CellAttribute } from '@/app/lib/models/cell';
-
-export type SortMode = 'none' | 'asc' | 'desc'; // 生成時間ソート
-export type TaskSortMode = 'none' | 'incomplete' | 'complete'; // タスクソート
+import { useCardSortContext, SortMode, TaskSortMode } from '@/app/contexts/CardSortContext';
 
 export interface UseCardSortResult {
     sortedCells: CellDB[];
@@ -20,35 +18,14 @@ export interface UseCardSortResult {
  * @param cells フィルタリング対象のセルリスト (DB形式)
  */
 export function useCardSort(cells: CellDB[] | undefined): UseCardSortResult {
-    const [sortMode, setSortMode] = useState<SortMode>('none');
-    const [taskSortMode, setTaskSortMode] = useState<TaskSortMode>('none');
-    const [isManualSort, setIsManualSort] = useState(false);
-
-    const toggleSort = useCallback(() => {
-        setIsManualSort(false);
-        setSortMode(prev => {
-            if (prev === 'none') return 'asc';
-            if (prev === 'asc') return 'desc';
-            return 'none';
-        });
-    }, []);
-
-    const toggleTaskSort = useCallback(() => {
-        setIsManualSort(false);
-        setTaskSortMode(prev => {
-            if (prev === 'none') return 'incomplete';
-            if (prev === 'incomplete') return 'complete';
-            return 'none';
-        });
-    }, []);
-
-    const setManualSortMode = useCallback(() => {
-        setIsManualSort(!isManualSort);
-        if (!isManualSort) {
-            setSortMode('none');
-            setTaskSortMode('none');
-        }
-    }, [isManualSort]);
+    const {
+        sortMode,
+        taskSortMode,
+        isManualSort,
+        toggleSort,
+        toggleTaskSort,
+        setManualSort
+    } = useCardSortContext();
 
     const sortedCells = useMemo(() => {
         if (!cells) return [];
@@ -59,8 +36,8 @@ export function useCardSort(cells: CellDB[] | undefined): UseCardSortResult {
         const timeCells = result.filter(c => c.A === CellAttribute.Time);
         let otherCells = result.filter(c => c.A !== CellAttribute.Time);
 
-        // Sorting Logic
-        if (sortMode !== 'none') {
+        // Sorting Logic: まず時間ソートを適用
+        if (!isManualSort) {
             otherCells.sort((a, b) => {
                 const timeA = parseInt(a.I.split('-')[0] || '0');
                 const timeB = parseInt(b.I.split('-')[0] || '0');
@@ -70,41 +47,25 @@ export function useCardSort(cells: CellDB[] | undefined): UseCardSortResult {
             });
         }
 
+        // 次にタスクソートを適用（時間ソートの結果を維持しつつグループ化）
         if (taskSortMode !== 'none') {
-            otherCells.sort((a, b) => {
-                // Task Priority Logic
-                // TaskSortMode: incomplete -> Task(incomplete) top, Task(complete) bottom
-                // TaskSortMode: complete -> Task(complete) top, Task(incomplete) bottom
+            const tasks = otherCells.filter(c => c.A === CellAttribute.Task);
+            const nonTasks = otherCells.filter(c => c.A !== CellAttribute.Task);
 
-                const isTaskA = a.A === CellAttribute.Task;
-                const isTaskB = b.A === CellAttribute.Task;
+            const doneTasks = tasks.filter(t => t.V === 'done');
+            const todoTasks = tasks.filter(t => t.V !== 'done');
 
-                if (!isTaskA && !isTaskB) return 0;
-                if (isTaskA && !isTaskB) return -1; // Task priority over non-task? Spec vague, assuming Task groupings
-                if (!isTaskA && isTaskB) return 1;
-
-                // Both are Tasks
-                const isDoneA = a.V === 'done';
-                const isDoneB = b.V === 'done';
-
-                if (taskSortMode === 'incomplete') {
-                    // Incomplete -> Complete
-                    if (!isDoneA && isDoneB) return -1;
-                    if (isDoneA && !isDoneB) return 1;
-                } else {
-                    // Complete -> Incomplete
-                    if (isDoneA && !isDoneB) return -1;
-                    if (!isDoneA && isDoneB) return 1;
-                }
-                return 0;
-            });
+            if (taskSortMode === 'complete') {
+                // 完了優先: 完了タスク -> 未完了タスク -> 非タスク（タスクを先頭グループ化）
+                otherCells = [...doneTasks, ...todoTasks, ...nonTasks];
+            } else {
+                // 未完了優先: 非タスク -> 未完了タスク -> 完了タスク（タスクを末尾グループ化）
+                otherCells = [...nonTasks, ...todoTasks, ...doneTasks];
+            }
         }
 
-        // Manual sort: uses provided order (handled via Drag & Drop externally mostly, 
-        // but here "none" sort means original order which is what we start with)
-
         return [...timeCells, ...otherCells];
-    }, [cells, sortMode, taskSortMode]);
+    }, [cells, sortMode, taskSortMode, isManualSort]);
 
     return {
         sortedCells,
@@ -112,7 +73,7 @@ export function useCardSort(cells: CellDB[] | undefined): UseCardSortResult {
         taskSortMode,
         toggleSort,
         toggleTaskSort,
-        setManualSort: setManualSortMode,
+        setManualSort,
         isManualSort
     };
 }

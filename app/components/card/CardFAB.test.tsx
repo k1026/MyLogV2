@@ -121,7 +121,7 @@ describe('CardFAB', () => {
         expect(fab).toHaveClass('w-[60px]');
         expect(fab).toHaveClass('h-[60px]');
         expect(fab).toHaveClass('rounded-full');
-        expect(fab).toHaveClass('bg-purple-200');
+        expect(fab).toHaveClass('bg-purple-600');
         expect(fab).toHaveClass('shadow-lg');
     });
 

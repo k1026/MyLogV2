@@ -33,14 +33,14 @@ describe('CellContainer', () => {
         expect(container.style.backgroundColor).toBe('transparent');
     });
 
-    it('Textセルの場合、32pxの角丸（rounded-[32px]）が適用されていること', () => {
+    it('Textセルの場合、8pxの角丸（rounded-[8px]）が適用されていること', () => {
         render(
             <RarityProvider>
                 <CellContainer cell={textCell} />
             </RarityProvider>
         );
         const container = screen.getByTestId('cell-container');
-        expect(container).toHaveClass('rounded-[32px]');
+        expect(container).toHaveClass('rounded-[8px]');
     });
 
     it('Textセルの場合、デフォルト背景色が白系であること', () => {

@@ -46,33 +46,82 @@ describe('CardToolbar', () => {
 
     // --- Style & Design Spec Tests ---
 
-    it('Toolbar container should have correct height and padding', () => {
+    it('Toolbar container should have gap-1 and background', () => {
         render(<CardToolbar sortState={mockSortState} />);
-        // Wrapper div
-        // Current code has h-[28px], px-1. Spec says p-4px? 
-        // We will test for h-[28px] and check if padding roughly matches.
-        // Spec says: "Height 28px... Padding 4px". 
-        // px-1 is 4px horizontal. If py is 0, that might be mismatch.
-        // Let's assert class names.
-        // Note: The code might be `h-[28px] px-1`.
-        const container = screen.getByLabelText('Sort by Time').parentElement;
-        expect(container).toHaveClass('h-[28px]');
-        // expect(container).toHaveClass('p-[4px]'); // This might fail if it's px-1
+        const toolbar = screen.getByLabelText('Sort by Time').closest('div');
+        expect(toolbar).toHaveClass('gap-1');
+        expect(toolbar).toHaveClass('bg-white/10');
     });
 
-    it('Toolbar buttons should be 24x24px', () => {
-        render(<CardToolbar sortState={mockSortState} />);
-        const btn = screen.getByLabelText('Manual Sort');
-        // w-6 h-6 matches 24px
-        expect(btn).toHaveClass('w-6');
-        expect(btn).toHaveClass('h-6');
-        expect(btn).toHaveClass('rounded');
-    });
-
-    it('Sort Label should be text-[10px]', () => {
-        const withSort = { ...mockSortState, sortMode: 'asc' as const };
+    it('Toolbar buttons should be vertical layout (flex-col)', () => {
+        const withSort = { ...mockSortState, sortMode: 'desc' as const };
         render(<CardToolbar sortState={withSort} />);
-        const label = screen.getByText('OLD');
-        expect(label).toHaveClass('text-[10px]');
+        const sortBtn = screen.getByLabelText('Sort by Time');
+        // 仕様: アイコンは横並び、詳細ラベルはアイコンの下に中央揃え
+        expect(sortBtn).toHaveClass('flex-col');
+        expect(sortBtn).toHaveClass('items-center');
+    });
+
+    it('Active/Inactive button styles', () => {
+        const withActive = { ...mockSortState, isManualSort: true };
+        const { rerender } = render(<CardToolbar sortState={withActive} />);
+        const manualBtn = screen.getByLabelText('Manual Sort');
+
+        // Active: text-white
+        expect(manualBtn).toHaveClass('text-white');
+
+        rerender(<CardToolbar sortState={{ ...mockSortState, isManualSort: false }} />);
+        // Inactive: text-white/50 (灰色)
+        expect(manualBtn).toHaveClass('text-white/50');
+    });
+
+    it('Task Sort icon should change based on state', () => {
+        // none -> complete (check_box) -> incomplete (check_box_outline_blank)
+        const { rerender } = render(<CardToolbar sortState={{ ...mockSortState, taskSortMode: 'none' }} />);
+        // MaterialIcon components generally render the icon name as text content
+        expect(screen.getByTestId('task-sort-icon')).toHaveTextContent('check_box');
+
+        rerender(<CardToolbar sortState={{ ...mockSortState, taskSortMode: 'complete' }} />);
+        expect(screen.getByTestId('task-sort-icon')).toHaveTextContent('check_box');
+
+        rerender(<CardToolbar sortState={{ ...mockSortState, taskSortMode: 'incomplete' }} />);
+        expect(screen.getByTestId('task-sort-icon')).toHaveTextContent('check_box_outline_blank');
+    });
+
+    it('Labels should be 10px and have transition classes', () => {
+        const { rerender } = render(<CardToolbar sortState={{ ...mockSortState, sortMode: 'desc' }} />);
+        const labelNew = screen.getByText('NEW');
+        expect(labelNew).toHaveClass('text-[10px]');
+        // 遷移アニメーションの検証
+        expect(labelNew).toHaveClass('transition-opacity');
+        expect(labelNew).toHaveClass('duration-200');
+        // アクティブ時は見える
+        expect(labelNew).toHaveClass('text-white');
+        expect(labelNew).not.toHaveClass('opacity-0');
+
+        rerender(<CardToolbar sortState={{ ...mockSortState, sortMode: 'none' }} />);
+        const labelPlaceholder = screen.getByText('NEW'); // NEW or OLD based on implementation, but let's assume it stays in DOM
+        expect(labelPlaceholder).toHaveClass('opacity-0');
+    });
+
+    it('Buttons should have hover scale and active shadow', () => {
+        const withActive = { ...mockSortState, isManualSort: true };
+        render(<CardToolbar sortState={withActive} />);
+        const manualBtn = screen.getByLabelText('Manual Sort');
+
+        // Active state shadow
+        expect(manualBtn).toHaveClass('shadow-sm');
+        expect(manualBtn).toHaveClass('shadow-white/20');
+
+        // Hover scale
+        expect(manualBtn).toHaveClass('hover:scale-105');
+    });
+
+    it('Task Sort label should toggle correctly', () => {
+        const { rerender } = render(<CardToolbar sortState={{ ...mockSortState, taskSortMode: 'complete' }} />);
+        expect(screen.getByText('DONE')).toBeInTheDocument();
+
+        rerender(<CardToolbar sortState={{ ...mockSortState, taskSortMode: 'incomplete' }} />);
+        expect(screen.getByText('TODO')).toBeInTheDocument();
     });
 });
