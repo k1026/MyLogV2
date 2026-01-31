@@ -72,7 +72,7 @@ export const CardFAB: React.FC<CardFABProps> = memo(({ onAdd }) => {
                             hoveredItem === CellAttribute.Task ? "scale-110 shadow-lg ring-2 ring-white/50" : "scale-100"
                         )}
                     >
-                        <MaterialIcon icon="task" size={24} />
+                        <MaterialIcon icon="check_box" size={24} />
                     </div>
 
                     {/* Text Item (Left) */}

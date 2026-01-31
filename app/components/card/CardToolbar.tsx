@@ -23,7 +23,7 @@ export const CardToolbar: React.FC<CardToolbarProps> = ({ sortState }) => {
                 onClick={sortState.toggleTaskSort}
                 className={`flex items-center justify-center w-6 h-6 rounded transition-colors ${sortState.taskSortMode !== 'none' ? 'bg-white/20 text-white' : 'text-white/50 hover:bg-white/10'}`}
             >
-                <MaterialIcon icon="task" size={20} />
+                <MaterialIcon icon="check_box" size={20} />
             </button>
 
             {/* Time Sort */}
