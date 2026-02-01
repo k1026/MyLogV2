@@ -1,9 +1,9 @@
 import './globals.css';
-import { RarityProvider } from './contexts/RarityContext';
-import { LocationProvider } from './contexts/LocationContext';
-import { UIStateProvider } from './contexts/UIStateContext';
-import { FilterProvider } from './contexts/FilterContext';
-import { CardSortProvider } from './contexts/CardSortContext';
+import { RarityProvider } from '@/contexts/RarityContext';
+import { LocationProvider } from '@/contexts/LocationContext';
+import { UIStateProvider } from '@/contexts/UIStateContext';
+import { FilterProvider } from '@/contexts/FilterContext';
+import { CardSortProvider } from '@/contexts/CardSortContext';
 
 export const metadata = {
   title: 'MyLog V2',

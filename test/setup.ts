@@ -32,7 +32,7 @@ Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
 });
 
 // モック: FilterContext
-vi.mock('@/app/contexts/FilterContext', () => ({
+vi.mock('@/contexts/FilterContext', () => ({
     useFilter: () => ({
         filterSettings: {
             attributes: ['Text', 'Task'],

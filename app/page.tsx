@@ -1,20 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Cell } from './lib/models/cell';
-import { cn } from './lib/utils';
-import { useRarity } from './contexts/RarityContext';
-import { createCard } from './components/card/cardUtils';
-import { DbViewer } from './components/db-viewer/DbViewer';
-import { useCardList } from './hooks/useCardList';
-import { Header } from './components/Header/Header';
-import { CardList } from './components/CardList/CardList';
-import { CardAddButton } from './components/CardList/CardAddButton';
-import { Footer } from './components/Footer/Footer';
-import { useUIState } from './contexts/UIStateContext';
-import { useFilter } from './contexts/FilterContext';
-import { filterCards } from './lib/filter/cardFilter';
-import { useCellTitleEstimation } from './lib/hooks/useCellTitleEstimation';
+import { Cell } from '@/lib/models/cell';
+import { cn } from '@/lib/utils/cn';
+import { useRarity } from '@/contexts/RarityContext';
+import { createCard } from '@/components/Card/cardUtils';
+import { DbViewer } from '@/components/DbViewer/DbViewer';
+import { useCardList } from '@/hooks/useCardList';
+import { Header } from '@/components/Header/Header';
+import { CardList } from '@/components/CardList/CardList';
+import { CardAddButton } from '@/components/CardList/CardAddButton';
+import { Footer } from '@/components/Footer/Footer';
+import { useUIState } from '@/contexts/UIStateContext';
+import { useFilter } from '@/contexts/FilterContext';
+import { filterCards } from '@/lib/filter/cardFilter';
+import { useCellTitleEstimation } from '@/hooks/useCellTitleEstimation';
 
 export default function Home() {
     const { sortOrder, filterState } = useUIState();
