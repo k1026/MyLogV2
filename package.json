@@ -3,8 +3,8 @@
   "version": "26.02.01",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "next dev --webpack --hostname 0.0.0.0",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "set DEBUG_PRINT_LIMIT=100 && vitest",
