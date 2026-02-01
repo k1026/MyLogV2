@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
+import packageInfo from '../../package.json';
 
 interface HeaderTitleProps {
     onReset: () => void;
@@ -10,7 +11,7 @@ interface HeaderTitleProps {
 export const HeaderTitle: React.FC<HeaderTitleProps> = ({
     onReset,
     isDbLoading,
-    version = "v2.0.0"
+    version = packageInfo.version
 }) => {
     return (
         <div className="flex flex-col items-center cursor-pointer group" onClick={onReset} role="button" aria-label="Reset App">
@@ -28,8 +29,8 @@ export const HeaderTitle: React.FC<HeaderTitleProps> = ({
                 )}
             </div>
 
-            <span className="text-[10px] text-slate-400 font-bold tracking-widest uppercase opacity-50 group-hover:opacity-100 transition-opacity">
-                {version}
+            <span className="text-[10px] text-slate-400 font-bold tracking-widest opacity-50 group-hover:opacity-100 transition-opacity">
+                ver: {version}
             </span>
 
 
