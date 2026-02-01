@@ -7,7 +7,7 @@
 - **競合解決:** 既存のコードと仕様書の間に矛盾がある場合は、必ずユーザーに報告すること。
 
 ## コード品質
-- 実装は`.agent/skills/guideline/SKILL.md`に従うこと。
+- 実装は`.agent/skills/coding-guideline/SKILL.md`に従うこと。
 
 ## バージョニング
 - **アプリバージョン形式:** `yy.mm.dd` (例: 26.01.25)

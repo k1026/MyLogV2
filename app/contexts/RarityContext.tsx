@@ -18,19 +18,6 @@ export function RarityProvider({ children }: { children: ReactNode }) {
     const [rarityData, setRarityData] = useState<Map<string, number>>(new Map());
     const [isCalculating, setIsCalculating] = useState(false);
 
-    // 仕様 9.3: 起動直後にlocalStorageから読み込む
-    useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved) as [string, number][];
-                setRarityData(new Map(parsed));
-            } catch (e) {
-                console.error('Failed to parse rarity data', e);
-            }
-        }
-    }, []);
-
     const calculateAndUpdate = useCallback(async () => {
         setIsCalculating(true);
         try {
@@ -48,6 +35,21 @@ export function RarityProvider({ children }: { children: ReactNode }) {
             setIsCalculating(false);
         }
     }, []);
+
+    // 仕様 9.3: 起動直後にlocalStorageから読み込み、最新データを再計算する
+    useEffect(() => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved) as [string, number][];
+                setRarityData(new Map(parsed));
+            } catch (e) {
+                console.error('Failed to parse rarity data', e);
+            }
+        }
+        // バックグラウンドで計算開始
+        calculateAndUpdate();
+    }, [calculateAndUpdate]);
 
     const value: RarityContextType = {
         rarityData,
