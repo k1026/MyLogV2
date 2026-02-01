@@ -42,9 +42,9 @@ export const HeaderStatus: React.FC<HeaderStatusProps> = ({ cardCount, cellCount
                 )}
             </button>
 
-            <div className="flex flex-col items-start text-slate-500/60 font-bold tracking-widest uppercase leading-none">
-                <div className="text-[9px] whitespace-nowrap">CARD: {cardCount}</div>
-                <div className="text-[9px] whitespace-nowrap">CELL: {cellCount}</div>
+            <div className="flex flex-col items-start text-slate-500/60 font-bold tracking-widest leading-none">
+                <div className="text-[9px] whitespace-nowrap">Card: {cardCount}</div>
+                <div className="text-[9px] whitespace-nowrap">Cell: {cellCount}</div>
             </div>
         </div>
     );
